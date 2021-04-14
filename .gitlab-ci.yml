@@ -1,0 +1,40 @@
+image: alpine:latest
+
+variables:
+  # KUBE_INGRESS_BASE_DOMAIN is the application deployment domain and should be set as a variable at the group or project level.
+  KUBE_INGRESS_BASE_DOMAIN: apibinpay.binaural.xyz
+
+  POSTGRES_USER: user
+  POSTGRES_PASSWORD: testing-password
+  POSTGRES_ENABLED: "false"
+  POSTGRES_DB: $CI_ENVIRONMENT_SLUG
+
+  DOCKER_DRIVER: overlay2
+  ROLLOUT_RESOURCE_TYPE: deployment
+  DOCKER_TLS_CERTDIR: ""  # https://gitlab.com/gitlab-org/gitlab-runner/issues/4501
+
+  # folder test
+  DIR_BASE_TEST: "app/test"
+  DIR_UNIT_TEST: ""
+  DIR_INTEGRATION_TEST: ""
+
+  STAGING_ENABLED: 1
+
+stages:  
+  - build
+  - test
+  - deploy 
+  - review
+  - staging
+  - release
+  - production  
+  - cleanup
+
+  
+include:
+  - project: 'binaural/ecosistema/DevOps/CI-CD/ymls'
+    file: '/code-quality.gitlab-ci.yml'
+  #- project: binaural/ecosistema/DevOps/ci-cd/ymls
+  #  file: /semantic-versioning/release.gitlab-ci.yml 
+  - project: binaural/ecosistema/DevOps/ci-cd/ymls
+    file: /sast.gitlab-ci.yml
