@@ -34,7 +34,7 @@ stages:
 include:
   - project: 'binaural/ecosistema/DevOps/CI-CD/ymls'
     file: '/code-quality.gitlab-ci.yml'
-  #- project: binaural/ecosistema/DevOps/ci-cd/ymls
-  #  file: /semantic-versioning/release.gitlab-ci.yml 
+  - project: binaural/ecosistema/DevOps/ci-cd/ymls
+    file: /semantic-versioning/release.gitlab-ci.yml 
   - project: binaural/ecosistema/DevOps/ci-cd/ymls
     file: /sast.gitlab-ci.yml
