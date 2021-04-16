@@ -11,7 +11,7 @@ Los modulos deberan tener el estilo Snake case ejemplo:
 
     Recordar que los nombres deben ser todos en minuscula y en español asi como el nombre debera ser corto
 
-En el archivo manifest colocar la descripcion de lo que hace el modulo asi como llenar la informacion y colocar logo (se encuentra en el proyecto), todo esto es obligatorio
+En el archivo manifest colocar la descripcion de lo que hace el modulo asi como llenar la informacion y colocar logo (se encuentra en el proyecto con el nombre: icon.png), todo esto es obligatorio
 
 Los nombre de las clases seran estilo Camel case ejemplo:
 
