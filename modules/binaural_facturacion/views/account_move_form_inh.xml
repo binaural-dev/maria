@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_form_move_inherited_binaural_facturacion_form" model="ir.ui.view">
+            <field name="name">Extension de formulario factura: agregar campos</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+
+                <!--add is_contingence field after other invisibles field-->
+                <field name="country_code" position="after">
+                    <field name="is_contingence" force_save="1" attrs="{'invisible': False,'readonly':False}"/><!--temporal, deberia ser oculto para solo editarse cuando se vaya desde el menut de contingencia-->                    
+                </field>
+               
+                <!--add nro control-->
+                <!--<field name="name" position="after">-->
+                <xpath expr="//h1[@class='mt0']" position="after">
+                
+                    <!--visible y requerido para contingencia ya que es editable-->
+                    
+                    <label for="correlative" string="Nro Control" style="font-weight:bold;" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+                    <field name="correlative" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))],'readonly':[('is_contingence','=',False),('move_type','in',('out_invoice','out_refund'))],'required':[('is_contingence','=',True)]}"/>
+                    <!--,('move_type','in',('in_invoice','in_refund')-->                    
+                <!--</field>-->
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

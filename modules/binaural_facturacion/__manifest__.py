@@ -6,7 +6,7 @@
        Modulo para el proceso de Facturacion, Retenciones etc """,
 
     'description': """
-        Modulo para el proceso de Compra/Facturacion/Retenciones asi como Ventas/Facturacion/Retenciones con manejo de multimonedas
+        Modulo para el proceso de Compra/Facturacion/Retenciones asi como Facturacion/Retenciones con manejo de multimonedas
     """,
 
     'author': "Binauraldev",
@@ -24,8 +24,13 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
+        'data/config_sequence.xml',
+        #'views/views.xml',
+        #'views/templates.xml',
+        'views/config_views.xml',
+        'views/account_move_form_inh.xml',
+        'views/account_move_search_inh.xml',
+        'views/account_move_trees_inh.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
