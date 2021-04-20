@@ -1,0 +1,42 @@
+<odoo>
+  <data>
+	    <!--TREE-->
+	    <record id="view_type_withholdings_tree" model="ir.ui.view">
+	        <field name="name">Retenciones de IVA</field>
+	        <field name="model">type.withholding</field>
+	        <field name="arch" type="xml">
+	            <tree>
+	                <field name="name" required="1"/>
+	                <field name="value" required="1"/>
+	                <field name="state" />
+	            </tree>
+	        </field>
+	    </record>
+
+	    <!--SEARCH-->
+	    <record id="view_search_withholdings" model="ir.ui.view">
+	        <field name="name">Porcentaje de Retención de IVA</field>
+	        <field name="model">type.withholding</field>
+	        <field name="arch" type="xml">
+	            <search string="Retenciones de IVA">
+	                <field name="name"/>
+	                <filter name="state"  domain="[('state','=',True)]" string="Activo"/>
+	            </search>
+	        </field>
+	    </record>
+
+	    <!--ACTION-->
+	    <record id="action_type_withholdings" model="ir.actions.act_window" >
+	        <field name="name">Porcentaje retención de IVA</field>
+	        <field name="res_model">type.withholding</field>
+	        <field name="type">ir.actions.act_window</field>
+	        <field name="binding_view_types">form</field>
+	        <field name="view_mode">tree,form</field>
+	        <field name="view_id" ref="view_type_withholdings_tree"/>
+	        <field name="context">{"search_default_state":True}</field>
+	    </record>
+
+        <!--MENU-->
+        <menuitem name="Porcentaje Retención de IVA" id="retention_type_withholdings" parent="binaural_contactos_configuraciones.retention_configuration" action="binaural_contactos_configuraciones.action_type_withholdings"/>
+  </data>
+</odoo>

@@ -1,0 +1,38 @@
+<odoo>
+    <data noupdate="1">
+	      <record id="type_person_0" model="type.person">
+	          <field name="name">PN Residente</field>
+	          <field name="state" eval="True"/>
+          </record>
+
+	      <record id="type_person_1" model="type.person">
+		       <field name="name">PN No Residente</field>
+		       <field name="state" eval="True"/>
+	      </record>
+
+	      <record id="type_person_2" model="type.person">
+		       <field name="name">PJ Domiciliada</field>
+		       <field name="state" eval="True"/>
+	      </record>
+
+	      <record id="type_person_3" model="type.person">
+		       <field name="name">PJ No Domiciliada</field>
+		       <field name="state" eval="True"/>
+	      </record>
+
+	      <record id="type_person_4" model="type.person">
+		       <field name="name">Instituciones Financieras No Domiciliadas</field>
+		       <field name="state" eval="True"/>
+	      </record>
+
+	      <record id="type_person_5" model="type.person">
+		       <field name="name">Otras PJ No Domiciliadas</field>
+		       <field name="state" eval="True"/>
+	      </record>
+
+	      <record id="type_person_6" model="type.person">
+		       <field name="name">PJ Empresa Emisora de Radio Domiciliada</field>
+		       <field name="state" eval="True"/>
+	      </record>
+    </data>
+</odoo>
