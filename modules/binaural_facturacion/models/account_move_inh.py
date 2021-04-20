@@ -154,3 +154,39 @@ class AccountMoveBinauralFacturacion(models.Model):
                 correlative = sequence.next_by_id(sequence.id)
                 move.write({'correlative':correlative})
         return to_post
+
+    #heredar constrain para permitir name duplicado solo en proveedor
+    @api.constrains('name', 'journal_id', 'state')
+    def _check_unique_sequence_number(self):
+
+        moves = self.filtered(lambda move: move.state == 'posted')
+        if not moves:
+            return
+
+        self.flush(['name', 'journal_id', 'move_type', 'state'])
+
+        # /!\ Computed stored fields are not yet inside the database.
+        self._cr.execute('''
+            SELECT move2.id, move2.name
+            FROM account_move move
+            INNER JOIN account_move move2 ON
+                move2.name = move.name
+                AND move2.journal_id = move.journal_id
+                AND move2.move_type = move.move_type
+                AND move2.id != move.id
+            WHERE move.id IN %s AND move2.state = 'posted'
+        ''', [tuple(moves.ids)])
+        res = self._cr.fetchall()
+        if res:
+            for i in moves:
+                if i.move_type not in ('in_invoice','in_refund'):
+                    raise ValidationError(_('Posted journal entry must have an unique sequence number per company.\n'
+                    'Problematic numbers: %s\n') % ', '.join(r[1] for r in res))
+                else:
+                    #verificar si es duplicado por el mismo proveedor
+                    for r in res:
+                        _logger.info("id a buscar %s",r[0])
+                        invoice = self.env['account.move'].sudo().browse(int(r[0]))
+                        if invoice.partner_id == i.partner_id:
+                            raise ValidationError(_('La entrada de diario registrada debe tener un número de secuencia único por empresa y Proveedor.\n'
+                            'Números problemáticos: %s\n') % ', '.join(r[1] for r in res))
