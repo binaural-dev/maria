@@ -21,9 +21,24 @@ _logger = logging.getLogger(__name__)
 class AccountMoveBinauralFacturacion(models.Model):
     _inherit = 'account.move'
 
+
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
 
+    phone = fields.Char(string='Teléfono', related='partner_id.phone')
+    vat = fields.Char(string='RIF', compute='_get_vat')
+    address = fields.Char(string='Dirección', related='partner_id.street')
+    #business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
+    
+    
+    @api.depends('partner_id')
+    def _get_vat(self):
+        #if self.partner_id.prefix_vat and self.partner_id.vat:
+        if self.partner_id.vat and self.partner_id.vat:
+            vat = self.partner_id.vat #self.partner_id.prefix_vat + 
+        else:
+            vat = str(self.partner_id.vat)
+        self.vat = vat
 
     def sequence(self):
         sequence = self.env['ir.sequence'].search([('code','=','invoice.correlative')])

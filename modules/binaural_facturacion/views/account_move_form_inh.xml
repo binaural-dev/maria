@@ -11,17 +11,29 @@
                 <field name="country_code" position="after">
                     <field name="is_contingence" force_save="1" invisible="1"/><!--desde el menu contingencia setear por defecto-->                    
                 </field>
+
                 <!--add nro control-->
                 <xpath expr="//h1[@class='mt0']" position="after">
                     <!--visible y requerido para contingencia ya que es editable--> 
                     <label for="correlative" string="Nro Control" style="font-weight:bold;" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
                     <field name="correlative" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))],'readonly':[('is_contingence','=',False),('move_type','in',('out_invoice','out_refund'))],'required':[('is_contingence','=',True)]}"/>
                 </xpath>
+
+                <!--make name field editable in supplier-->
                 <xpath expr="//h1[@class='mt0']" position="replace">
                     <h1 class="mt0" attrs="{'invisible':[('move_type', 'not in',('in_invoice','in_refund')), ('posted_before', '=', False)]}"><!--('name', '=', '/')-->
                         <field name="name" attrs="{'readonly': [('state', '!=', 'draft')],'required':[('move_type', 'in',('in_invoice','in_refund'))]}" placeholder="JRNL/2016/00001"/>
                     </h1>
                 </xpath>
+
+                <!--add fields: vat,phone,address,business_name-->
+                <field name="partner_id" position="after">
+                    <!--<field name="business_name" force_save="1" readonly="1"/>-->
+                    <field name="vat" force_save="1" readonly="1"/>
+                    <field name="phone" force_save="1" readonly="1"/>
+                    <field name="address" force_save="1" readonly="1"/>            
+                </field>
+
             </field>
         </record>
     </data>
