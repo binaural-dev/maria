@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.actions.server" id="ir_action_form_control_number">
+            <field name="name">Sequences</field>
+            <field name="model_id" ref="base.model_ir_sequence"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = {
+                "type": "ir.actions.act_window",
+                "view_mode": "form",
+                "res_model": "ir.sequence",
+                "res_id": env['ir.sequence'].search([('code', '=', 'invoice.correlative')]).id,
+                }
+            </field>
+        </record>
+
+
+        <menuitem name="Número de control" action="ir_action_form_control_number"
+                  sequence="90"
+                  id="menu_sequence_invoice_extend"
+                  parent="account.account_invoicing_menu"/>
+
+    </data>
+</odoo>

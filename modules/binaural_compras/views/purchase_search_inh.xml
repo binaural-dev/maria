@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_purchase_order_filter_inherited_binaural_compras_search" model="ir.ui.view">
+            <field name="name">Extension de filtros de orden de compra 1: agregar campos</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="arch" type="xml">
+                <!--add fields-->
+                <field name="partner_id" position="after">
+                    <field name="vat"/>   
+                    <field name="address"/>                    
+                </field>
+            </field>
+        </record>
+
+        
+        <record id="purchase_order_view_search_inherited_binaural_compras_search" model="ir.ui.view">
+            <field name="name">Extension de filtros de orden de compra 2: agregar campos</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+            <field name="arch" type="xml">
+                <!--add fields-->
+                <field name="partner_id" position="after">
+                    <field name="vat"/>   
+                    <field name="address"/>                    
+                </field>
+            </field>
+        </record>
+        
+    </data>
+</odoo>

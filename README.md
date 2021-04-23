@@ -13,12 +13,13 @@ Los modulos deberan tener el estilo Snake case ejemplo:
 
 En el archivo manifest colocar la descripcion de lo que hace el modulo asi como llenar la informacion y colocar logo (se encuentra en el proyecto con el nombre: icon.png), todo esto es obligatorio
 
-Los nombre de las clases seran estilo Camel case ejemplo:
+Los nombre de las clases seran estilo Camel case y el nombre debera contener la clase a la que se hereda mas el nombre del modulo ejemplo:
 
-    invoiceInh
+    AccountMoveBinauralFacturacion
 
     Recordar que se debe evitar en la medida de lo posible tener la misma funcion en modulos diferentes ya que pueden perderse funcionalidades
 
 Para el manejo de Gitlab considerar:
 Commit message: ^((Merge branch '(.*)' into '(.*)')\n\n)?(fix|feat|BREAKING CHANGE|build|ci|docs|perf|refactor|style|test|revert)\(?.*\)?:((.|\n)*)$ 
 Branch name: (hotfix_([a-zA-Z_-]*)|fix_([a-zA-Z_-]*)|feature_([a-zA-Z_-]*)|issue_([a-zA-Z_-]*)|test_([a-zA-Z_-]*)|cicd_([a-zA-Z_-]*))
+

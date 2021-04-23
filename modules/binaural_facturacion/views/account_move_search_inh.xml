@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_form_move_inherited_binaural_facturacion_search" model="ir.ui.view">
+            <field name="name">Extension de filtros de factura: agregar campos</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <!--add nro control-->
+                <field name="name" position="after">
+                    <field name="correlative"/>                    
+                </field>
+
+            </field>
+        </record>
+    </data>
+</odoo>
