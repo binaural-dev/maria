@@ -111,7 +111,7 @@ class PaymentConceptLine(models.Model):
     _rec_name = 'code'
 
     @api.onchange('percentage_tax_base')
-    def onchange_percentage(self):
+    def check_value_percentage(self):
         if self.percentage_tax_base > 100:
             return {
                 'warning': {
