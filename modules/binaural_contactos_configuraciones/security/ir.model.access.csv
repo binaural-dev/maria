@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_type_withholdind_binaural_contactos,id_type_withholdind_binaural_contactos,model_type_withholding,base.group_user,1,1,1,1
+access_type_person_binaural_contactos,id_type_person_binaural_contactos,model_type_person,base.group_user,1,1,1,1

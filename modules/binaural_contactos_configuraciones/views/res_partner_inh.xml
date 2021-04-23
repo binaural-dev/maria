@@ -1,0 +1,48 @@
+<odoo>
+  <data>
+		<record id="view_form_res_partner_inherited" model="ir.ui.view">
+	        <field name="name">Extension de cliente</field>
+	        <field name="model">res.partner</field>
+	        <field name="inherit_id" ref="base.view_partner_form"/>
+	        <field name="arch" type="xml">
+		        <field name="name" position="after">
+					<field name="customer_rank" invisible="1"/>
+					<field name="supplier_rank" invisible="1"/>
+		        </field>
+		        <field name="vat" position="replace">
+	                <label id="vat" for="vat" string="Rif"/>
+	                <div id="vat" class="">
+	                    <field name="prefix_vat"/>
+	                    <field name="vat"/>
+	                </div>
+	            </field>
+
+	            <div id="vat" position="after">
+                    <field name="withholding_type" attrs="{'required':[('supplier_rank','&gt;', 0)]}"/>
+		            <field name="taxpayer" required="1"/>
+		            <field name="type_person_ids" domain="[('state','=',True)]" attrs="{'required':['|',('supplier_rank','&gt;', 0),('customer_rank','&gt;',0)]}" />
+	            </div>
+		        <label for="street" position="before">
+	                <field name="business_name" required="1"/>
+	            </label>
+
+		        <page name="sales_purchases" position="after">
+	                <page name='retention' string="Retenciones">
+	                    <group>
+	                        <group>
+		                        <field name="exempt_iva" />
+	                            <field name="iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)]}"/>
+	                            <field name="supplier_iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)]}"/>
+	                        </group>
+	                        <group>
+		                        <field name="exempt_islr"/>
+	                            <field name="islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)]}"/>
+	                            <field name="supplier_islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)]}"/>
+	                        </group>
+	                   </group>
+	                </page>
+	            </page>
+	        </field>
+	    </record>
+  </data>
+</odoo>
