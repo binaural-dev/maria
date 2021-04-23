@@ -9,13 +9,18 @@
             <field name="arch" type="xml">
                 <!--add nro control-->
                 <field name="name" position="after">
-                    <field name="correlative"/>                   
+                    <field name="correlative" optional="show"/>                   
                 </field>
                 <!--add vat,adress,bussines name-->
                 <field name="partner_id" position="after">
-                    <field name="vat"/>
-                    <field name="address"/> 
+                    <field name="vat" optional="show"/>
+                    <field name="address" optional="show"/> 
                 </field>
+                <!--add date_reception-->
+                <field name="invoice_date" position="after">
+                    <field name="date_reception" optional="show"/>
+                </field>
+
             </field>
         </record>
     </data>

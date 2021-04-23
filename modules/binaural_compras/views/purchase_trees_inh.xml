@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
                 <!--add fields: vat,adress,bussines name-->
                 <field name="partner_id" position="after">
-                    <!--<field name="business_name" optional="show"/>  -->
+                    <field name="business_name" optional="show"/>
                     <field name="vat" optional="show"/>   
                     <field name="address" optional="show"/>  
                     <field name="phone" optional="show"/>                
@@ -24,8 +24,8 @@
             <field name="arch" type="xml">
                 <!--add fields: vat,adress,bussines name-->
                 <field name="partner_id" position="after">
-                    <!--<field name="business_name" optional="show"/>  -->
-                    <field name="vat" optional="show"/>   
+                    <field name="business_name" optional="show"/> 
+                    <field name="vat" optional="show"/>  
                     <field name="address" optional="show"/>  
                     <field name="phone" optional="show"/>                
                 </field>
@@ -39,6 +39,7 @@
             <field name="arch" type="xml">
                 <!--add fields-->
                 <field name="partner_id" position="after">
+                    <field name="business_name" optional="show"/>   
                     <field name="vat" optional="show"/>   
                     <field name="address" optional="show"/>  
                     <field name="phone" optional="show"/>                

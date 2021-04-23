@@ -20,15 +20,14 @@ class PurchaseOrderBinauralCompras(models.Model):
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
     address = fields.Char(string='Dirección', related='partner_id.street')
-    #business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
+    business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
     
     
     @api.depends('partner_id')
     def _get_vat(self):
         for p in self:
-            #if self.partner_id.prefix_vat and self.partner_id.vat:
-            if p.partner_id.vat and p.partner_id.vat:
-                vat = str(p.partner_id.vat) #str(p.partner_id.prefix_vat) +
+            if p.partner_id.prefix_vat and p.partner_id.vat:
+                vat = str(p.partner_id.prefix_vat) + str(p.partner_id.vat)
             else:
                 vat = str(p.partner_id.vat)
             p.vat = vat
