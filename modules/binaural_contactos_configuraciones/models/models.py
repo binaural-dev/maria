@@ -66,7 +66,7 @@ class TarifRetentionBinaural(models.Model):
             return {
                 'warning': {
                     'title': 'Error en campo porcentaje de tarifa',
-                    'message': 'el porcentaje no puede exceder el 100%'
+                    'message': 'el porcentaje de la tarifa no puede ser mayor a 100%'
                 },
                 'value': {
                     'percentage': 0
@@ -116,7 +116,7 @@ class PaymentConceptLine(models.Model):
             return {
                 'warning': {
                     'title': 'Error en campo porcentaje de base imponible',
-                    'message': 'el porcentaje no puede exceder el 100%'
+                    'message': 'el porcentaje no puede exceder el 100% en la linea de concepto de pago'
                 },
                 'value': {
                     'percentage_tax_base': 0
