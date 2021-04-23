@@ -31,6 +31,7 @@
         'views/menuitem.xml',
         'views/views.xml',
         'views/res_partner_inh.xml',
+        'views/res_config_settings_inh.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

@@ -1,5 +1,6 @@
 <odoo>
     <data noupdate="1">
+	      <!--TYPE WITHHOLDING-->
           <record id="demo_type_withholding_0" model="type.withholding">
 	          <field name="name">PORCENTAJE 100%</field>
 	          <field name="value">100</field>
@@ -12,6 +13,7 @@
 	          <field name="state" eval="True"/>
           </record>
 
+          <!--TYPE PERSON-->
 	      <record id="demo_type_person_0" model="type.person">
 	          <field name="name">PN Residente</field>
 	          <field name="state" eval="True"/>
@@ -21,5 +23,79 @@
 		       <field name="name">PJ Domiciliada</field>
 		       <field name="state" eval="True"/>
 	      </record>
+
+	      <!--TAX UNIT-->
+	      <record id="demo_tax_unit_0" model="tax.unit">
+		      <field name="name">1500,00 UT</field>
+		      <field name="value">1500</field>
+		      <field name="status" eval="True"/>
+	      </record>
+
+	      <!--TAX UNIT-->
+	      <record id="demo_tax_unit_0" model="tax.unit">
+		      <field name="name">1500,00 UT</field>
+		      <field name="value">1500</field>
+		      <field name="status" eval="True"/>
+	      </record>
+
+	      <!--TARIF RETENTION-->
+	      <record id="demo_tarif_retention_0" model="tarif.retention">
+		      <field name="name">T - 2(Acumulativo)</field>
+		      <field name="percentage">0</field>
+		      <field name="sustract_money">0</field>
+		      <field name="apply_subtracting" eval="False"/>
+		      <field name="acumulative_rate" eval="True"/>
+		      <field name="status" eval="True"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+	      </record>
+
+	     <record id="demo_acumulative_tarif_retention_0" model="acumulative.tarif">
+		      <field name="name">0-2000 UT</field>
+		      <field name="since">0</field>
+		      <field name="until">2000</field>
+		      <field name="percentage">15</field>
+		      <field name="sustract_ut">0</field>
+		      <field name="tariffs_id" eval="demo_tarif_retention_0"/>
+	     </record>
+
+	     <record id="demo_tarif_retention_1" model="tarif.retention">
+		      <field name="name">3%</field>
+		      <field name="percentage">3</field>
+		      <field name="sustract_money">0</field>
+		      <field name="apply_subtracting" eval="False"/>
+		      <field name="acumulative_rate" eval="False"/>
+		      <field name="status" eval="True"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+	      </record>
+
+	    <record id="demo_tarif_retention_2" model="tarif.retention">
+		      <field name="name">3% -(Bs. 3.750,00)</field>
+		      <field name="percentage">3</field>
+		      <field name="sustract_money">0</field>
+		      <field name="apply_subtracting" eval="True"/>
+		      <field name="acumulative_rate" eval="False"/>
+		      <field name="status" eval="True"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+	      </record>
+
+	    <!--PAYMENT CONCEPT-->
+
+	    <record id="demo_payment_concept_0" model="payment.concept">
+		      <field name="name">Honorarios Profesionales Pagados a</field>
+		      <field name="status" eval="True"/>
+	    </record>
+
+	    <record id="demo_payment_concept_1" model="payment.concept">
+		      <field name="name">Gastos de Trasnporte (Fletes) Pagados a </field>
+		      <field name="status" eval="True"/>
+	    </record>
+
+	    <record id="demo_payment_concept_2" model="payment.concept">
+		      <field name="name">(Contratista) Ejecución de obras y prestación de servicios en Venezuela pagadas a:</field>
+		      <field name="status" eval="True"/>
+	    </record>
+
+
+
     </data>
 </odoo>
