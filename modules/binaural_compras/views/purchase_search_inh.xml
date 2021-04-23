@@ -7,8 +7,9 @@
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
             <field name="arch" type="xml">
-                <!--add fields-->
+                <!--add fields: vat,adress,bussines name-->
                 <field name="partner_id" position="after">
+                    <!--<field name="business_name" />-->
                     <field name="vat"/>   
                     <field name="address"/>                    
                 </field>
@@ -21,8 +22,9 @@
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
             <field name="arch" type="xml">
-                <!--add fields-->
+                <!--add fields: vat,adress,bussines name-->
                 <field name="partner_id" position="after">
+                    <!--<field name="business_name" />-->
                     <field name="vat"/>   
                     <field name="address"/>                    
                 </field>

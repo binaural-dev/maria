@@ -9,7 +9,12 @@
             <field name="arch" type="xml">
                 <!--add nro control-->
                 <field name="name" position="after">
-                    <field name="correlative"/>                    
+                    <field name="correlative"/>                   
+                </field>
+                <!--add vat,adress,bussines name-->
+                <field name="partner_id" position="after">
+                    <field name="vat"/>
+                    <field name="address"/> 
                 </field>
             </field>
         </record>

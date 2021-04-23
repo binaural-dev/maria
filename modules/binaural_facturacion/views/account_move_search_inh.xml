@@ -7,11 +7,12 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_account_invoice_filter"/>
             <field name="arch" type="xml">
-                <!--add nro control-->
+                <!--add nro control,vat,adress,bussiness name-->
                 <field name="name" position="after">
-                    <field name="correlative"/>                    
+                    <field name="correlative"/>       
+                    <field name="vat"/>
+                    <field name="address"/>                
                 </field>
-
             </field>
         </record>
     </data>
