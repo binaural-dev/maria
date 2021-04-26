@@ -1,8 +1,6 @@
 <odoo>
   <data>
 	  <!--Menu Retenciones-->
-	  <menuitem name="Retenciones" id="menu_root_retention" parent="account.menu_finance"/>
-
-	  <menuitem name="Configuración" id="retention_configuration" sequence="150" parent="binaural_contactos_configuraciones.menu_root_retention"/>
+	  <menuitem name="Retenciones" id="retention_configuration" parent="account.menu_finance_configuration"/>
   </data>
 </odoo>

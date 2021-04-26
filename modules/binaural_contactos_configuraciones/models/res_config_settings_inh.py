@@ -14,8 +14,8 @@ class ResConfigSettingBinauralContactos(models.TransientModel):
     account_retention_receivable_client = fields.Many2one('account.account', 'Cuenta P/cobrar clientes')
     account_retention_to_pay_supplier = fields.Many2one('account.account', 'Cuenta P/pagar proveedor')
 
-    journal_retention_client = fields.Many2one('account.journal', 'Libro de Retenciones de Clientes')
-    journal_retention_supplier = fields.Many2one('account.journal', 'Libro de Retenciones de Proveedores')
+    journal_retention_client = fields.Many2one('account.journal', 'Diario de Retenciones de Clientes')
+    journal_retention_supplier = fields.Many2one('account.journal', 'Diario de Retenciones de Proveedores')
 
     @api.model
     def get_values(self):

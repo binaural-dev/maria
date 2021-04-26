@@ -31,12 +31,16 @@
 	                    <group>
 	                        <group>
 		                        <field name="exempt_iva" />
-	                            <field name="iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)]}"/>
+	                            <field name="iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)],
+	                            'required': ['&amp;', ('exempt_iva', '=', False), '|', ('customer_rank', '&gt;', 0),
+	                            '&amp;', ('customer_rank', '=', 0), ('customer_rank', '=', 0)]}"/>
 	                            <field name="supplier_iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)]}"/>
 	                        </group>
 	                        <group>
 		                        <field name="exempt_islr"/>
-	                            <field name="islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)]}"/>
+	                            <field name="islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)],
+	                            'required': ['&amp;', ('islr_retention', '=', False), '|', ('customer_rank', '&gt;', 0),
+	                            '&amp;', ('customer_rank', '=', 0), ('customer_rank', '=', 0)]}"/>
 	                            <field name="supplier_islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)]}"/>
 	                        </group>
 	                   </group>
