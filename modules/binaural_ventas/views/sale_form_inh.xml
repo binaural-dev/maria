@@ -16,6 +16,12 @@
                     <field name="address" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>            
                 </field>
 
+                <!--add fields: amount_by_group-->
+                <field name="amount_tax" position="after">
+                    <field name="amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                    <field name="amount_by_group" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>          
+                </field>
+                
             </field>
         </record>
     </data>
