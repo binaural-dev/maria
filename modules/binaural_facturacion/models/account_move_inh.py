@@ -28,17 +28,58 @@ class AccountMoveBinauralFacturacion(models.Model):
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
     address = fields.Char(string='Dirección', related='partner_id.street')
-    #business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
+    business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
+
+    date_reception = fields.Date(string='Fecha de recepción',copy=False)
     
-    
+    days_expired = fields.Integer('Dias vencidos en base a Fecha de recepción', compute='_compute_days_expired',copy=False)
+
+    @api.onchange("date_reception")
+    def _onchange_date_reception(self):
+        if self.is_invoice() and self.date_reception and self.invoice_date and self.date_reception < self.invoice_date:
+            raise ValidationError("Fecha de recepcion no puede ser menor a fecha de factura")
+
+    def _write(self, vals):
+        res = super(AccountMoveBinauralFacturacion, self)._write(vals)
+        if 'date_reception' in vals:
+            self._compute_days_expired()
+        return res
+
+    @api.depends('date_reception', 'invoice_date_due', 'invoice_payment_term_id', 'state')
+    def _compute_days_expired(self):
+        days_expired = 0
+        for i in self:
+            if i.is_invoice() and i.state not in ['cancel'] and i.invoice_date_due and i.date_reception and i.invoice_date:
+                if i.date_reception < i.invoice_date:
+                    raise ValidationError("No puedes asignar una fecha de recepción menor a la fecha de factura")
+                diff = i.invoice_date_due - i.invoice_date
+                date_today = fields.Date.today()
+                try:
+                    real_due = i.date_reception+timedelta(days=diff.days)
+                    #payment_state: reversed invoicing_legacy
+                    if i.payment_state in ['not_paid','partial']:
+                        days_expired = (date_today - real_due).days
+                    elif i.payment_state in ['paid','in_payment']:
+                        lines = i._get_reconciled_invoices_partials()
+                        last_date = max(dt[2].date for dt in lines)
+                        _logger.info("la ultima fecha de conciliacion es %s",last_date)
+                        if last_date:
+                            days_expired = (last_date - real_due).days
+                except Exception as e:
+                    _logger.info("Exepction en days expired")
+                    _logger.info(e)
+                    days_expired = 0
+                _logger.info("Days expired %s",days_expired)
+            i.days_expired = days_expired if days_expired > 0 else 0
+        
     @api.depends('partner_id')
     def _get_vat(self):
-        #if self.partner_id.prefix_vat and self.partner_id.vat:
-        if self.partner_id.vat and self.partner_id.vat:
-            vat = self.partner_id.vat #self.partner_id.prefix_vat + 
-        else:
-            vat = str(self.partner_id.vat)
-        self.vat = vat
+        for p in self:
+            if p.partner_id.prefix_vat and p.partner_id.vat:
+                vat = str(p.partner_id.prefix_vat) + str(p.partner_id.vat)
+            else:
+                vat = str(p.partner_id.vat)
+            p.vat = vat
 
     def sequence(self):
         sequence = self.env['ir.sequence'].search([('code','=','invoice.correlative')])

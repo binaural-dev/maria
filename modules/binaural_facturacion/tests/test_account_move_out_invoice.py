@@ -7,7 +7,9 @@ from odoo.exceptions import UserError
 
 from unittest.mock import patch
 from datetime import timedelta
-
+import logging
+from odoo.exceptions import UserError, ValidationError
+_logger = logging.getLogger(__name__)
 
 @tagged('post_install', '-at_install')
 class TestAccountMoveOutInvoiceBinauralFacturacion(AccountTestInvoicingCommon):
@@ -130,6 +132,12 @@ class TestAccountMoveOutInvoiceBinauralFacturacion(AccountTestInvoicingCommon):
             'amount_tax': 210.0,
             'amount_total': 1410.0,
         }
+
+        cls.custom_payment_method_in = cls.env['account.payment.method'].create({
+            'name': 'custom_payment_method_in',
+            'code': 'CUSTOMIN',
+            'payment_type': 'inbound',
+        })
 
     def setUp(self):
         super(TestAccountMoveOutInvoiceBinauralFacturacion, self).setUp()
@@ -376,3 +384,124 @@ class TestAccountMoveOutInvoiceBinauralFacturacion(AccountTestInvoicingCommon):
             'currency_id': self.currency_data['currency'].id,
         })
         move2.action_post()
+
+    def test_out_invoice_onchange_date_reception(self):
+        move = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': fields.Date.from_string('2019-01-01'),
+            'currency_id': self.currency_data['currency'].id,
+            'invoice_payment_term_id': self.pay_terms_a.id,
+            'invoice_line_ids': [
+                (0, None, {
+                    'product_id': self.product_a.id,
+                    'product_uom_id': self.product_a.uom_id.id,
+                    'quantity': 1.0,
+                    'price_unit': 1000.0,
+                    'tax_ids': [(6, 0, self.product_a.taxes_id.ids)],
+                }),
+                (0, None, {
+                    'product_id': self.product_b.id,
+                    'product_uom_id': self.product_b.uom_id.id,
+                    'quantity': 1.0,
+                    'price_unit': 200.0,
+                    'tax_ids': [(6, 0, self.product_b.taxes_id.ids)],
+                }),
+            ]
+        })
+
+        self.assertInvoiceValues(move, [
+            {
+                **self.product_line_vals_1,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -1000.0,
+                'credit': 500.0,
+            },
+            {
+                **self.product_line_vals_2,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -200.0,
+                'credit': 100.0,
+            },
+            {
+                **self.tax_line_vals_1,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -180.0,
+                'credit': 90.0,
+            },
+            {
+                **self.tax_line_vals_2,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -30.0,
+                'credit': 15.0,
+            },
+            {
+                **self.term_line_vals_1,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': 1410.0,
+                'debit': 705.0,
+            },
+        ], {
+            **self.move_vals,
+            'currency_id': self.currency_data['currency'].id,
+        })
+        move.action_post()
+        move.invoice_date_due = fields.Date.from_string('2019-01-03')
+        move_form = Form(move)
+        move_form.date_reception = fields.Date.from_string('2019-01-05')
+        _logger.info("Dias expirados----------------- %s",move_form.days_expired)
+        self.assertEqual(move_form.days_expired,self.calc_days_expired(fields.Date.from_string('2019-01-05')), "Dias de vencimiento en base a fecha de recepcion no coincide.")
+        
+        with self.assertRaises(ValidationError):
+            move_form.date_reception = fields.Date.from_string('2018-12-31')
+
+
+        active_ids = move.id
+        payments = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_ids).create({
+            'amount': 2000.0,
+            'group_payment': True,
+            'payment_difference_handling': 'open',
+            'currency_id': self.currency_data['currency'].id,
+            'payment_method_id': self.custom_payment_method_in.id,
+        })._create_payments()
+
+        self.assertRecordValues(payments, [{
+            'payment_method_id': self.custom_payment_method_in.id,
+        }])
+        self.assertRecordValues(payments.line_ids.sorted('balance'), [
+            # Receivable line:
+            {
+                'debit': 0.0,
+                'credit': 1000.0,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -2000.0,
+                'reconciled': False,
+            },
+            # Liquidity line:
+            {
+                'debit': 1000.0,
+                'credit': 0.0,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': 2000.0,
+                'reconciled': False,
+            },
+        ])
+        _logger.info("move move.payment_state::::: %s",move.payment_state)
+        move_form = Form(move)
+        move_form.date_reception = fields.Date.from_string('2019-01-06')
+
+        self.assertEqual(move_form.days_expired,self.calc_days_expired(fields.Date.from_string('2019-01-06')), "Dias de vencimiento en base a fecha de recepcion no coincide en factura pagada.")
+
+
+
+    def calc_days_expired(self,reception):
+        days_expired = 0
+        due = fields.Date.from_string('2019-01-03')
+        invoice_date = fields.Date.from_string('2019-01-01')
+
+        days = (due - invoice_date).days
+        today = fields.Date.today()
+
+        real_due = reception+timedelta(days=days)
+        days_expired = (today - real_due).days
+        return days_expired

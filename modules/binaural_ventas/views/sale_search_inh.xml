@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_sales_order_filter_inherited_binaural_ventas_search" model="ir.ui.view">
+            <field name="name">Extension de filtros de orden de ventas 1: agregar campos</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <field name="arch" type="xml">
+                <!--add fields: vat,adress,bussines name-->
+                <field name="partner_id" position="after">
+                    <field name="business_name" />
+                    <field name="vat"/>   
+                    <field name="address"/>                    
+                </field>
+            </field>
+        </record>
+        
+    </data>
+</odoo>

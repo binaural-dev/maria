@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_binaural_ventas_binaural_ventas,binaural_ventas.binaural_ventas,model_binaural_ventas_binaural_ventas,base.group_user,1,1,1,1
