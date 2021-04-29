@@ -21,6 +21,24 @@ _logger = logging.getLogger(__name__)
 class AccountMoveBinauralFacturacion(models.Model):
     _inherit = 'account.move'
 
+    @api.onchange('filter_partner')
+    def get_domain_partner(self):
+        for record in self:
+            record.partner_id = False
+            if record.filter_partner == 'customer':
+                return {'domain': {
+                    'partner_id': [('customer_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'supplier':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'contact':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '=', 0), ('customer_rank', '=', 0)],
+                }}
+            else:
+                return []
 
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
@@ -33,6 +51,8 @@ class AccountMoveBinauralFacturacion(models.Model):
     date_reception = fields.Date(string='Fecha de recepción',copy=False)
     
     days_expired = fields.Integer('Dias vencidos en base a Fecha de recepción', compute='_compute_days_expired',copy=False)
+    filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
+                                      string='Filtro de Contacto')
 
     @api.onchange("date_reception")
     def _onchange_date_reception(self):

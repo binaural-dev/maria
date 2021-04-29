@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from . import validations
+from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
 
 
 class TypeWithholdingsBinauralContactos(models.Model):
@@ -55,10 +56,13 @@ class TarifRetentionBinaural(models.Model):
 
     @api.depends('apply_subtracting', 'percentage', 'tax_unit_ids')
     def compute_amount_sustract(self):
-        if self.apply_subtracting:
-            # formula del sustraendo
-            # (BaseImponible * %Base) * % Tarifa - (UT * FACTOR(83.334) * PORCENTAJE DE RETENCION)
-            self.amount_sustract = self.tax_unit_ids.value * 83.3334 * self.percentage/100
+        for record in self:
+            if record.apply_subtracting:
+                # formula del sustraendo
+                # (BaseImponible * %Base) * % Tarifa - (UT * FACTOR(83.334) * PORCENTAJE DE RETENCION)
+                record.amount_sustract = record.tax_unit_ids.value * 83.3334 * record.percentage/100
+            else:
+                record.amount_sustract = 0
 
     @api.onchange('percentage')
     def onchange_percentage(self):
@@ -72,6 +76,13 @@ class TarifRetentionBinaural(models.Model):
                     'percentage': 0
                 }
             }
+
+    @api.constrains('acumulative_rate_ids', 'percentage')
+    def _check_data_acumulative(self):
+        if self.acumulative_rate and len(self.acumulative_rate_ids) is 0:
+            raise ValidationError(_('Debe ingresar las tarifas acumuladas.\n'))
+        if self.percentage < 0:
+            raise ValidationError(_('El porcentaje de tarifa no puede ser negativo.\n'))
 
     name = fields.Char(string='Descripción', required=True)
     percentage = fields.Float(string="Porcentaje de tarifa")

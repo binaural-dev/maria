@@ -38,4 +38,4 @@ class ResPartnerBinauralContactos(models.Model):
         ('j', 'J'),
         ('g', 'G'),
         ('c', 'C'),
-    ], 'Prefijo Rif', required=True, default='v')
+    ], 'Prefijo Rif', required=False, default='v')

@@ -12,8 +12,8 @@
 		        <field name="vat" position="replace">
 	                <label id="vat" for="vat" string="Rif"/>
 	                <div id="vat" class="">
-	                    <field name="prefix_vat"/>
-	                    <field name="vat"/>
+	                    <field name="prefix_vat" required="1"/>
+	                    <field name="vat" required="1"/>
 	                </div>
 	            </field>
 
