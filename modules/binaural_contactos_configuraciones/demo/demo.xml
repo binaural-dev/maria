@@ -31,13 +31,6 @@
 		      <field name="status" eval="True"/>
 	      </record>
 
-	      <!--TAX UNIT-->
-	      <record id="demo_tax_unit_0" model="tax.unit">
-		      <field name="name">1500,00 UT</field>
-		      <field name="value">1500</field>
-		      <field name="status" eval="True"/>
-	      </record>
-
 	      <!--TARIF RETENTION-->
 	      <record id="demo_tarif_retention_0" model="tarif.retention">
 		      <field name="name">T - 2(Acumulativo)</field>
@@ -50,9 +43,9 @@
 	      </record>
 
 	     <record id="demo_acumulative_tarif_retention_0" model="acumulative.tarif">
-		      <field name="name">0-2000 UT</field>
+		      <field name="name">0-3000 UT</field>
 		      <field name="since">0</field>
-		      <field name="until">2000</field>
+		      <field name="until">3000</field>
 		      <field name="percentage">15</field>
 		      <field name="sustract_ut">0</field>
 		      <field name="tariffs_id" eval="demo_tarif_retention_0"/>
@@ -95,7 +88,20 @@
 		      <field name="status" eval="True"/>
 	    </record>
 
+		<record id="demo_payment_concept_line_0" model="payment.concept.line">
+		      <field name="code">001</field>
+		      <field name="type_person_ids" ref="demo_type_person_0"/>
+		      <field name="payment_concept_id" ref="demo_payment_concept_0"/>
+			  <field name="percentage_tax_base">100</field>
+			  <field name="tariffs_ids" ref="demo_tarif_retention_0"/>
+			  <field name="pay_from">125000</field>
+	    </record>
 
+		<!--SIGNATURE CONF-->
 
+	    <record id="demo_signature_config_0" model="signature.config">
+		      <field name="email">demo@odoo.com</field>
+		      <field name="active" eval="True"/>
+	    </record>
     </data>
 </odoo>
