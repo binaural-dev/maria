@@ -1,28 +1,46 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-from datetime import datetime, time
-from dateutil.relativedelta import relativedelta
-from itertools import groupby
-from pytz import timezone, UTC
-from werkzeug.urls import url_encode
 
 from odoo import api, fields, models, _
-from odoo.osv import expression
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
-from odoo.tools.float_utils import float_is_zero
-from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools.misc import formatLang, get_lang
 
 
 class PurchaseOrderBinauralCompras(models.Model):
     _inherit = 'purchase.order'
 
+    READONLY_STATES = {
+        'purchase': [('readonly', True)],
+        'done': [('readonly', True)],
+        'cancel': [('readonly', True)],
+    }
+
+    @api.onchange('filter_partner')
+    def get_domain_partner(self):
+        for record in self:
+            record.partner_id = False
+            if record.filter_partner == 'customer':
+                return {'domain': {
+                    'partner_id': [('customer_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'supplier':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'contact':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '=', 0), ('customer_rank', '=', 0)],
+                }}
+            else:
+                return []
+
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
     address = fields.Char(string='Dirección', related='partner_id.street')
     business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
-    
-    
+    partner_id = fields.Many2one('res.partner', string='Vendor', required=True, states=READONLY_STATES,\
+                                 change_default=True, tracking=True,\
+                                 help="You can find a vendor by its Name, TIN, Email or Internal Reference.")
+    filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
+                                      string='Filtro de Contacto', default='supplier')
+
     @api.depends('partner_id')
     def _get_vat(self):
         for p in self:

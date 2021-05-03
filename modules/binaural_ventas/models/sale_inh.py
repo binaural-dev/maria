@@ -13,8 +13,28 @@ from werkzeug.urls import url_encode
 import logging
 _logger = logging.getLogger(__name__)
 
+
 class SaleOrderBinauralVentas(models.Model):
     _inherit = 'sale.order'
+    
+    @api.onchange('filter_partner')
+    def get_domain_partner(self):
+        for record in self:
+            record.partner_id = False
+            if record.filter_partner == 'customer':
+                return {'domain': {
+                    'partner_id': [('customer_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'supplier':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'contact':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '=', 0), ('customer_rank', '=', 0)],
+                }}
+            else:
+                return []
 
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
@@ -22,6 +42,12 @@ class SaleOrderBinauralVentas(models.Model):
     business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
     
     amount_by_group = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+    partner_id = fields.Many2one(
+        'res.partner', string='Customer', readonly=True,
+        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+        required=True, change_default=True, index=True, tracking=1)
+    filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],\
+                                      string='Filtro de Contacto', default='customer')
     
     amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
 
