@@ -25,7 +25,7 @@
 	      </record>
 
 	      <!--TAX UNIT-->
-	      <record id="demo_tax_unit_0" model="tax.unit">
+	      <record id="demo_tax_unit_1" model="tax.unit">
 		      <field name="name">1500,00 UT</field>
 		      <field name="value">1500</field>
 		      <field name="status" eval="True"/>
@@ -40,7 +40,7 @@
 		      <field name="apply_subtracting" eval="False"/>
 		      <field name="acumulative_rate" eval="True"/>
 		      <field name="status" eval="True"/>
-		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_1"/>
 	      </record>
 
 	     <record id="demo_acumulative_tarif_retention_0" model="acumulative.tarif">
@@ -59,7 +59,7 @@
 		      <field name="apply_subtracting" eval="False"/>
 		      <field name="acumulative_rate" eval="False"/>
 		      <field name="status" eval="True"/>
-		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_1"/>
 	      </record>
 
 	    <record id="demo_tarif_retention_2" model="tarif.retention">
@@ -69,7 +69,7 @@
 		      <field name="apply_subtracting" eval="True"/>
 		      <field name="acumulative_rate" eval="False"/>
 		      <field name="status" eval="True"/>
-		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_1"/>
 	      </record>
 
 	    <!--PAYMENT CONCEPT-->
