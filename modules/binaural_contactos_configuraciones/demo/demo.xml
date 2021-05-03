@@ -31,12 +31,6 @@
 		      <field name="status" eval="True"/>
 	      </record>
 
-	      <!--TAX UNIT-->
-	      <record id="demo_tax_unit_0" model="tax.unit">
-		      <field name="name">1500,00 UT</field>
-		      <field name="value">1500</field>
-		      <field name="status" eval="True"/>
-	      </record>
 
 	      <!--TARIF RETENTION-->
 	      <record id="demo_tarif_retention_0" model="tarif.retention">
