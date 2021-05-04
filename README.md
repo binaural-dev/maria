@@ -1,4 +1,5 @@
-Hacer git submodule init y git submodule update para obtener la carpeta enterprise y los modulos
+Para la carpeta enterprise descargar aparte dicha carpeta dentro del directorio raiz de este proyecto
+Nota: se tenia anteriormente el submodulo pero el mismo causaba conflicto en odoo.sh y se removio
 
 Para verificar que el contenedor este corriendo satisfactoriamente ejecutar ./test_deploy_local.sh
 
