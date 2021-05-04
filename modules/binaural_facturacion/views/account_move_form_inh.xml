@@ -21,8 +21,8 @@
 
                 <!--make name field editable in supplier-->
                 <xpath expr="//h1[@class='mt0']" position="replace">
-                    <h1 class="mt0" attrs="{'invisible':[('move_type', 'not in',('in_invoice','in_refund')), ('posted_before', '=', False)]}"><!--('name', '=', '/')-->
-                        <field name="name" attrs="{'readonly': [('state', '!=', 'draft')],'required':[('move_type', 'in',('in_invoice','in_refund'))]}" placeholder="JRNL/2016/00001"/>
+                    <h1 class="mt0" attrs="{'invisible':[('move_type', 'not in',('in_invoice','in_refund','in_receipt')), ('posted_before', '=', False)]}"><!--('name', '=', '/')-->
+                        <field name="name" attrs="{'readonly': [('state', '!=', 'draft')],'required':[('move_type', 'in',('in_invoice','in_refund','in_receipt'))]}" placeholder="JRNL/2016/00001"/>
                     </h1>
                 </xpath>
 
