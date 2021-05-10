@@ -16,6 +16,10 @@
 	                    <field name="vat" required="1"/>
 	                </div>
 	            </field>
+		        <field name="city" position="replace">
+			        <field name="city_id" placeholder="Ciudad"/>
+			        <field name="city" invisible=""/>
+		        </field>
 
 	            <div id="vat" position="after">
                     <field name="withholding_type" attrs="{'required':[('supplier_rank','&gt;', 0)]}"/>

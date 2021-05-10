@@ -90,6 +90,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 'padding': 5
             })
         return sequence
+    
     def _post(self, soft=True):
         """Post/Validate the documents.
 
@@ -333,3 +334,12 @@ class AccountMoveBinauralFacturacion(models.Model):
             self.filtered(lambda m: not m.name).name = '/'
         else:
             self.filtered(lambda m: not m.name).name = '/'
+            
+    @api.constrains('invoice_line_ids')
+    def qty_line_invocie(self):
+        for record in self:
+            if record.move_type in ['out_invoice', 'out_refund']:
+                raise ValidationError("1")
+                qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
+                if qty_max and qty_max < len(record.invoice_line_ids):
+                    raise ValidationError("La cantidad de lineas de la factura es mayor a la cantidad configurada")

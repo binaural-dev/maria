@@ -39,3 +39,10 @@ class ResPartnerBinauralContactos(models.Model):
         ('g', 'G'),
         ('c', 'C'),
     ], 'Prefijo Rif', required=False, default='v')
+    city_id = fields.Many2one('res.country.city', 'Ciudad', track_visibility='onchange')
+
+    @api.constrains('city_id')
+    def _update_city(self):
+        for record in self:
+            if record.city_id:
+                record.city = record.city_id.name
