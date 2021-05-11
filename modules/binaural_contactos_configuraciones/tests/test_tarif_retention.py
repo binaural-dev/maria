@@ -19,11 +19,7 @@ class TestTarifRetention(TransactionCase):
                 'apply_subtracting': True,
                 'acumulative_rate': False,
                 'status': True,
-<<<<<<< HEAD
                 'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
-=======
-                'tax_unit_ids': self.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
->>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
             })
 
         self.tarif_2 = self.env['tarif.retention'].create({
@@ -33,7 +29,6 @@ class TestTarifRetention(TransactionCase):
                 'apply_subtracting': False,
                 'acumulative_rate': False,
                 'status': True,
-<<<<<<< HEAD
                 'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
             })
         
@@ -41,9 +36,6 @@ class TestTarifRetention(TransactionCase):
                 'name': '2000,00 UT',
                 'value': 2000,
                 'status': True,
-=======
-                'tax_unit_ids': self.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
->>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
             })
 
     def test_save_tarif_retencion(self):
@@ -58,11 +50,7 @@ class TestTarifRetention(TransactionCase):
             'apply_subtracting': False,
             'acumulative_rate': True,
             'status': True,
-<<<<<<< HEAD
             'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1'),
-=======
-            'tax_unit_ids': self.ref('binaural_contactos_configuraciones.demo_tax_unit_1'),
->>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
             'acumulative_rate_ids': [(0, 0, {
                 'name': '0 - 3000 UT',
                 'percentage': 15.00,
@@ -79,7 +67,6 @@ class TestTarifRetention(TransactionCase):
             self.tarif_1.write({'percentage': -10})
 
     def test_required_field(self):
-<<<<<<< HEAD
         tarif = self.env['tarif.retention'].create({
             'name': 'T - 4(Acumulativo)',
             'percentage': 1.00,
@@ -97,19 +84,6 @@ class TestTarifRetention(TransactionCase):
             })]
         })
         self.assertNotEqual(len(tarif.acumulative_rate_ids), 0, msg='Debe agregar al menos una linea de tarifa acumulada')
-=======
-        with self.assertRaises(ValidationError):
-            tarif = self.env['tarif.retention'].create({
-                'name': 'T - 4(Acumulativo)',
-                'percentage': 0.00,
-                'sustract_money': 0.00,
-                'apply_subtracting': False,
-                'acumulative_rate': True,
-                'status': True,
-                'tax_unit_ids': self.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
-            })
-            tarif._check_data_acumulative()
->>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
 
     def test_form_required_field(self):
         f = Form(self.env['tarif.retention'])
@@ -123,11 +97,7 @@ class TestTarifRetention(TransactionCase):
         f.percentage = 7
         f.apply_subtracting = True
         f.acumulative_rate = False,
-<<<<<<< HEAD
         f.tax_unit_ids = self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
-=======
-        f.tax_unit_ids = self.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
->>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
         so = f.save()
         self.assertEqual(int(so.amount_sustract), 8750, msg='Error e el calculo del sustraendo')
         so.apply_subtracting = False

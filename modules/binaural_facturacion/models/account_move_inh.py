@@ -276,7 +276,6 @@ class AccountMoveBinauralFacturacion(models.Model):
                 record.highest_name = record._get_last_sequence()
             else:
                 record.highest_name = '/'
-<<<<<<< HEAD
     
     @api.depends('posted_before', 'state', 'journal_id', 'date')
     def _compute_name(self):
@@ -360,11 +359,7 @@ class AccountMoveBinauralFacturacion(models.Model):
     def qty_line_invocie(self):
         for record in self:
             if record.move_type in ['out_invoice', 'out_refund']:
-                raise ValidationError("1")
                 qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
                 if qty_max and qty_max < len(record.invoice_line_ids):
                     raise ValidationError("La cantidad de lineas de la factura es mayor a la cantidad configurada")
-=======
 
-    
->>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
