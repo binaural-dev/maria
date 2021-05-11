@@ -30,6 +30,10 @@
 		      <field name="value">1500</field>
 		      <field name="status" eval="True"/>
 	      </record>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
 
 	      <!--TARIF RETENTION-->
 	      <record id="demo_tarif_retention_0" model="tarif.retention">
@@ -40,7 +44,10 @@
 		      <field name="acumulative_rate" eval="True"/>
 		      <field name="status" eval="True"/>
 		      <field name="tax_unit_ids" eval="demo_tax_unit_1"/>
+<<<<<<< HEAD
 		      <field name="acumulative_rate_ids" eval="[(5, 0), (0, 0, {'name': '0-3000 UT', 'since': 0, 'until': 3000, 'percentage': 15, 'sustract_ut': 0})]"/>
+=======
+>>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
 	      </record>
 
 	     <record id="demo_tarif_retention_1" model="tarif.retention">
@@ -88,6 +95,7 @@
 			  <field name="tariffs_ids" ref="demo_tarif_retention_0"/>
 			  <field name="pay_from">125000</field>
 	    </record>
+<<<<<<< HEAD
 
 		<!--SIGNATURE CONF-->
 
@@ -111,6 +119,14 @@
 		      <field name="country_id" ref="base.ve"/>
 		      <field name="state_id" ref="demo_res_country_state_0"/>
 	    </record>
+=======
 
+		<!--SIGNATURE CONF-->
+>>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
+
+	    <record id="demo_signature_config_0" model="signature.config">
+		      <field name="email">demo@odoo.com</field>
+		      <field name="active" eval="True"/>
+	    </record>
     </data>
 </odoo>

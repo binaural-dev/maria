@@ -21,6 +21,24 @@ _logger = logging.getLogger(__name__)
 class AccountMoveBinauralFacturacion(models.Model):
     _inherit = 'account.move'
 
+    @api.onchange('filter_partner')
+    def get_domain_partner(self):
+        for record in self:
+            record.partner_id = False
+            if record.filter_partner == 'customer':
+                return {'domain': {
+                    'partner_id': [('customer_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'supplier':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'contact':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '=', 0), ('customer_rank', '=', 0)],
+                }}
+            else:
+                return []
 
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
@@ -33,6 +51,8 @@ class AccountMoveBinauralFacturacion(models.Model):
     date_reception = fields.Date(string='Fecha de recepción',copy=False)
     
     days_expired = fields.Integer('Dias vencidos en base a Fecha de recepción', compute='_compute_days_expired',copy=False)
+    filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
+                                      string='Filtro de Contacto')
 
     @api.onchange("date_reception")
     def _onchange_date_reception(self):
@@ -204,7 +224,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 
         for move in to_post:  
             #cliente
-            if move.is_sale_document(include_receipts=True):
+            if move.is_sale_document(include_receipts=False):
                 #incrementar numero de control de factura y Nota de credito de manera automatica
                 sequence = move.sequence()
                 next_correlative = sequence.get_next_char(sequence.number_next_actual) 
@@ -236,7 +256,7 @@ class AccountMoveBinauralFacturacion(models.Model):
         res = self._cr.fetchall()
         if res:
             for i in moves:
-                if not i.is_purchase_document(include_receipts=True):
+                if not i.is_invoice(include_receipts=True) or not i.is_purchase_document(include_receipts=True) :
                     raise ValidationError(_('Posted journal entry must have an unique sequence number per company.\n'
                     'Problematic numbers: %s\n') % ', '.join(r[1] for r in res))
                 else:
@@ -244,8 +264,8 @@ class AccountMoveBinauralFacturacion(models.Model):
                     for r in res:
                         _logger.info("id a buscar %s",r[0])
                         invoice = self.env['account.move'].sudo().browse(int(r[0]))
-                        if invoice.partner_id == i.partner_id:
-                            raise ValidationError(_('La entrada de diario registrada debe tener un número de secuencia único por empresa y Proveedor.\n'
+                        if invoice.partner_id == i.partner_id and i.is_purchase_document(include_receipts=True):
+                            raise ValidationError(_('La entrada registrada debe tener un número de secuencia único por empresa y Proveedor.\n'
                             'Números problemáticos: %s\n') % ', '.join(r[1] for r in res))
 
     @api.depends('journal_id', 'date')
@@ -256,6 +276,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 record.highest_name = record._get_last_sequence()
             else:
                 record.highest_name = '/'
+<<<<<<< HEAD
     
     @api.depends('posted_before', 'state', 'journal_id', 'date')
     def _compute_name(self):
@@ -343,3 +364,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
                 if qty_max and qty_max < len(record.invoice_line_ids):
                     raise ValidationError("La cantidad de lineas de la factura es mayor a la cantidad configurada")
+=======
+
+    
+>>>>>>> 6595a8a053ee3c095b79e4558031a7eddfac8e8f
