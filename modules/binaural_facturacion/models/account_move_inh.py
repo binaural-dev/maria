@@ -99,7 +99,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 vat = str(p.partner_id.prefix_vat) + str(p.partner_id.vat)
             else:
                 vat = str(p.partner_id.vat)
-            p.vat = vat
+            p.vat = vat.upper()
 
     def sequence(self):
         sequence = self.env['ir.sequence'].search([('code','=','invoice.correlative')])
@@ -223,7 +223,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 
         for move in to_post:  
             #cliente
-            if move.is_sale_document(include_receipts=False):
+            if move.is_sale_document(include_receipts=False) and not move.correlative:
                 #incrementar numero de control de factura y Nota de credito de manera automatica
                 sequence = move.sequence()
                 next_correlative = sequence.get_next_char(sequence.number_next_actual) 
@@ -264,8 +264,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                         _logger.info("id a buscar %s",r[0])
                         invoice = self.env['account.move'].sudo().browse(int(r[0]))
                         if invoice.partner_id == i.partner_id and i.is_purchase_document(include_receipts=True):
-                            raise ValidationError(_('La entrada registrada debe tener un número de secuencia único por empresa y Proveedor.\n'
-                            'Números problemáticos: %s\n') % ', '.join(r[1] for r in res))
+                            raise ValidationError(_('La factura Nro %s esta repetida para el proveedor %s.\n') %(', '.join(r[1] for r in res),i.partner_id.name))
 
     @api.depends('journal_id', 'date')
     def _compute_highest_name(self):

@@ -63,7 +63,7 @@ class SaleOrderBinauralVentas(models.Model):
                 vat = str(p.partner_id.prefix_vat) + str(p.partner_id.vat)
             else:
                 vat = str(p.partner_id.vat)
-            p.vat = vat
+            p.vat = vat.upper()
 
     @api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.tax_id', 'partner_id', 'currency_id')
     def _compute_invoice_taxes_by_group(self):
@@ -83,7 +83,14 @@ class SaleOrderBinauralVentas(models.Model):
                 _logger.info("line.price_subtotal en primer for %s",line.price_subtotal)
                 res[line.tax_id.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
                 tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
-                if tax_key_add_base not in done_taxes:
+                _logger.info("done_taxesdone_taxes %s",done_taxes)
+
+                if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
+                    amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
+                else:
+                    amount = line.price_tax
+                res[line.tax_id.tax_group_id]['amount'] += amount
+                """if tax_key_add_base not in done_taxes:
                     _logger.info("line.price_tax en primer for %s",line.price_tax)
                     if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
                         amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
@@ -91,7 +98,7 @@ class SaleOrderBinauralVentas(models.Model):
                         amount = line.price_tax
                     res[line.tax_id.tax_group_id]['amount'] += amount
                     # The base should be added ONCE
-                    done_taxes.add(tax_key_add_base)
+                    done_taxes.add(tax_key_add_base)"""
 
             # At this point we only want to keep the taxes with a zero amount since they do not
             # generate a tax line.
@@ -102,6 +109,8 @@ class SaleOrderBinauralVentas(models.Model):
                         res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
                         res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
                         zero_taxes.add(tax.tax_group_id)
+
+            _logger.info("res========== %s",res)
 
             res = sorted(res.items(), key=lambda l: l[0].sequence)
             move.amount_by_group = [(
