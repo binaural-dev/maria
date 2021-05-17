@@ -31,7 +31,6 @@
 		      <field name="status" eval="True"/>
 	      </record>
 
-
 	      <!--TARIF RETENTION-->
 	      <record id="demo_tarif_retention_0" model="tarif.retention">
 		      <field name="name">T - 2(Acumulativo)</field>
@@ -44,9 +43,9 @@
 	      </record>
 
 	     <record id="demo_acumulative_tarif_retention_0" model="acumulative.tarif">
-		      <field name="name">0-2000 UT</field>
+		      <field name="name">0-3000 UT</field>
 		      <field name="since">0</field>
-		      <field name="until">2000</field>
+		      <field name="until">3000</field>
 		      <field name="percentage">15</field>
 		      <field name="sustract_ut">0</field>
 		      <field name="tariffs_id" eval="demo_tarif_retention_0"/>
