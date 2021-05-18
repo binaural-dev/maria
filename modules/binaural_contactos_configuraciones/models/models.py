@@ -150,3 +150,13 @@ class SignatureConfigBinuaral(models.Model):
     email = fields.Char(string='Correo electronico')
     signature = fields.Binary(string='Firma')
     active = fields.Boolean(string='Activo', default=True)
+    
+    
+class ResCountryCityBinaural(models.Model):
+    _name = 'res.country.city'
+    _rec_name = 'name'
+    _sql_constraints = [('name_uniq', 'unique (name,country_id,state_id)', 'No puede registrar una ciudad con el mismo nombre para el estado y el pais seleccionado')]
+    
+    country_id = fields.Many2one('res.country', string="Pais", required=True)
+    state_id = fields.Many2one('res.country.state', string="Estado", required=True)
+    name = fields.Char(string="Ciudad", required=True)

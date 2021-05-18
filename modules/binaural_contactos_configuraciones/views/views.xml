@@ -308,5 +308,49 @@
 	    <!--MENU-->
         <menuitem name="Firma" id="menu_retention_configurate_signature" parent="binaural_contactos_configuraciones.retention_configuration" action="action_configurate_signature"/>
         <!--SIGNATURE CONFIG-->
+
+	    <!--RES COUNTRY CITY-->
+	    <!--TREE-->
+		<record id="view_res_country_city_tree" model="ir.ui.view">
+            <field name="name">Ciudad</field>
+            <field name="model">res.country.city</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="country_id"/>
+                    <field name="state_id"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--FORM-->
+        <record id="view_res_country_city_form" model="ir.ui.view">
+            <field name="name">Ciudad</field>
+            <field name="model">res.country.city</field>
+            <field name="arch" type="xml">
+                <form string="Ciudad">
+                    <sheet string="Ciudad">
+	                    <group>
+	                        <field name="country_id"/>
+	                        <field name="state_id"/>
+	                        <field name="name"/>
+	                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--ACTION-->
+        <record id="action_res_city" model="ir.actions.act_window">
+            <field name="name">Ciudad</field>
+            <field name="res_model">res.country.city</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+	    <!--MENU-->
+        <menuitem name="Ciudad" id="menu_res_city" parent="binaural_contactos_configuraciones.master_configuration" action="action_res_city"/>
+        <!--RES COUNTRY CITY-->
   </data>
 </odoo>
