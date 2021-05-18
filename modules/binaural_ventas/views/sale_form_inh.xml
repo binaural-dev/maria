@@ -8,7 +8,6 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
 
-                <!--add fields: vat,phone,address,business_name-->
 	            <field name="partner_id" position="before">
 		            <field name="filter_partner" required="1"/>
 	            </field>
@@ -19,7 +18,6 @@
                     <field name="address" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>            
                 </field>
 
-                <!--add fields: amount_by_group-->
                 <field name="amount_tax" position="after">
                     <field name="amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
                     <field name="amount_by_group" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>          

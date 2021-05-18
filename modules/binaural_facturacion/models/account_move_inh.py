@@ -89,7 +89,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                     _logger.info("Exepction en days expired")
                     _logger.info(e)
                     days_expired = 0
-                _logger.info("Days expired %s",days_expired)
+                _logger.info("Daysssss expired %s",days_expired)
             i.days_expired = days_expired if days_expired > 0 else 0
         
     @api.depends('partner_id')
@@ -354,10 +354,14 @@ class AccountMoveBinauralFacturacion(models.Model):
             self.filtered(lambda m: not m.name).name = '/'
         else:
             self.filtered(lambda m: not m.name).name = '/'
-            
-    @api.constrains('invoice_line_ids')
-    def qty_line_invocie(self):
+
+    @api.constrains('move_type', 'invoice_date', 'invoice_line_ids')
+    def _check_qty_lines(self):
         for record in self:
+            _logger.info('RECORD')
+            _logger.info(record)
+            if not record.invoice_date:
+                raise ValidationError("Debe ingresar fecha")
             if record.move_type in ['out_invoice', 'out_refund']:
                 qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
                 if qty_max and qty_max < len(record.invoice_line_ids):

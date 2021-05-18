@@ -144,10 +144,18 @@ class SaleAdvancePaymentInvBinaural(models.TransientModel):
     _inherit = "sale.advance.payment.inv"
     
     def create_invoices(self):
+        _logger.info('Creando factura')
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
+        _logger.info('Ordenes')
+        _logger.info(sale_orders)
         qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
+        _logger.info('QTY_MAX')
+        _logger.info(qty_max)
+        qty_lines = 0
         for order in sale_orders:
             qty_lines = len(order.order_line)
+        _logger.info('QTY_LINES')
+        _logger.info(qty_lines)
         if qty_max and qty_max <= qty_lines:
             qty_invoice = qty_lines / qty_max
         else:
@@ -156,6 +164,8 @@ class SaleAdvancePaymentInvBinaural(models.TransientModel):
             qty_invoice = int(qty_invoice) + 1
         else:
             qty_invoice = int(qty_invoice)
+        _logger.info('QTY_INVOICE')
+        _logger.info(qty_invoice)
         for i in range(0, qty_invoice):
             if self.advance_payment_method == 'delivered':
                 sale_orders._create_invoices(final=self.deduct_down_payments)
