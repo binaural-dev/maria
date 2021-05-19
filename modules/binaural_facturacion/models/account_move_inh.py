@@ -54,6 +54,118 @@ class AccountMoveBinauralFacturacion(models.Model):
     filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
                                       string='Filtro de Contacto')
 
+    amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+
+    """@api.depends('line_ids.price_subtotal', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id')
+    def _compute_invoice_taxes_by_group_base(self):
+        ''' Helper to get the taxes grouped according their account.tax.group.
+        This method is only used when printing the invoice.
+        '''
+        _logger.info("se ejecuto la funcion:_compute_invoice_taxes_by_group_base")
+        for move in self:
+            lang_env = move.with_context(lang=move.partner_id.lang).env
+            tax_lines = move.line_ids.filtered(lambda line: line.tax_line_id)
+            tax_balance_multiplicator = 1 #-1 if move.is_inbound(True) else 1
+            res = {}
+            # There are as many tax line as there are repartition lines
+            done_taxes = set()
+            for line in tax_lines:
+                res.setdefault(line.tax_line_id.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                _logger.info("line.price_subtotal en primer for %s",line.price_subtotal)
+                res[line.tax_line_id.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
+                tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
+                _logger.info("done_taxesdone_taxes %s",done_taxes)
+
+                if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
+                    amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
+                else:
+                    amount = line.price_tax
+                res[line.tax_line_id.tax_group_id]['amount'] += amount
+
+
+            # At this point we only want to keep the taxes with a zero amount since they do not
+            # generate a tax line.
+            zero_taxes = set()
+            for line in move.line_ids:
+                for tax in line.tax_line_id.flatten_taxes_hierarchy():
+                    if tax.tax_group_id not in res or tax.tax_group_id in zero_taxes:
+                        res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
+                        zero_taxes.add(tax.tax_group_id)
+
+            _logger.info("res========== %s",res)
+
+            res = sorted(res.items(), key=lambda l: l[0].sequence)
+
+
+            move.amount_by_group_base = [(
+                group.name.replace("IVA", "Base"), amounts['base'],
+                amounts['amount'],
+                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]"""
+
+    @api.depends('line_ids.price_subtotal', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id')
+    def _compute_invoice_taxes_by_group(self):
+        ''' Helper to get the taxes grouped according their account.tax.group.
+        This method is only used when printing the invoice.
+        '''
+        for move in self:
+            lang_env = move.with_context(lang=move.partner_id.lang).env
+            tax_lines = move.line_ids.filtered(lambda line: line.tax_line_id)
+            tax_balance_multiplicator = -1 if move.is_inbound(True) else 1
+            res = {}
+            # There are as many tax line as there are repartition lines
+            done_taxes = set()
+            for line in tax_lines:
+                res.setdefault(line.tax_line_id.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                res[line.tax_line_id.tax_group_id]['amount'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
+                tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
+                if tax_key_add_base not in done_taxes:
+                    if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
+                        amount = line.company_currency_id._convert(line.tax_base_amount, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
+                    else:
+                        amount = line.tax_base_amount
+                    res[line.tax_line_id.tax_group_id]['base'] += amount
+                    # The base should be added ONCE
+                    done_taxes.add(tax_key_add_base)
+
+            # At this point we only want to keep the taxes with a zero amount since they do not
+            # generate a tax line.
+            zero_taxes = set()
+            for line in move.line_ids:
+                for tax in line.tax_ids.flatten_taxes_hierarchy():
+                    if tax.tax_group_id not in res or tax.tax_group_id in zero_taxes:
+                        res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
+                        zero_taxes.add(tax.tax_group_id)
+
+            res = sorted(res.items(), key=lambda l: l[0].sequence)
+            move.amount_by_group = [(
+                group.name, amounts['amount'],
+                amounts['base'],
+                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
+            move.amount_by_group_base = [(
+                group.name.replace("IVA", "Base"), amounts['base'],
+                amounts['amount'],
+                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+                
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
+            
+
+
+
     @api.onchange("date_reception")
     def _onchange_date_reception(self):
         if self.is_invoice() and self.date_reception and self.invoice_date and self.date_reception < self.invoice_date:

@@ -36,6 +36,11 @@
                         attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))],'readonly':[('state','=','draft')]}"/>
                     <field name="days_expired" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
                 </field>
+
+
+                <field name="amount_by_group" position="before">
+                    <field name="amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>          
+                </field>
             </field>
         </record>
 
