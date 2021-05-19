@@ -89,7 +89,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                     _logger.info("Exepction en days expired")
                     _logger.info(e)
                     days_expired = 0
-                _logger.info("Days expired %s",days_expired)
+                _logger.info("Daysssss expired %s",days_expired)
             i.days_expired = days_expired if days_expired > 0 else 0
         
     @api.depends('partner_id')
@@ -110,6 +110,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 'padding': 5
             })
         return sequence
+    
     def _post(self, soft=True):
         """Post/Validate the documents.
 
@@ -274,5 +275,94 @@ class AccountMoveBinauralFacturacion(models.Model):
                 record.highest_name = record._get_last_sequence()
             else:
                 record.highest_name = '/'
-
     
+    @api.depends('posted_before', 'state', 'journal_id', 'date')
+    def _compute_name(self):
+        #No aplicar para documentos de compras
+        for record in self:
+            if not record.is_purchase_document(include_receipts=True):
+                def journal_key(move):
+                    return (move.journal_id, move.journal_id.refund_sequence and move.move_type)
+
+                def date_key(move):
+                    return (move.date.year, move.date.month)
+
+                grouped = defaultdict(  # key: journal_id, move_type
+                    lambda: defaultdict(  # key: first adjacent (date.year, date.month)
+                        lambda: {
+                            'records': self.env['account.move'],
+                            'format': False,
+                            'format_values': False,
+                            'reset': False
+                        }
+                    )
+                )
+                self = self.sorted(lambda m: (m.date, m.ref or '', m.id))
+                highest_name = self[0]._get_last_sequence() if self else False
+
+                # Group the moves by journal and month
+                for move in self:
+                    if not highest_name and move == self[0] and not move.posted_before:
+                        # In the form view, we need to compute a default sequence so that the user can edit
+                        # it. We only check the first move as an approximation (enough for new in form view)
+                        pass
+                    elif (move.name and move.name != '/') or move.state != 'posted':
+                        try:
+                            if not move.posted_before:
+                                move._constrains_date_sequence()
+                            # Has already a name or is not posted, we don't add to a batch
+                            continue
+                        except ValidationError:
+                            # Has never been posted and the name doesn't match the date: recompute it
+                            pass
+                    group = grouped[journal_key(move)][date_key(move)]
+                    if not group['records']:
+                        # Compute all the values needed to sequence this whole group
+                        move._set_next_sequence()
+                        group['format'], group['format_values'] = move._get_sequence_format_param(move.name)
+                        group['reset'] = move._deduce_sequence_number_reset(move.name)
+                    group['records'] += move
+
+                # Fusion the groups depending on the sequence reset and the format used because `seq` is
+                # the same counter for multiple groups that might be spread in multiple months.
+                final_batches = []
+                for journal_group in grouped.values():
+                    for date_group in journal_group.values():
+                        if (
+                            not final_batches
+                            or final_batches[-1]['format'] != date_group['format']
+                            or final_batches[-1]['format_values'] != date_group['format_values']
+                        ):
+                            final_batches += [date_group]
+                        elif date_group['reset'] == 'never':
+                            final_batches[-1]['records'] += date_group['records']
+                        elif (
+                            date_group['reset'] == 'year'
+                            and final_batches[-1]['records'][0].date.year == date_group['records'][0].date.year
+                        ):
+                            final_batches[-1]['records'] += date_group['records']
+                        else:
+                            final_batches += [date_group]
+
+                # Give the name based on previously computed values
+                for batch in final_batches:
+                    for move in batch['records']:
+                        move.name = batch['format'].format(**batch['format_values'])
+                        batch['format_values']['seq'] += 1
+                    batch['records']._compute_split_sequence()
+                self.filtered(lambda m: not m.name).name = '/'
+            else:
+                self.filtered(lambda m: not m.name).name = '/'
+
+    @api.constrains('move_type', 'invoice_date', 'invoice_line_ids')
+    def _check_qty_lines(self):
+        for record in self:
+            _logger.info('RECORD')
+            _logger.info(record)
+            if not record.invoice_date:
+                raise ValidationError("Debe ingresar fecha")
+            if record.move_type in ['out_invoice', 'out_refund']:
+                qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
+                if qty_max and qty_max < len(record.invoice_line_ids):
+                    raise ValidationError("La cantidad de lineas de la factura es mayor a la cantidad configurada")
+

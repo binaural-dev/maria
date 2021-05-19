@@ -98,19 +98,19 @@
 
 	    <!--RES COUNTRY STATE-->
 
-	    <!--<record id="demo_res_country_state_0" model="res.country.state">
+	    <record id="demo_res_country_state_0" model="res.country.state">
 		      <field name="name">Portuguesa</field>
 		      <field name="code">VEPO</field>
 		      <field name="country_id" ref="base.ve"/>
-	    </record>-->
+	    </record>
 
 	    <!--RES COUNTRY CITY-->
 
-	   <!-- <record id="demo_res_country_city_0" model="res.country.city">
+	    <record id="demo_res_country_city_0" model="res.country.city">
 		      <field name="name">Guanare</field>
 		      <field name="country_id" ref="base.ve"/>
 		      <field name="state_id" ref="demo_res_country_state_0"/>
-	    </record>-->
+	    </record>
 
     </data>
 </odoo>

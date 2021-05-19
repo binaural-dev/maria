@@ -11,7 +11,6 @@
                 <field name="user_id" position="before">
 	                <field name="filter_partner"/>
                 </field>
-                <!--add fields: vat,phone,address,business_name-->
                 <field name="partner_id" position="after">
                     <field name="business_name" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>
                     <field name="vat" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>
