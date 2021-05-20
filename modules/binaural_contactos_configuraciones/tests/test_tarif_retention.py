@@ -19,7 +19,7 @@ class TestTarifRetention(TransactionCase):
                 'apply_subtracting': True,
                 'acumulative_rate': False,
                 'status': True,
-                'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
+                'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1').id
             })
 
         self.tarif_2 = self.env['tarif.retention'].create({
@@ -29,7 +29,7 @@ class TestTarifRetention(TransactionCase):
                 'apply_subtracting': False,
                 'acumulative_rate': False,
                 'status': True,
-                'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
+                'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1').id
             })
         
         self.tax_unit = self.env['tax.unit'].create({
@@ -50,7 +50,7 @@ class TestTarifRetention(TransactionCase):
             'apply_subtracting': False,
             'acumulative_rate': True,
             'status': True,
-            'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1'),
+            'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1').id,
             'acumulative_rate_ids': [(0, 0, {
                 'name': '0 - 3000 UT',
                 'percentage': 15.00,
@@ -74,7 +74,7 @@ class TestTarifRetention(TransactionCase):
             'apply_subtracting': False,
             'acumulative_rate': True,
             'status': True,
-            'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1'),
+            'tax_unit_ids': self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1').id,
             'acumulative_rate_ids': [(0, 0, {
                 'name': '0 - 4000 UT',
                 'percentage': 15.00,
@@ -97,7 +97,7 @@ class TestTarifRetention(TransactionCase):
         f.percentage = 7
         f.apply_subtracting = True
         f.acumulative_rate = False,
-        f.tax_unit_ids = self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1')
+        f.tax_unit_ids = self.env.ref('binaural_contactos_configuraciones.demo_tax_unit_1').id
         so = f.save()
         self.assertEqual(int(so.amount_sustract), 8750, msg='Error e el calculo del sustraendo')
         so.apply_subtracting = False
