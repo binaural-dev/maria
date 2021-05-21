@@ -84,7 +84,7 @@ class PurchaseOrderBinauralCompras(models.Model):
                 res.setdefault(line.taxes_id.tax_group_id, {'base': 0.0, 'amount': 0.0})
                 _logger.info("line.price_subtotal en primer for %s",line.price_subtotal)
                 res[line.taxes_id.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
-                tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
+                #tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
                 _logger.info("done_taxesdone_taxes %s",done_taxes)
 
                 if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
