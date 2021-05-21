@@ -471,8 +471,8 @@ class AccountMoveBinauralFacturacion(models.Model):
         for record in self:
             _logger.info('RECORD')
             _logger.info(record)
-            if not record.invoice_date:
-                raise ValidationError("Debe ingresar fecha")
+            #if not record.invoice_date:
+            #    raise ValidationError("Debe ingresar fecha")
             if record.move_type in ['out_invoice', 'out_refund']:
                 qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
                 if qty_max and qty_max < len(record.invoice_line_ids):
