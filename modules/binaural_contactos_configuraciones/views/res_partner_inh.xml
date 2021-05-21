@@ -18,7 +18,7 @@
 	            </field>
 		        <field name="city" position="replace">
 			        <field name="city_id" placeholder="Ciudad"/>
-			        <field name="city" invisible=""/>
+			        <field name="city" invisible="1"/>
 		        </field>
 
 	            <div id="vat" position="after">
@@ -29,6 +29,11 @@
 		        <label for="street" position="before">
 	                <field name="business_name" required="1"/>
 	            </label>
+
+		        <xpath expr="//sheet/notebook/page[@name='contact_addresses']/field[@name='child_ids']/form//field[@name='city']" position="replace">
+					<field name="city_id" placeholder="Ciudad"/>
+			        <field name="city" invisible="1"/>
+				</xpath>
 
 		        <page name="sales_purchases" position="after">
 	                <page name='retention' string="Retenciones">
