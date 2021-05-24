@@ -125,7 +125,7 @@ class PurchaseOrderBinauralCompras(models.Model):
             ) for group, amounts in res]
 
             move.amount_by_group_base = [(
-                group.name.replace("IVA", "Base"), amounts['base'],
+                group.name.replace("IVA", "Total G").replace("TAX", "Total G"), amounts['base'],
                 amounts['amount'],
                 formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
                 formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
