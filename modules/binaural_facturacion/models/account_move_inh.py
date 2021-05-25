@@ -55,6 +55,9 @@ class AccountMoveBinauralFacturacion(models.Model):
                                       string='Filtro de Contacto')
 
     amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+    
+
+    apply_retention_iva = fields.Boolean(string="¿Se aplico retención de iva?", default=False)
 
     @api.depends('line_ids.price_subtotal', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id')
     def _compute_invoice_taxes_by_group(self):
