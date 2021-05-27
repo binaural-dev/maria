@@ -165,7 +165,7 @@
         </record>
 
         <!--Menu Lateral: Retenciones-->
-        <menuitem name="Retenciones IVA" id="menu_retention_iva" sequence="4" parent="account.menu_finance"/>
+        <menuitem name="Retenciones IVA" id="menu_retention_iva" sequence="4" parent="account_accountant.menu_accounting"/>
 
         <menuitem name="Cliente" id="menu_retention_iva_client" sequence="0" parent="menu_retention_iva" action="action_retention_iva_client"/>
 
