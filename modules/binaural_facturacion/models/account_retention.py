@@ -2,6 +2,7 @@ from odoo import api, fields, models, _, exceptions
 from datetime import datetime
 
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
+import math
 from odoo.tools import float_compare, date_utils, email_split, email_re
 from odoo.tools.misc import formatLang, format_date, get_lang
 
@@ -117,9 +118,8 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 self.amount_imp_ret += line.iva_amount
                 self.total_tax_ret += line.retention_amount
 
-    @api.multi
     def action_emitted(self):
-        today = datetime.datetime.now()
+        today = datetime.now()
         if not self.date_accounting:
             self.date_accounting = str(today)
         if not self.date:
@@ -128,7 +128,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
             #REVISAR CUANDO TOQUE EL FLUJO
             sequence = self.sequence()
             self.correlative = sequence.next_by_code('retention.iva.control.number')
-            today = datetime.datetime.now()
+            today = datetime.now()
             self.number = str(today.year) + today.strftime("%m") + self.correlative
             self.make_accounting_entries(False)
         elif self.type in ['out_invoice', 'out_refund', 'out_debit', 'out_contingence']:
@@ -181,6 +181,74 @@ class AccountRetentionBinauralFacturacion(models.Model):
 
     amount_total_facture = fields.Float(compute=amount_ret_all, store=True, string="Total Facturado")
     company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string="Company Currency")
+    
+    def round_half_up(self, n, decimals=0):
+        multiplier = 10 ** decimals
+        return math.floor(n * multiplier + 0.5) / multiplier
+
+    def make_accounting_entries(self, amount_edit):
+        move, facture = [], []
+        decimal_places = self.company_id.currency_id.decimal_places
+        journal_sale_id = int(self.env['ir.config_parameter'].sudo().get_param('journal_retention_client'))
+        journal_sale = self.env['account.journal'].search([('id', '=', journal_sale_id)], limit=1)
+        if not journal_sale:
+            raise UserError("Por favor configure los diarios de las renteciones")
+    
+        if self.type == 'out_invoice':
+            for ret_line in self.retention_line:
+                line_ret = []
+                if ret_line.retention_amount > 0:
+                    if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
+                            ret_line.invoice_id.amount_tax, decimal_places):
+                        # Disminuye cuentas por cobrar
+                        cxc = int(self.env['ir.config_parameter'].sudo().get_param('account_retention_receivable_client'))
+                        line_ret.append((0, 0, {
+                            'name': 'Cuentas por Cobrar Cientes (R)',
+                            'account_id': cxc,
+                            'partner_id': self.partner_id.id,
+                            'debit': 0,
+                            'credit': self.round_half_up(amount_edit,
+                                                         decimal_places) if amount_edit else self.round_half_up(
+                                ret_line.retention_amount, decimal_places),
+                        }))
+                        # Registra la retencion
+                        line_ret.append((0, 0, {
+                            'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
+                            'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+                            'partner_id': self.partner_id.id,
+                            'debit': self.round_half_up(amount_edit,
+                                                        decimal_places) if amount_edit else self.round_half_up(
+                                ret_line.retention_amount, decimal_places),
+                            'credit': 0,
+                        }))
+                        
+                        move_obj = self.env['account.move'].create({
+                            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
+                            'date': self.date_accounting,
+                            'journal_id': journal_sale.id,
+                            'state': 'draft',
+                            'move_type': 'entry',
+                            'line_ids': line_ret
+                        })
+                        move_obj.action_post()
+                        # self.move_id = move_obj.id
+                        move.append(self.env['account.move.line'].search(
+                            [('move_id', '=', move_obj.id), ('name', '=', 'Cuentas por Cobrar Cientes (R)')]))
+                        facture.append(ret_line.invoice_id)
+                        ret_line.move_id = move_obj.id
+                    else:
+                        raise UserError("Disculpe, el monto retenido de la factura " + str(
+                            ret_line.invoice_id.name) + ' no debe superar la cantidad de IVA registrado')
+                else:
+                    raise UserError(
+                        "Disculpe, la factura " + str(ret_line.invoice_id.name) + ' no posee el monto retenido')
+            
+                ret_line.invoice_id.write(
+                    {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
+            for index, move_line in enumerate(move):
+                facture[index].js_assign_outstanding_line(move_line.id)
+        else:
+            return
 
 
 class AccountRetentionBinauralLineFacturacion(models.Model):
@@ -206,22 +274,24 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
 
     @api.depends('invoice_id')
     def _retention_rate(self):
-        if self.invoice_id.move_type in ['in_invoice', 'in_refund', 'in_debit']:
-            self.retention_rate = self.invoice_id.partner_id.withholding_type.value
+        for record in self:
+            if record.invoice_id.move_type in ['in_invoice', 'in_refund', 'in_debit']:
+                record.retention_rate = record.invoice_id.partner_id.withholding_type.value
 
     @api.onchange('retention_amount')
     def _onchange_retention_amount(self):
-        if self.retention_amount > self.iva_amount:
-            return {
-                'warning': {
-                    'title': 'El monto retenido excedende',
-                    'message': 'El monto a retener no debe superar al IVA de la factura, por favor verificar'
-                },
-                'value': {
-                    'retention_amount': 0
-                },
-            
-            }
+        for record in self:
+            if record.retention_amount > record.iva_amount:
+                return {
+                    'warning': {
+                        'title': 'El monto retenido excedende',
+                        'message': 'El monto a retener no debe superar al IVA de la factura, por favor verificar'
+                    },
+                    'value': {
+                        'retention_amount': 0
+                    },
+                
+                }
 
     name = fields.Char('Descripción', size=64, select=True)
     currency_id = fields.Many2one(related="retention_id.company_currency_id")
@@ -242,7 +312,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     imp_ret = fields.Float(string='Impuesto Causado')
     retention_rate = fields.Float(compute=_retention_rate, store=True, string='Portancentaje de Retención',
                                   help="Porcentaje de Retencion ha aplicar a la factura")
-
+    move_id = fields.Many2one('account.move', 'Movimiento Contable', help="Asiento Contable", ondelete='cascade')
     is_retention_client = fields.Boolean(string='registro de retencion de cliente', default=True)
     display_invoice_number = fields.Char(string='Display', compute='_compute_fields_combination_iva', store=True)
     
