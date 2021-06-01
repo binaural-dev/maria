@@ -73,7 +73,7 @@
 		                    </div>
 		                </div>
 
-				        <div class="col-12 col-lg-6 o_setting_box" id="cxc_customer">
+				        <!--div class="col-12 col-lg-6 o_setting_box" id="cxc_customer">
 		                    <div class="o_setting_left_pane">
 		                    </div>
 					        <div class="o_setting_right_pane">
@@ -83,9 +83,9 @@
 		                        </div>
 	                            <field name="account_retention_receivable_client" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
 		                    </div>
-		                </div>
+		                </div-->
 
-				        <div class="col-12 col-lg-6 o_setting_box" id="cxp_supplier">
+				        <!--div class="col-12 col-lg-6 o_setting_box" id="cxp_supplier">
 		                    <div class="o_setting_left_pane">
 		                    </div>
 					        <div class="o_setting_right_pane">
@@ -97,7 +97,7 @@
 	                                <field name="account_retention_to_pay_supplier" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
 	                            </div>
 		                    </div>
-		                </div>
+		                </div-->
 		            </div>
 				</xpath>
 		        <xpath expr="//div[@id='invoicing_settings']" position="inside">

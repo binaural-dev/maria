@@ -17,14 +17,14 @@
                 <form string="Retention">
                     <header>
                         <button name="action_emitted" type="object" states="draft" string="Validar" class="oe_highlight"/>
-                        <!--button name="action_cancel" type="object" states="draft,emitted,corrected" string="Anular" confirm="¿Esta seguro que quiere anular este comprabante? Se revertiran los asientos contables asociados" /-->
+                        <button name="action_cancel" type="object" states="draft,emitted" string="Anular" confirm="¿Esta seguro que quiere anular este comprabante? Se revertiran los asientos contables asociados" />
                         <field name="state" widget="statusbar" nolabel="1"/>
                     </header>
                     <group colspan="4" col="4">
                         <field name="type" force_save="1" select="2"/>
                         <field name="partner_id" on_change="onchange_partner_id(type,partner_id)" select="1"  attrs="{'invisible':[('type','=', False)],'readonly':[('state','in',['emitted','cancel'])]}"/>
                         <field name="date_accounting" select="1" attrs="{'readonly':[('state','in',['emitted','cancel'])]}"/>
-                        <field name="number" force_save="1" attrs="{'readonly':['|',('type','=', 'in_invoice'),('state','in', ['emitted','cancel'])] }" />
+                        <field name="number" force_save="1" required="1" attrs="{'readonly':['|',('type','=', 'in_invoice'),('state','in', ['emitted','cancel'])] }" />
                         <field name="correlative" force_save="1" invisible="1" attrs="{'readonly':[('type','=', 'in_invoice')] }"/>
                         <field name="date" attrs="{'readonly':[('state','in',['emitted','cancel'])]}"/>
                     </group>
@@ -34,6 +34,7 @@
                                 <tree editable='bottom'>
                                     <field name="name"/>
                                     <field name="invoice_id" force_save="1" />
+                                    <field name="invoice_type" readonly="1"/>
 	                                <field name="tax_line"/>
                                     <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />

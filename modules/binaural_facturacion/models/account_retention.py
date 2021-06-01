@@ -32,14 +32,16 @@ class AccountRetentionBinauralFacturacion(models.Model):
         if self.type == 'out_invoice' and self.partner_id:  # Rentention of client
             if self.partner_id.taxpayer != 'ordinary':
                 for facture_line_retention in self.env['account.move'].search(
-                        [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_invoice', 'out_debit', 'out_refund', 'out_contingence']),
+                        [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_invoice', 'out_debit', 'out_refund']),
                          ('state', '=', 'posted')]):
-                    if not facture_line_retention.apply_retention_iva and facture_line_retention.move_type != 'out_refund' and facture_line_retention.amount_tax > 0 and facture_line_retention.payment_state in ['not_paid', 'partial']:
+                    # 'move_id': move_obj.id,
+                    if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0 and facture_line_retention.payment_state in ['not_paid', 'partial']:
                         for tax in facture_line_retention.amount_by_group:
                             tax_id = self.env['account.tax'].search([('tax_group_id', '=', tax[6]), ('type_tax_use', '=', 'sale')])
-                            data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
-                                                'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount, 'facture_amount': tax[2],
-                                                'iva_amount': tax[1]}))
+                            if tax_id.amount > 0:
+                                data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
+                                                    'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount, 'facture_amount': tax[2],
+                                                    'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type}))
                 if len(data) != 0:
                     return {'value': {'retention_line': data}}
                 else:
@@ -131,11 +133,22 @@ class AccountRetentionBinauralFacturacion(models.Model):
             today = datetime.now()
             self.number = str(today.year) + today.strftime("%m") + self.correlative
             self.make_accounting_entries(False)
-        elif self.type in ['out_invoice', 'out_refund', 'out_debit', 'out_contingence']:
+        elif self.type in ['out_invoice', 'out_refund', 'out_debit']:
             if not self.number:
                 raise exceptions.UserError("Introduce el número de comprobante")
             self.make_accounting_entries(False)
         return self.write({'state': 'emitted'})
+
+    def action_cancel(self):
+        for line in self.retention_line:
+            if line.move_id and line.move_id.line_ids:
+                line.move_id.line_ids.remove_move_reconcile()
+            if line.move_id and line.move_id.state != 'draft':
+                line.move_id.button_cancel()
+            line.invoice_id.write({'apply_retention_iva': False, 'iva_voucher_number': None})
+            #line.move_id.unlink()
+        self.write({'state': 'cancel'})
+        return True
 
     name = fields.Char('Descripción', size=64, select=True, states={'draft': [('readonly', False)]},
                        help="Descripción del Comprobante")
@@ -187,7 +200,8 @@ class AccountRetentionBinauralFacturacion(models.Model):
         return math.floor(n * multiplier + 0.5) / multiplier
 
     def make_accounting_entries(self, amount_edit):
-        move, facture = [], []
+        move, facture, move_ids = [], [], []
+        invoices = []
         decimal_places = self.company_id.currency_id.decimal_places
         journal_sale_id = int(self.env['ir.config_parameter'].sudo().get_param('journal_retention_client'))
         journal_sale = self.env['account.journal'].search([('id', '=', journal_sale_id)], limit=1)
@@ -198,53 +212,172 @@ class AccountRetentionBinauralFacturacion(models.Model):
             for ret_line in self.retention_line:
                 line_ret = []
                 if ret_line.retention_amount > 0:
-                    if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
-                            ret_line.invoice_id.amount_tax, decimal_places):
-                        # Disminuye cuentas por cobrar
-                        cxc = int(self.env['ir.config_parameter'].sudo().get_param('account_retention_receivable_client'))
-                        line_ret.append((0, 0, {
-                            'name': 'Cuentas por Cobrar Cientes (R)',
-                            'account_id': cxc,
-                            'partner_id': self.partner_id.id,
-                            'debit': 0,
-                            'credit': self.round_half_up(amount_edit,
-                                                         decimal_places) if amount_edit else self.round_half_up(
-                                ret_line.retention_amount, decimal_places),
-                        }))
-                        # Registra la retencion
-                        line_ret.append((0, 0, {
-                            'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
-                            'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
-                            'partner_id': self.partner_id.id,
-                            'debit': self.round_half_up(amount_edit,
-                                                        decimal_places) if amount_edit else self.round_half_up(
-                                ret_line.retention_amount, decimal_places),
-                            'credit': 0,
-                        }))
-                        
-                        move_obj = self.env['account.move'].create({
-                            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
-                            'date': self.date_accounting,
-                            'journal_id': journal_sale.id,
-                            'state': 'draft',
-                            'move_type': 'entry',
-                            'line_ids': line_ret
-                        })
-                        move_obj.action_post()
-                        # self.move_id = move_obj.id
-                        move.append(self.env['account.move.line'].search(
-                            [('move_id', '=', move_obj.id), ('name', '=', 'Cuentas por Cobrar Cientes (R)')]))
-                        facture.append(ret_line.invoice_id)
-                        ret_line.move_id = move_obj.id
+                    if ret_line.invoice_id.name not in invoices:
+                        # Crea los apuntes y asiento contable  de las primeras lineas de retencion
+                        if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
+                                ret_line.invoice_id.amount_tax, decimal_places):
+                            # Verifica la cuenta por cobrar de la factura a utilizar en el asiento
+                            cxc = False
+                            for cta in ret_line.invoice_id.line_ids:
+                                if cta.account_id.user_type_id.type == 'receivable':
+                                    cxc = cta.account_id.id
+                            if not cxc:
+                                raise UserError(
+                                    "Disculpe, la factura %s no tiene ninguna cuenta por cobrar ") % ret_line.invoice_id.name
+                            if ret_line.invoice_id.move_type not in ['out_refund']:
+                                # Crea los apuntes contables para las facturas, Nota debito
+                                # Apuntes
+                                line_ret.append((0, 0, {
+                                    'name': 'Cuentas por Cobrar Cientes (R)',
+                                    'account_id': cxc,
+                                    'partner_id': self.partner_id.id,
+                                    'debit': 0,
+                                    'credit': self.round_half_up(amount_edit,
+                                                                 decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                }))
+                                line_ret.append((0, 0, {
+                                    'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
+                                    'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+                                    'partner_id': self.partner_id.id,
+                                    'debit': self.round_half_up(amount_edit,
+                                                                decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                    'credit': 0,
+                                }))
+                                # Asiento Contable
+                                move_obj = self.env['account.move'].create({
+                                    'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
+                                    'date': self.date_accounting,
+                                    'journal_id': journal_sale.id,
+                                    'state': 'draft',
+                                    'move_type': 'entry',
+                                    'line_ids': line_ret
+                                })
+                                move_ids.append(move_obj.id)
+                            else:
+                                # Crea los apuntes contables para las notas de credito
+                                # Apuntes
+                                line_ret.append((0, 0, {
+                                    'name': 'Cuentas por Cobrar Cientes (R)',
+                                    'account_id': cxc,
+                                    # account.id, Cuentas Por Cobrar Clientes
+                                    'partner_id': self.partner_id.id,
+                                    'debit': self.round_half_up(amount_edit,
+                                                                decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                    'credit': 0,
+                                }))
+                                line_ret.append((0, 0, {
+                                    'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
+                                    'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+                                    'partner_id': self.partner_id.id,
+                                    'debit': 0,
+                                    'credit': self.round_half_up(amount_edit,
+                                                                 decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                }))
+                                # Asiento Contable
+                                move_obj = self.env['account.move'].create({
+                                    'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
+                                    'date': self.date_accounting,
+                                    'journal_id': journal_sale.id,
+                                    'state': 'draft',
+                                    'move_type': 'entry',
+                                    'line_ids': line_ret
+                                })
+                                move_ids.append(move_obj.id)
+                            # Va recopilando los IDS de las facturas para la conciliacion
+                            facture.append(ret_line.invoice_id)
+                            # Asocia el apunte al asiento contable creado
+                            ret_line.move_id = move_obj.id
+                        else:
+                            raise UserError("Disculpe, el monto retenido de la factura " + str(
+                                ret_line.invoice_id.name) + ' no debe superar la cantidad de IVA registrado')
+                        invoices.append(ret_line.invoice_id.name)
                     else:
-                        raise UserError("Disculpe, el monto retenido de la factura " + str(
-                            ret_line.invoice_id.name) + ' no debe superar la cantidad de IVA registrado')
+                        # Crea los apuntes contables y los asocia a el asiento contable creado para las primeras lineas de la retencion
+                        if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
+                                ret_line.invoice_id.amount_tax, decimal_places):
+                            # Verifica la cuenta por cobrar de la factura a utilizar en el asiento
+                            cxc = False
+                            for cta in ret_line.invoice_id.line_ids:
+                                if cta.account_id.user_type_id.type == 'receivable':
+                                    cxc = cta.account_id.id
+                            if not cxc:
+                                raise UserError(
+                                    "Disculpe, la factura %s no tiene ninguna cuenta por cobrar ") % ret_line.invoice_id.name
+                            if ret_line.invoice_id.move_type not in ['out_refund']:
+                                # Crea los apuntes contables para las facturas, Nota debito y lo asocia al asiento creado
+                                # (Un solo movimiento por impuestos de factura)
+                                # Apuntes
+                                line_ret.append({
+                                    'name': 'Cuentas por Cobrar Cientes (R)',
+                                    'account_id': cxc,
+                                    'partner_id': self.partner_id.id,
+                                    'debit': 0,
+                                    'credit': self.round_half_up(amount_edit,
+                                                                 decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                    'move_id': move_obj.id,
+                                })
+                                line_ret.append({
+                                    'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
+                                    'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+                                    'partner_id': self.partner_id.id,
+                                    'debit': self.round_half_up(amount_edit,
+                                                                decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                    'credit': 0,
+                                    'move_id': move_obj.id,
+                                })
+                                self.env['account.move.line'].create(line_ret)
+                            else:
+                                line_ret.append({
+                                    'name': 'Cuentas por Cobrar Cientes (R)',
+                                    'account_id': cxc,
+                                    'partner_id': self.partner_id.id,
+                                    'debit': self.round_half_up(amount_edit,
+                                                                decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                    'credit': 0,
+                                    'move_id': move_obj.id,
+                                })
+                                line_ret.append({
+                                    'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
+                                    'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+                                    'partner_id': self.partner_id.id,
+                                    'debit': 0,
+                                    'credit': self.round_half_up(amount_edit,
+                                                                 decimal_places) if amount_edit else self.round_half_up(
+                                        ret_line.retention_amount, decimal_places),
+                                    'move_id': move_obj.id,
+                                })
+                                _logger.info('2DA LINEA DE RETENTION DE NC')
+                                _logger.info(line_ret)
+                                self.env['account.move.line'].create(line_ret)
+                                # Crea los apuntes contables para las notas de credito y lo asocia al asiento contable
+                                # Apuntes
+                            facture.append(ret_line.invoice_id)
+                            ret_line.move_id = move_obj.id
+                        else:
+                            raise UserError("Disculpe, el monto retenido de la factura " + str(
+                                ret_line.invoice_id.name) + ' no debe superar la cantidad de IVA registrado')
                 else:
                     raise UserError(
                         "Disculpe, la factura " + str(ret_line.invoice_id.name) + ' no posee el monto retenido')
             
                 ret_line.invoice_id.write(
                     {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
+            moves = self.env['account.move.line'].search(
+                [('move_id', 'in', move_ids), ('name', '=', 'Cuentas por Cobrar Cientes (R)')])
+            _logger.info('MOVES')
+            _logger.info(moves)
+            for mv in moves:
+                move.append(mv)
+            for rlines in self.retention_line:
+                if rlines.move_id and rlines.move_id.state in 'draft':
+                    rlines.move_id.action_post()
             for index, move_line in enumerate(move):
                 facture[index].js_assign_outstanding_line(move_line.id)
         else:
@@ -254,23 +387,6 @@ class AccountRetentionBinauralFacturacion(models.Model):
 class AccountRetentionBinauralLineFacturacion(models.Model):
     _name = 'account.retention.line'
     _rec_name = 'name'
-
-    """@api.depends('invoice_id')
-    def _amount_all(self):
-        self.facture_amount = 0.00
-        self.iva_amount = 0.00
-        self.base_ret = 0.00
-        self.imp_ret = 0.00
-        self.amount_tax_ret = 0.00
-        for record in self:
-            if record.invoice_id:
-                if record.invoice_id.move_type == 'out_invoice' or record.invoice_id.move_type == 'out_refund' or record.invoice_id.move_type == 'out_debit' or record.invoice_id.move_type == 'out_contingence':  # Cliente
-                    record.facture_amount += self.invoice_id.amount_total
-                    record.iva_amount += self.invoice_id.amount_tax
-                elif record.invoice_id.move_type == 'in_invoice' or record.invoice_id.move_type == 'in_refund' or record.invoice_id.move_type == 'in_debit':  # Proveedor
-                    record.base_ret = record.invoice_id.amount_untaxed
-                    record.imp_ret = record.invoice_id.amount_tax
-                    record.amount_tax_ret = record.imp_ret * record.retention_rate / 100"""
 
     @api.depends('invoice_id')
     def _retention_rate(self):
@@ -292,6 +408,17 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     },
                 
                 }
+            if record.retention_amount > record.invoice_id.amount_residual:
+                return {
+                    'warning': {
+                        'title': 'El monto retenido excedende',
+                        'message': 'El monto a retener no debe superar el monto adeudado de la factura, por favor verificar'
+                    },
+                    'value': {
+                        'retention_amount': 0
+                    },
+        
+                }
 
     name = fields.Char('Descripción', size=64, select=True)
     currency_id = fields.Many2one(related="retention_id.company_currency_id")
@@ -303,6 +430,14 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                                    help="Comprobante")
     invoice_id = fields.Many2one('account.move', 'Factura', required=True, readonly=True, ondelete='cascade',
                                  select=True, help="Factura a retener")
+    invoice_type = fields.Selection(selection=[
+        ('out_invoice', 'Factura de Cliente'),
+        ('out_refund', 'Nota de Crédito Cliente'),
+        ('out_debit', 'Nota de Débito de Cliente'),
+        ('in_invoice', 'Factura de Proveedor'),
+        ('in_refund', 'Nota de Crédito de Proveedor'),
+        ('in_debit', 'Nota de Crédito de Proveedor'),
+    ], string='Tipo de Factura',)
     reference_invoice_number = fields.Char(string="Número de factura", related="invoice_id.name", store=True)
     tax_line = fields.Float(string='Alicuota')
     amount_tax_ret = fields.Float(string='Impuesto retenido',
