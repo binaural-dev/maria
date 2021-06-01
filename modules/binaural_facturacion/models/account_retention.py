@@ -116,9 +116,14 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 self.amount_imp_ret += line.imp_ret
                 self.total_tax_ret += line.amount_tax_ret
             else:
-                self.amount_total_facture += line.facture_amount
-                self.amount_imp_ret += line.iva_amount
-                self.total_tax_ret += line.retention_amount
+                if line.invoice_type in ['out_invoice', 'out_debit', 'in_refund']:
+                    self.amount_total_facture += line.facture_amount
+                    self.amount_imp_ret += line.iva_amount
+                    self.total_tax_ret += line.retention_amount
+                else:
+                    self.amount_total_facture -= line.facture_amount
+                    self.amount_imp_ret -= line.iva_amount
+                    self.total_tax_ret -= line.retention_amount
 
     def action_emitted(self):
         today = datetime.now()

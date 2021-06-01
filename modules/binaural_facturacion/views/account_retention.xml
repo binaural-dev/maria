@@ -34,7 +34,7 @@
                                 <tree editable='bottom'>
                                     <field name="name"/>
                                     <field name="invoice_id" force_save="1" />
-                                    <field name="invoice_type" readonly="1"/>
+                                    <field name="invoice_type" force_save="1" readonly="1"/>
 	                                <field name="tax_line"/>
                                     <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
