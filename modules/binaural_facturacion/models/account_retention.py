@@ -154,6 +154,10 @@ class AccountRetentionBinauralFacturacion(models.Model):
             #line.move_id.unlink()
         self.write({'state': 'cancel'})
         return True
+    
+    def action_draft(self):
+        self.write({'state': 'draft'})
+        return True
 
     name = fields.Char('Descripción', size=64, select=True, states={'draft': [('readonly', False)]},
                        help="Descripción del Comprobante")
