@@ -19,6 +19,8 @@ class ResConfigSettingBinauralContactos(models.TransientModel):
 
     qty_max = fields.Integer(string='Cantidad Máxima', required=True, default=25)
 
+    journal_contingence_ids = fields.Many2one('account.journal', 'Diario de Factura de Contingencia')
+
     @api.model
     def get_values(self):
         res = super(ResConfigSettingBinauralContactos, self).get_values()

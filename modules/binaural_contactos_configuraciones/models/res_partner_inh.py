@@ -33,11 +33,11 @@ class ResPartnerBinauralContactos(models.Model):
     business_name = fields.Char(string='Razón Social')
 
     prefix_vat = fields.Selection([
-        ('v', 'V'),
-        ('e', 'E'),
-        ('j', 'J'),
-        ('g', 'G'),
-        ('c', 'C'),
+        ('V', 'V'),
+        ('E', 'E'),
+        ('J', 'J'),
+        ('G', 'G'),
+        ('C', 'C'),
     ], 'Prefijo Rif', required=False, default='v')
     city_id = fields.Many2one('res.country.city', 'Ciudad', track_visibility='onchange')
 
