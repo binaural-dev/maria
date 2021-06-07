@@ -55,7 +55,7 @@ def create_move_invoice_retention(self, line_ret, ret_line,cxc, journal_sale, am
     }))
     line_ret.append((0, 0, {
         'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
-        'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+        'account_id': self.partner_id.iva_retention.id if self.type_retention in ['iva'] else self.partner_id.islr_retention.id,
         'partner_id': self.partner_id.id,
         'debit': self.round_half_up(amount_edit,
                                     decimal_places) if amount_edit else self.round_half_up(
@@ -66,7 +66,7 @@ def create_move_invoice_retention(self, line_ret, ret_line,cxc, journal_sale, am
     # Asiento Contable
     if new_move:
         move_obj = self.env['account.move'].create({
-            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
+            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name if self.type_retention in ['iva'] else 'RIS-' + self.number + "-" + ret_line.invoice_id.name,
             'date': self.date_accounting,
             'journal_id': journal_sale.id,
             'state': 'draft',
@@ -92,7 +92,7 @@ def create_move_refund_retention(self, line_ret, ret_line,cxc, journal_sale, amo
     }))
     line_ret.append((0, 0, {
         'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
-        'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+        'account_id': self.partner_id.iva_retention.id if self.type_retention in ['iva'] else self.partner_id.islr_retention.id,
         'partner_id': self.partner_id.id,
         'debit': 0,
         'credit': self.round_half_up(amount_edit,
@@ -103,7 +103,7 @@ def create_move_refund_retention(self, line_ret, ret_line,cxc, journal_sale, amo
     # Asiento Contable
     if new_move:
         move_obj = self.env['account.move'].create({
-            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
+            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name if self.type_retention in ['iva'] else 'RIS-' + self.number + "-" + ret_line.invoice_id.name,
             'date': self.date_accounting,
             'journal_id': journal_sale.id,
             'state': 'draft',
