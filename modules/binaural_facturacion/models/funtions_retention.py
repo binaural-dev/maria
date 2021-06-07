@@ -11,16 +11,22 @@ def load_line_retention(self, data):
     for facture_line_retention in self.env['account.move'].search(
             [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_invoice', 'out_debit', 'out_refund']),
              ('state', '=', 'posted')]):
-        # 'move_id': move_obj.id,
-        if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0\
-                and facture_line_retention.payment_state in ['not_paid', 'partial']:
-            for tax in facture_line_retention.amount_by_group:
-                tax_id = self.env['account.tax'].search([('tax_group_id', '=', tax[6]), ('type_tax_use', '=', 'sale')])
-                if tax_id.amount > 0:
-                    data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
-                                        'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount,
-                                        'facture_amount': tax[2],
-                                        'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type}))
+        if self.type_retention in ['iva']:
+            if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0\
+                    and facture_line_retention.payment_state in ['not_paid', 'partial']:
+                for tax in facture_line_retention.amount_by_group:
+                    tax_id = self.env['account.tax'].search([('tax_group_id', '=', tax[6]), ('type_tax_use', '=', 'sale')])
+                    if tax_id.amount > 0:
+                        data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
+                                            'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount,
+                                            'facture_amount': tax[2],
+                                            'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type}))
+        elif self.type_retention in ['islr']:
+            if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in ['not_paid', 'partial']:
+                data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
+                                    'name': 'Retención ISLR Cliente',
+                                    'facture_amount': facture_line_retention.amount_untaxed, 'facture_total': facture_line_retention.amount_total,
+                                    'iva_amount': facture_line_retention.amount_tax, 'invoice_type': facture_line_retention.move_type}))
     return data
 
 

@@ -139,6 +139,10 @@ class AccountRetentionBinauralFacturacion(models.Model):
 
     amount_total_facture = fields.Float(compute=amount_ret_all, store=True, string="Total Facturado")
     company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string="Company Currency")
+    type_retention = fields.Selection([
+        ('iva', 'IVA'),
+        ('islr', 'ISLR'),
+    ], 'Tipo de retención')
     
     def round_half_up(self, n, decimals=0):
         multiplier = 10 ** decimals
