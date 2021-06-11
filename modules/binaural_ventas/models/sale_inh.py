@@ -54,7 +54,43 @@ class SaleOrderBinauralVentas(models.Model):
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,
         help='Utility field to express amount currency')
+    # Foreing cyrrency fields
+    foreign_currency_id = fields.Many2one('res.currency', default=lambda self: self.env.ref('base.USD').id,
+                                          tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", compute='_compute_foreign_currency_rate',
+                                         inverse='_inverse_foreign_currency_rate', tracking=True)
+    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+    # fields convert
+    # amount_untaxed_foreing = fields.Monetary(string='tes', compute='_amount_untaxed_coin')
 
+    # @api.depends('amount_untaxed', 'foreign_currency_id')
+    # def _amount_untaxed_coin(self):
+    #     for record in self:
+    #         print("------>", record.currency_id + record.foreign_currency_id)
+            # if not record.foreign_currency_id.is_zero(record.amount_untaxed):
+                    #order.currency_id._convert(record.amount_untaxed, record.company_id, record.company_id, fields.Date.today())
+
+            # else:
+            #    amount_untaxed = 0
+            # record.amount_untaxed = 0
+
+    @api.depends('foreign_currency_id', 'foreign_currency_date')
+    def _compute_foreign_currency_rate(self):
+        for record in self:
+            rate = 0
+            test_rate = record.currency_id._get_rates(record.company_id, record.foreign_currency_date)
+            test_rate.update({record.foreign_currency_id.id: record.foreign_currency_rate})
+            print("------>", test_rate)
+            # if record.foreign_currency_id and record.foreign_currency_date:
+            #     currency_rate = self.env['res.currency.rate'].search([
+            #         ('currency_id', '=', record.foreign_currency_id.id), ('name', '=', record.foreign_currency_date)])
+            #     if currency_rate.exists():
+            #         rate = currency_rate
+            record.foreign_currency_rate = rate
+
+    def _inverse_foreign_currency_rate(self):
+        for record in self:
+            record.foreign_currency_rate = record.foreign_currency_rate
 
     @api.depends('partner_id')
     def _get_vat(self):
