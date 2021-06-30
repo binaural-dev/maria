@@ -36,7 +36,7 @@
                 </field>
 	            <field name="amount_total" position="before">
                     <field name="foreign_currency_rate" optional="show"/>
-                    <field name="foreign_currency_id" string="Moneda Alterna"git  optional="show"/>
+                    <field name="foreign_currency_id" string="Moneda Alterna" optional="show"/>
                 </field>
             </field>
         </record>
