@@ -7,6 +7,9 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
+	            <button name="action_cancel" position="after">
+					<button name="recalculate_foreign_rate" type="object" states="draft,sent" string="Recalcular Presupuesto"/>
+	            </button>
 
 	            <field name="partner_id" position="before">
 		            <field name="filter_partner" required="1"/>
@@ -34,17 +37,24 @@
                             </group>
                             <group class="oe_subtotal_footer oe_right" colspan="2" name="coin_total">
                                 <field name="foreign_amount_untaxed" widget="monetary"
-                                       options="{'currency_field': 'currency_id'}"/>
-                                <field name="foreign_amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                       options="{'currency_field': 'foreign_currency_id'}"/>
+                                <field name="foreign_amount_tax" widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
                                 <div class="oe_subtotal_footer_separator oe_inline o_td_label">
                                     <label for="foreign_amount_total"/>
                                 </div>
                                 <field name="foreign_amount_total" nolabel="1" class="oe_subtotal_footer_separator"
-                                       widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                       widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
                             </group>
                             <div class="oe_clear"/>
                         </group>
                     </page>
+                </xpath>
+	            <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                    <field name="foreign_currency_id" invisible="1"/>
+                    <field name="foreign_price_unit" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
+                </xpath>
+	            <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
+                    <field name="foreign_subtotal" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
                 </xpath>
             </field>
         </record>

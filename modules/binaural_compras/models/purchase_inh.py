@@ -55,17 +55,23 @@ class PurchaseOrderBinauralCompras(models.Model):
                                                          ('name', '<=', record.foreign_currency_date)], limit=1,
                                                         order='name desc')
             if rate:
-                record.foreign_currency_rate = rate.rate
+                record.update({
+                    'foreign_currency_rate': rate.rate,
+                })
             else:
                 rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
                                                              ('name', '>=', record.foreign_currency_date)], limit=1,
                                                             order='name asc')
                 if rate:
-                    record.foreign_currency_rate = rate.rate
+                    record.update({
+                        'foreign_currency_rate': rate.rate,
+                    })
                 else:
-                    record.foreign_currency_rate = 0.00
+                    record.update({
+                        'foreign_currency_rate': 0.00,
+                    })
 
-    @api.depends('order_line.price_total')
+    @api.depends('order_line.price_total', 'foreign_currency_rate')
     def _amount_all_foreign(self):
         """
         Compute the foreign total amounts of the SO.
@@ -104,8 +110,7 @@ class PurchaseOrderBinauralCompras(models.Model):
     # Foreing cyrrency fields
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
-    foreign_currency_rate = fields.Float(string="Tasa", compute='_compute_foreign_currency_rate',
-                                         inverse='_inverse_foreign_currency_rate', tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
     foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
     foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True,
@@ -202,7 +207,30 @@ class PurchaseOrderBinauralCompras(models.Model):
 
 class PurchaseOrderLineBinauralCompras(models.Model):
     _inherit = 'purchase.order.line'
+
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+    
+        if alternate_currency:
+            return alternate_currency
+        else:
+            return False
+
+    @api.depends('order_id.foreign_currency_rate')
+    def _amount_all_foreign(self):
+        """
+        Compute the foreign total amounts of the SO.
+        """
+        for order in self:
+            order.update({
+                'foreign_price_unit': order.price_unit * order.order_id.foreign_currency_rate,
+                'foreign_subtotal': order.price_subtotal * order.order_id.foreign_currency_rate,
+            })
     
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,
         help='Utility field to express amount currency')
+    foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_subtotal = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+                                          tracking=True)
