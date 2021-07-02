@@ -17,6 +17,10 @@ _logger = logging.getLogger(__name__)
 class SaleOrderBinauralVentas(models.Model):
     _inherit = 'sale.order'
     
+    def recalculate_foreign_rate(self):
+        for record in self:
+            record._compute_foreign_currency_rate()
+    
     @api.onchange('filter_partner')
     def get_domain_partner(self):
         for record in self:
@@ -35,7 +39,97 @@ class SaleOrderBinauralVentas(models.Model):
                 }}
             else:
                 return []
+    
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+        
+        if alternate_currency:
+            return alternate_currency
+        else:
+            return False
 
+    @api.model
+    def _get_conversion_rate_purchase(self, from_currency, to_currency, order):
+        from_currency = from_currency.with_env(self.env)
+        to_currency = to_currency.with_env(self.env)
+        rate_before = self.env['res.currency.rate'].search([('currency_id', '=', from_currency.id),
+                                                            ('name', '<=', order.date_planned)], limit=1,
+                                                           order='id desc')
+        rate_from = None
+        if rate_before:
+            rate_from = rate_before
+        else:
+            rate_after = self.env['res.currency.rate'].search([('currency_id', '=', from_currency.id),
+                                                               ('name', '>=', order.date_planned)], limit=1,
+                                                              order='id asc')
+            if rate_after:
+                rate_from = rate_after
+        return to_currency.rate / (rate_from.rate if rate_from else from_currency.rate)
+
+    @api.onchange('foreign_currency_id', 'foreign_currency_date')
+    def _compute_foreign_currency_rate(self):
+        for record in self:
+            rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+                                                                ('name', '<=', record.foreign_currency_date)], limit=1,
+                                                               order='name desc')
+            if rate:
+                record.update({
+                    'foreign_currency_rate': rate.rate,
+                })
+            else:
+                rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+                                                                   ('name', '>=', record.foreign_currency_date)], limit=1,
+                                                                  order='name asc')
+                if rate:
+                    record.update({
+                        'foreign_currency_rate': rate.rate,
+                    })
+                else:
+                    record.update({
+                        'foreign_currency_rate': 0.00,
+                    })
+
+    @api.depends('order_line.price_total', 'foreign_currency_rate')
+    def _amount_all_foreign(self):
+        """
+        Compute the foreign total amounts of the SO.
+        """
+        for order in self:
+            foreign_amount_untaxed = foreign_amount_tax = 0.0
+            for line in order.order_line:
+                foreign_amount_untaxed += line.price_subtotal
+                foreign_amount_tax += line.price_tax
+            foreign_amount_untaxed *= order.foreign_currency_rate
+            foreign_amount_tax *= order.foreign_currency_rate
+            order.update({
+                'foreign_amount_untaxed': foreign_amount_untaxed,
+                'foreign_amount_tax': foreign_amount_tax,
+                'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
+            })
+
+    def _foreign_amount_by_group(self):
+        for order in self:
+            currency = order.currency_id or order.company_id.currency_id
+            fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
+            res = {}
+            for line in order.order_line:
+                price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
+                taxes = line.tax_id.compute_all(price_reduce, quantity=line.product_uom_qty, product=line.product_id,
+                                                partner=order.partner_shipping_id)['taxes']
+                for tax in line.tax_id:
+                    group = tax.tax_group_id
+                    res.setdefault(group, {'amount': 0.0, 'base': 0.0})
+                    for t in taxes:
+                        if t['id'] == tax.id or t['id'] in tax.children_tax_ids.ids:
+                            res[group]['amount'] += t['amount'] * order.foreign_currency_rate
+                            res[group]['base'] += t['base'] * order.foreign_currency_rate
+            res = sorted(res.items(), key=lambda l: l[0].sequence)
+            order.amount_by_group = [(
+                l[0].name, l[1]['amount'], l[1]['base'],
+                fmt(l[1]['amount']), fmt(l[1]['base']),
+                len(res),
+            ) for l in res]
+        
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
     address = fields.Char(string='Dirección', related='partner_id.street')
@@ -54,7 +148,22 @@ class SaleOrderBinauralVentas(models.Model):
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,
         help='Utility field to express amount currency')
+    # Foreing cyrrency fields
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+                                          tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
+    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
+    foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True, compute='_amount_all_foreign',
+                                     tracking=5)
+    foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
+    foreign_amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo", compute='_foreign_amount_by_group')
+
+
+    def _inverse_foreign_currency_rate(self):
+        for record in self:
+            record.foreign_currency_rate = record.foreign_currency_rate
 
     @api.depends('partner_id')
     def _get_vat(self):
@@ -143,11 +252,33 @@ class SaleOrderBinauralVentas(models.Model):
 
 class SaleOrderLineBinauralVentas(models.Model):
     _inherit = 'sale.order.line'
+
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+    
+        if alternate_currency:
+            return alternate_currency
+        else:
+            return False
+
+    @api.depends('order_id.foreign_currency_rate')
+    def _amount_all_foreign(self):
+        """
+        Compute the foreign total amounts of the SO.
+        """
+        for order in self:
+            order.update({
+                'foreign_price_unit': order.price_unit * order.order_id.foreign_currency_rate,
+                'foreign_subtotal': order.price_subtotal * order.order_id.foreign_currency_rate,
+            })
     
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,
         help='Utility field to express amount currency')
-
+    foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_subtotal = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+                                          tracking=True)
 
 class SaleAdvancePaymentInvBinaural(models.TransientModel):
     _inherit = "sale.advance.payment.inv"

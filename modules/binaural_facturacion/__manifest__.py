@@ -32,6 +32,7 @@
         'views/account_move_search_inh.xml',
         'views/account_move_trees_inh.xml',
         'views/account_retention.xml',
+        'views/account_retention_islr.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

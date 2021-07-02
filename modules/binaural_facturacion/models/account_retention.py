@@ -139,6 +139,10 @@ class AccountRetentionBinauralFacturacion(models.Model):
 
     amount_total_facture = fields.Float(compute=amount_ret_all, store=True, string="Total Facturado")
     company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string="Company Currency")
+    type_retention = fields.Selection([
+        ('iva', 'IVA'),
+        ('islr', 'ISLR'),
+    ], 'Tipo de retención')
     
     def round_half_up(self, n, decimals=0):
         multiplier = 10 ** decimals
@@ -160,7 +164,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                     if ret_line.invoice_id.name not in invoices:
                         # Crea los apuntes y asiento contable  de las primeras lineas de retencion
                         if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
-                                ret_line.invoice_id.amount_tax, decimal_places):
+                                ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
                             cxc = funtions_retention.search_account(ret_line)
                             if ret_line.invoice_id.move_type not in ['out_refund']:
                                 # Crea los apuntes contables para las facturas, Nota debito
@@ -187,7 +191,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                     else:
                         # Crea los apuntes contables y los asocia a el asiento contable creado para las primeras lineas de la retencion
                         if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
-                                ret_line.invoice_id.amount_tax, decimal_places):
+                                ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
                             # Verifica la cuenta por cobrar de la factura a utilizar en el asiento
                             cxc = funtions_retention.search_account(ret_line)
                             if ret_line.invoice_id.move_type not in ['out_refund']:
