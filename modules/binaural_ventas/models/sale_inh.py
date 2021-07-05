@@ -174,7 +174,7 @@ class SaleOrderBinauralVentas(models.Model):
     foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True, compute='_amount_all_foreign',
                                      tracking=5)
     foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
-    foreign_amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_amount_total = fields.Monetary(string='Total moneda alterna', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
     foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
     foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
 
