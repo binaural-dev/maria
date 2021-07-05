@@ -119,6 +119,10 @@ class PurchaseOrderBinauralCompras(models.Model):
     foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
     foreign_amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all_foreign',
                                            tracking=4)
+    foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo",
+                                            compute='_compute_invoice_taxes_by_group')
+    foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo",
+                                                 compute='_compute_invoice_taxes_by_group')
     
     @api.depends('partner_id')
     def _get_vat(self):
@@ -195,6 +199,29 @@ class PurchaseOrderBinauralCompras(models.Model):
                 group.id
             ) for group, amounts in res]
 
+            move.foreign_amount_by_group = [(
+                group.name, amounts['amount'] * move.foreign_currency_rate,
+                amounts['base'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
+            move.foreign_amount_by_group_base = [(
+                group.name.replace("IVA", "Total G").replace("TAX", "Total G"),
+                amounts['base'] * move.foreign_currency_rate,
+                amounts['amount'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
     @api.model
     def _get_tax_key_for_group_add_base(self, line):
         """
@@ -216,7 +243,7 @@ class PurchaseOrderLineBinauralCompras(models.Model):
         else:
             return False
 
-    @api.depends('order_id.foreign_currency_rate')
+    @api.depends('order_id.foreign_currency_rate', 'price_unit', 'product_uom_qty')
     def _amount_all_foreign(self):
         """
         Compute the foreign total amounts of the SO.
@@ -231,6 +258,6 @@ class PurchaseOrderLineBinauralCompras(models.Model):
         readonly=True, store=True,
         help='Utility field to express amount currency')
     foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_subtotal = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)

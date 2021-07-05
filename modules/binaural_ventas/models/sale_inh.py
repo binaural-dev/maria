@@ -107,28 +107,45 @@ class SaleOrderBinauralVentas(models.Model):
                 'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
             })
 
-    def _foreign_amount_by_group(self):
-        for order in self:
-            currency = order.currency_id or order.company_id.currency_id
-            fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
-            res = {}
-            for line in order.order_line:
-                price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
-                taxes = line.tax_id.compute_all(price_reduce, quantity=line.product_uom_qty, product=line.product_id,
-                                                partner=order.partner_shipping_id)['taxes']
-                for tax in line.tax_id:
-                    group = tax.tax_group_id
-                    res.setdefault(group, {'amount': 0.0, 'base': 0.0})
-                    for t in taxes:
-                        if t['id'] == tax.id or t['id'] in tax.children_tax_ids.ids:
-                            res[group]['amount'] += t['amount'] * order.foreign_currency_rate
-                            res[group]['base'] += t['base'] * order.foreign_currency_rate
-            res = sorted(res.items(), key=lambda l: l[0].sequence)
-            order.amount_by_group = [(
-                l[0].name, l[1]['amount'], l[1]['base'],
-                fmt(l[1]['amount']), fmt(l[1]['base']),
-                len(res),
-            ) for l in res]
+    def _prepare_invoice(self):
+        """
+        Prepare the dict of values to create the new invoice for a sales order. This method may be
+        overridden to implement custom invoice generation (making sure to call super() to establish
+        a clean extension chain).
+        """
+        self.ensure_one()
+        journal = self.env['account.move'].with_context(default_move_type='out_invoice')._get_default_journal()
+        if not journal:
+            raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (
+            self.company_id.name, self.company_id.id))
+    
+        invoice_vals = {
+            'ref': self.client_order_ref or '',
+            'move_type': 'out_invoice',
+            'narration': self.note,
+            'currency_id': self.pricelist_id.currency_id.id,
+            'campaign_id': self.campaign_id.id,
+            'medium_id': self.medium_id.id,
+            'source_id': self.source_id.id,
+            'invoice_user_id': self.user_id and self.user_id.id,
+            'team_id': self.team_id.id,
+            'partner_id': self.partner_invoice_id.id,
+            'partner_shipping_id': self.partner_shipping_id.id,
+            'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id.get_fiscal_position(
+                self.partner_invoice_id.id)).id,
+            'partner_bank_id': self.company_id.partner_id.bank_ids[:1].id,
+            'journal_id': journal.id,  # company comes from the journal
+            'invoice_origin': self.name,
+            'invoice_payment_term_id': self.payment_term_id.id,
+            'payment_reference': self.reference,
+            'transaction_ids': [(6, 0, self.transaction_ids.ids)],
+            'invoice_line_ids': [],
+            'company_id': self.company_id.id,
+            'foreign_currency_id': self.foreign_currency_id.id,
+            'foreign_currency_date': self.foreign_currency_date,
+            'foreign_currency_rate': self.foreign_currency_rate,
+        }
+        return invoice_vals
         
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
@@ -158,7 +175,8 @@ class SaleOrderBinauralVentas(models.Model):
                                      tracking=5)
     foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
     foreign_amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo", compute='_foreign_amount_by_group')
+    foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
+    foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
 
 
     def _inverse_foreign_currency_rate(self):
@@ -240,6 +258,24 @@ class SaleOrderBinauralVentas(models.Model):
                 group.id
             ) for group, amounts in res]
 
+            move.foreign_amount_by_group = [(
+                group.name, amounts['amount'] * move.foreign_currency_rate,
+                amounts['base'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
+            move.foreign_amount_by_group_base = [(
+                group.name.replace("IVA", "Total G").replace("TAX", "Total G"), amounts['base'] * move.foreign_currency_rate,
+                amounts['amount'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
     @api.model
     def _get_tax_key_for_group_add_base(self, line):
         """
@@ -261,7 +297,7 @@ class SaleOrderLineBinauralVentas(models.Model):
         else:
             return False
 
-    @api.depends('order_id.foreign_currency_rate')
+    @api.depends('order_id.foreign_currency_rate', 'price_unit', 'product_uom_qty')
     def _amount_all_foreign(self):
         """
         Compute the foreign total amounts of the SO.
@@ -276,9 +312,10 @@ class SaleOrderLineBinauralVentas(models.Model):
         readonly=True, store=True,
         help='Utility field to express amount currency')
     foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_subtotal = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
+
 
 class SaleAdvancePaymentInvBinaural(models.TransientModel):
     _inherit = "sale.advance.payment.inv"
