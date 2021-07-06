@@ -106,8 +106,9 @@ class SaleOrderBinauralVentas(models.Model):
 				'foreign_amount_tax': foreign_amount_tax,
 				'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
 			})
-
+	@api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.tax_id', 'partner_id', 'currency_id')
 	def _foreign_amount_by_group(self):
+		
 		for order in self:
 			currency = order.currency_id or order.company_id.currency_id
 			fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
@@ -123,8 +124,9 @@ class SaleOrderBinauralVentas(models.Model):
 						if t['id'] == tax.id or t['id'] in tax.children_tax_ids.ids:
 							res[group]['amount'] += t['amount'] * order.foreign_currency_rate
 							res[group]['base'] += t['base'] * order.foreign_currency_rate
+			_logger.info("res========== %s",res)
 			res = sorted(res.items(), key=lambda l: l[0].sequence)
-			order.amount_by_group = [(
+			order.foreign_amount_by_group = [(
 				l[0].name, l[1]['amount'], l[1]['base'],
 				fmt(l[1]['amount']), fmt(l[1]['base']),
 				len(res),
