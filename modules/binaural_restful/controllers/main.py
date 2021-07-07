@@ -6,7 +6,7 @@ import logging
 from odoo.exceptions import AccessError
 
 from odoo import http
-from odoo.addons.restful.common import (
+from odoo.addons.binaural_restful.common import (
     extract_arguments,
     invalid_response,
     valid_response,
@@ -85,12 +85,15 @@ class APIController(http.Controller):
         values = {}
         if model:
             try:
+                _logger.info("PAYLOAD %s",payload)
                 # changing IDs from string to int.
                 for k, v in payload.items():
                     if "__api__" in k:
                         values[k[7:]] = ast.literal_eval(v)
                     else:
+                        _logger.info("PARSEAR %s",v)
                         values[k] = ast.literal_eval(v)
+                _logger.info("VALORES %s",values)
                 resource = request.env[model.model].create(values)
             except Exception as e:
                 request.env.cr.rollback()
@@ -107,22 +110,29 @@ class APIController(http.Controller):
     @http.route(_routes, type="http", auth="none", methods=["PUT"], csrf=False)
     def put(self, model=None, id=None, **payload):
         """."""
-        payload = payload.get('payload', {})
+        #payload = payload.get('payload', {})
         try:
             _id = int(id)
         except Exception as e:
             return invalid_response("invalid object id", "invalid literal %s for id with base " % id)
         _model = request.env[self._model].sudo().search([("model", "=", model)], limit=1)
+        values = {}
         if not _model:
             return invalid_response(
                 "invalid object model", "The model %s is not available in the registry." % model, 404,
             )
         try:
             record = request.env[_model.model].sudo().browse(_id)
-            record.write(payload)
+            for k, v in payload.items():
+                if "__api__" in k:
+                    values[k[7:]] = ast.literal_eval(v)
+                else:
+                    _logger.info("PARSEAR %s",v)
+                    values[k] = ast.literal_eval(v)
+            record.write(values)
         except Exception as e:
             request.env.cr.rollback()
-            return invalid_response("exception", e.name)
+            return invalid_response("exception", e)
         else:
             return valid_response(record.read())
 

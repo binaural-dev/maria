@@ -1,12 +1,12 @@
 {
-    "name": "Odoo RESTFUL API",
+    "name": "Binaural Restful API",
     "version": "1.0.1",
     "category": "API",
     "author": "Babatope Ajepe",
     "website": "https://ajepe.github.io/blog/restful-api-for-odoo",
-    "summary": "Odoo RESTFUL API",
-    "support": "ajepebabatope@gmail.com",
-    "description": """ RESTFUL API For Odoo
+    "summary": "Binaural Restful API",
+    "support": "contacto@binauraldev.com",
+    "description": """ Binaural Restful API
 ====================
 With use of this module user can enable REST API in any Odoo applications/modules
 

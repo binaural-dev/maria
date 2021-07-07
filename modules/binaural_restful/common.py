@@ -41,7 +41,7 @@ def invalid_response(typ, message=None, status=401):
 
 def extract_arguments(payloads, offset=0, limit=0, order=None):
     """Parse additional data  sent along request."""
-    payloads = payloads.get("payload", {})
+    #payloads = payloads.get("payload", {})
     fields, domain, payload = [], [], {}
 
     if payloads.get("domain", None):
