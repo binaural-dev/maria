@@ -16,7 +16,7 @@ class TestResPartnerBinaural(TransactionCase):
     def test_form_required_field(self):
         f = Form(self.env['res.partner'])
         f.name = "Ana"
-        f.prefix_vat = 'v'
+        f.prefix_vat = 'V'
         f.vat = '21397845'
         f.type_person_ids = self.ref('binaural_contactos_configuraciones.demo_type_person_0')
         with self.assertRaises(Exception):

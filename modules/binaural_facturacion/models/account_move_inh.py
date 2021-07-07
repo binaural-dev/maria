@@ -40,6 +40,55 @@ class AccountMoveBinauralFacturacion(models.Model):
             else:
                 return []
 
+    @api.onchange('foreign_currency_id', 'foreign_currency_date')
+    def _compute_foreign_currency_rate(self):
+        for record in self:
+            rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+                                                         ('name', '<=', record.foreign_currency_date)], limit=1,
+                                                        order='name desc')
+            if rate:
+                record.update({
+                    'foreign_currency_rate': rate.rate,
+                })
+            else:
+                rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+                                                             ('name', '>=', record.foreign_currency_date)], limit=1,
+                                                            order='name asc')
+                if rate:
+                    record.update({
+                        'foreign_currency_rate': rate.rate,
+                    })
+                else:
+                    record.update({
+                        'foreign_currency_rate': 0.00,
+                    })
+
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+    
+        if alternate_currency:
+            return alternate_currency
+        else:
+            return False
+
+    @api.depends('invoice_line_ids.price_total', 'foreign_currency_rate')
+    def _amount_all_foreign(self):
+        """
+        Compute the foreign total amounts of the SO.
+        """
+        for order in self:
+            foreign_amount_untaxed = foreign_amount_tax = 0.0
+            for line in order.invoice_line_ids:
+                foreign_amount_untaxed += line.price_subtotal
+            foreign_amount_tax += order.amount_tax
+            foreign_amount_untaxed *= order.foreign_currency_rate
+            foreign_amount_tax *= order.foreign_currency_rate
+            order.update({
+                'foreign_amount_untaxed': foreign_amount_untaxed,
+                'foreign_amount_tax': foreign_amount_tax,
+                'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
+            })
+
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
 
@@ -57,7 +106,24 @@ class AccountMoveBinauralFacturacion(models.Model):
     amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
     
     apply_retention_iva = fields.Boolean(string="¿Se aplico retención de iva?", default=False, copy=False)
+    apply_retention_islr = fields.Boolean(string="¿Se aplico retención de islr?", default=False, copy=False)
     iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=True)
+    # Foreing cyrrency fields
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+                                          tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
+    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+
+    foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True,
+                                             compute='_amount_all_foreign',
+                                             tracking=5)
+    foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
+    foreign_amount_total = fields.Monetary(string='Total moneda alterna', store=True, readonly=True, compute='_amount_all_foreign',
+                                           tracking=4)
+    foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo",
+                                            compute='_compute_invoice_taxes_by_group')
+    foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo",
+                                                 compute='_compute_invoice_taxes_by_group')
 
     @api.depends('line_ids.price_subtotal', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id')
     def _compute_invoice_taxes_by_group(self):
@@ -114,9 +180,28 @@ class AccountMoveBinauralFacturacion(models.Model):
                 group.id
             ) for group, amounts in res]
 
-            
+            move.foreign_amount_by_group = [(
+                group.name, amounts['amount'] * move.foreign_currency_rate,
+                amounts['base'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
 
-
+            move.foreign_amount_by_group_base = [(
+                group.name.replace("IVA", "Total G").replace("TAX", "Total G"),
+                amounts['base'] * move.foreign_currency_rate,
+                amounts['amount'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
 
     @api.onchange("date_reception")
     def _onchange_date_reception(self):
@@ -429,4 +514,34 @@ class AccountMoveBinauralFacturacion(models.Model):
                 qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
                 if qty_max and qty_max < len(record.invoice_line_ids):
                     raise ValidationError("La cantidad de lineas de la factura es mayor a la cantidad configurada")
+                
+                
+class AcoountMoveLineBinauralFact(models.Model):
+    _inherit = 'account.move.line'
+
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+    
+        if alternate_currency:
+            return alternate_currency
+        else:
+            return False
+
+    @api.depends('move_id.foreign_currency_rate')
+    def _amount_all_foreign(self):
+        """
+        Compute the foreign total amounts of the SO.
+        """
+        for order in self:
+            order.update({
+                'foreign_price_unit': order.price_unit * order.move_id.foreign_currency_rate,
+                'foreign_subtotal': order.price_subtotal * order.move_id.foreign_currency_rate,
+            })
+
+    foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True,
+                                         compute='_amount_all_foreign', tracking=4)
+    foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True,
+                                       compute='_amount_all_foreign', tracking=4)
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+                                          tracking=True)
 

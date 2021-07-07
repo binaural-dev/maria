@@ -34,7 +34,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     @api.onchange('retention_amount')
     def _onchange_retention_amount(self):
         for record in self:
-            if record.retention_amount > record.iva_amount:
+            if record.retention_amount > record.iva_amount and record.retention_id.type_retention in ['iva']:
                 return {
                     'warning': {
                         'title': 'El monto retenido excedende',
@@ -56,6 +56,15 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     },
         
                 }
+
+    @api.onchange('porcentage_retention')
+    def _onchange_porcentage_retention(self):
+        for record in self:
+            return {
+                'value': {
+                    'retention_amount': record.facture_amount * (record.porcentage_retention/100)
+                },
+            }
 
     name = fields.Char('Descripción', size=64, select=True)
     currency_id = fields.Many2one(related="retention_id.company_currency_id")
@@ -88,6 +97,10 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     is_retention_client = fields.Boolean(string='registro de retencion de cliente', default=True)
     display_invoice_number = fields.Char(string='Display', compute='_compute_fields_combination_iva', store=True)
     
-    facture_amount = fields.Float(string='Monto total del documento')
+    facture_amount = fields.Float(string='Base Imponible')
+    facture_total = fields.Float(string='Total Facturado')
     iva_amount = fields.Float(string='Iva factura')
     retention_amount = fields.Float(string='Monto Retenido')
+    
+    #Campos para uso en ISLR
+    porcentage_retention = fields.Float(string='% Retención')

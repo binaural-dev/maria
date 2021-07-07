@@ -115,8 +115,87 @@
 		                    </div>
 		                </div>
 	                </div>
+			        <div class="col-12 col-lg-6 o_setting_box">
+	                    <div class="o_setting_left_pane">
+	                    </div>
+				        <div class="o_setting_right_pane">
+					        <span class="o_form_label">Diario de Facturas de Contingencia</span>
+	                        <div class="text-muted">
+	                            Ingrese el diario para las facturas de contingencia
+	                        </div>
+                            <field name="journal_contingence_ids"/>
+	                    </div>
+	                </div>
+				</xpath>
+		        <xpath expr="//div[@name='main_currency_setting_container']" position="inside">
+				    <div class="col-12 col-lg-6 o_setting_box" id="alternate_currency">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">Moneda Alterna</span>
+                            <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
+                            <div class="text-muted">
+                                Moneda Alterna de la compañia
+                            </div>
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="curreny_foreign_id" class="col-lg-3 o_light_label"/>
+                                    <field name="curreny_foreign_id" options="{'no_create_edit': True, 'no_open': True}" context="{'active_test': False}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 				</xpath>
 	        </field>
 	  </record>
+
+	  <record id="view_move_line_tree_grouped_sales_purchases" model="ir.ui.view">
+            <field name="name">account.move.line.tree.grouped.sales.purchase</field>
+            <field name="model">account.move.line</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
+            <field name="arch" type="xml">
+                <field name="date" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="move_id" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="partner_id" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="matching_number" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="tax_ids" position="attributes"><attribute name="optional">show</attribute></field>
+                <field name="tax_tag_ids" position="attributes"><attribute name="optional">show</attribute></field>
+            </field>
+        </record>
+
+	  <record id="view_account_journal_contingence_tree" model="ir.ui.view">
+	        <field name="name">account.journal.tree</field>
+	        <field name="model">account.journal</field>
+	        <field name="priority">1</field>
+	        <field name="arch" type="xml">
+	            <tree string="Account Journal">
+	                <field name='sequence' widget='handle'/>
+	                <field name="name"/>
+	                <field name="type"/>
+	                <field name="journal_group_ids" widget="many2many_tags" readonly="1"/>
+	                <field name="company_id" groups="base.group_multi_company"/>
+		            <field name="journal_contingence" widget="boolean_toggle"/>
+	            </tree>
+	        </field>
+	  </record>
+
+	  <record id="action_account_moves_journal_contingence_sales" model="ir.actions.act_window">
+            <field name="name">Journals</field>
+            <field name="res_model">account.journal</field>
+            <field name="view_mode">tree</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_account_journal_contingence_tree')})]"/>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Add a journal
+              </p><p>
+                A journal is used to record transactions of all accounting data
+                related to the day-to-day business.
+              </p>
+            </field>
+	  </record>
+
+	  <menuitem name="Diarios de contingencia" id="journal_contingence_configuration" parent="account.account_account_menu"
+	  sequence="2" action="action_account_moves_journal_contingence_sales"/>
   </data>
 </odoo>

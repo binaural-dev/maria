@@ -37,6 +37,7 @@
                                     <field name="invoice_id" force_save="1" />
                                     <field name="invoice_type" force_save="1" readonly="1"/>
 	                                <field name="tax_line"/>
+                                    <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
                                     <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
@@ -164,7 +165,8 @@
             <field name="binding_view_types">list</field>
 	        <field name="view_mode">tree,form</field>
             <!--field name="search_view_id" ref="view_search_retention_iva"/-->
-            <field name="context">{"default_type":'out_invoice'}</field>
+            <field name="context">{"default_type":'out_invoice', "default_type_retention":'iva'}</field>
+	        <field name="domain">[('type_retention', '=', 'iva')]</field>
         </record>
 
         <!--Menu Lateral: Retenciones-->

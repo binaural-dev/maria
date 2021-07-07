@@ -11,16 +11,22 @@ def load_line_retention(self, data):
     for facture_line_retention in self.env['account.move'].search(
             [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_invoice', 'out_debit', 'out_refund']),
              ('state', '=', 'posted')]):
-        # 'move_id': move_obj.id,
-        if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0\
-                and facture_line_retention.payment_state in ['not_paid', 'partial']:
-            for tax in facture_line_retention.amount_by_group:
-                tax_id = self.env['account.tax'].search([('tax_group_id', '=', tax[6]), ('type_tax_use', '=', 'sale')])
-                if tax_id.amount > 0:
-                    data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
-                                        'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount,
-                                        'facture_amount': tax[2],
-                                        'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type}))
+        if self.type_retention in ['iva']:
+            if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0\
+                    and facture_line_retention.payment_state in ['not_paid', 'partial']:
+                for tax in facture_line_retention.amount_by_group:
+                    tax_id = self.env['account.tax'].search([('tax_group_id', '=', tax[6]), ('type_tax_use', '=', 'sale')])
+                    if tax_id.amount > 0:
+                        data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
+                                            'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount,
+                                            'facture_amount': tax[2],
+                                            'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type}))
+        elif self.type_retention in ['islr']:
+            if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in ['not_paid', 'partial']:
+                data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
+                                    'name': 'Retención ISLR Cliente',
+                                    'facture_amount': facture_line_retention.amount_untaxed, 'facture_total': facture_line_retention.amount_total,
+                                    'iva_amount': facture_line_retention.amount_tax, 'invoice_type': facture_line_retention.move_type}))
     return data
 
 
@@ -49,7 +55,7 @@ def create_move_invoice_retention(self, line_ret, ret_line,cxc, journal_sale, am
     }))
     line_ret.append((0, 0, {
         'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
-        'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+        'account_id': self.partner_id.iva_retention.id if self.type_retention in ['iva'] else self.partner_id.islr_retention.id,
         'partner_id': self.partner_id.id,
         'debit': self.round_half_up(amount_edit,
                                     decimal_places) if amount_edit else self.round_half_up(
@@ -60,7 +66,7 @@ def create_move_invoice_retention(self, line_ret, ret_line,cxc, journal_sale, am
     # Asiento Contable
     if new_move:
         move_obj = self.env['account.move'].create({
-            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
+            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name if self.type_retention in ['iva'] else 'RIS-' + self.number + "-" + ret_line.invoice_id.name,
             'date': self.date_accounting,
             'journal_id': journal_sale.id,
             'state': 'draft',
@@ -86,7 +92,7 @@ def create_move_refund_retention(self, line_ret, ret_line,cxc, journal_sale, amo
     }))
     line_ret.append((0, 0, {
         'name': 'RC-' + self.number + "-" + ret_line.invoice_id.name,
-        'account_id': self.partner_id.iva_retention.id,  # Retencion de IVA
+        'account_id': self.partner_id.iva_retention.id if self.type_retention in ['iva'] else self.partner_id.islr_retention.id,
         'partner_id': self.partner_id.id,
         'debit': 0,
         'credit': self.round_half_up(amount_edit,
@@ -97,7 +103,7 @@ def create_move_refund_retention(self, line_ret, ret_line,cxc, journal_sale, amo
     # Asiento Contable
     if new_move:
         move_obj = self.env['account.move'].create({
-            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name,
+            'name': 'RIV-' + self.number + "-" + ret_line.invoice_id.name if self.type_retention in ['iva'] else 'RIS-' + self.number + "-" + ret_line.invoice_id.name,
             'date': self.date_accounting,
             'journal_id': journal_sale.id,
             'state': 'draft',

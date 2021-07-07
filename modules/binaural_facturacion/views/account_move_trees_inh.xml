@@ -21,7 +21,29 @@
                     <field name="date_reception" optional="show"/>
                 </field>
 
+	            <field name="amount_total_signed" position="before">
+                    <field name="foreign_currency_rate" optional="show"/>
+                    <field name="foreign_amount_total" optional="show"/>
+                </field>
+
             </field>
         </record>
+
+	    <record id="action_move_out_contingence_type" model="ir.actions.act_window">
+            <field name="name">Facturas contingencia</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="account.view_invoice_tree"/>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="domain">[('move_type', '=', 'out_invoice'), ('is_contingence', '=', True)]</field>
+            <field name="context">{'default_move_type': 'out_invoice', 'default_is_contingence': True}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Crear una factura de contingencia
+              </p>
+            </field>
+        </record>
+
+	    <menuitem id="menu_action_move_out_contingence_type" parent="account.menu_finance_receivables" action="action_move_out_contingence_type" sequence="3"/>
     </data>
 </odoo>
