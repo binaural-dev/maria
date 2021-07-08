@@ -284,11 +284,12 @@ class SaleOrderBinauralVentas(models.Model):
 		 @return list
 		"""
 		return [line.tax_id.id]
+
 	def _create_invoices(self, grouped=False, final=False,date=None):
 		"""
 		Create the invoice associated to the SO.
 		:param grouped: if True, invoices are grouped by SO id. If False, invoices are grouped by
-						(partner_invoice_id, currency)
+		(partner_invoice_id, currency)
 		:param final: if True, refunds will be generated if necessary
 		:returns: list of created invoices
 		"""
