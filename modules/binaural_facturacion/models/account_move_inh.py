@@ -514,7 +514,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 				qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
 				if qty_max and qty_max < len(record.invoice_line_ids):
 					#pass
-					raise ValidationError("La cantidad de lineas de la factura "+str(len(record.invoice_line_ids))+" es mayor a la cantidad configurada "+str(qty_max))
+					raise UserError("La cantidad de lineas de la factura "+str(len(record.invoice_line_ids))+" es mayor a la cantidad configurada "+str(qty_max))
 				
 				
 class AcoountMoveLineBinauralFact(models.Model):
