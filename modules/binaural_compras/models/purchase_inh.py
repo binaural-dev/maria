@@ -154,14 +154,14 @@ class PurchaseOrderBinauralCompras(models.Model):
                 _logger.info("done_taxesdone_taxes %s",done_taxes)
 
                 if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
-                    amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
+                    amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(self))
                 else:
                     amount = line.price_tax
                 res[line.taxes_id.tax_group_id]['amount'] += amount
                 """if tax_key_add_base not in done_taxes:
                     _logger.info("line.price_tax en primer for %s",line.price_tax)
                     if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
-                        amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
+                        amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(self))
                     else:
                         amount = line.price_tax
                     res[line.taxes_id.tax_group_id]['amount'] += amount
