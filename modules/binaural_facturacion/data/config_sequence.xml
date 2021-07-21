@@ -9,6 +9,18 @@
             <field name="padding">5</field>
         </record>
 
+        <!--Retention Sequence-->
+        <record id="retention_sequence_iva" model="ir.sequence">
+            <field name="name">Numero de control</field>
+            <field name="code">retention.iva.control.number</field>
+            <field name="padding">8</field>
+        </record>
+
+        <record id="retention_sequence_islr" model="ir.sequence">
+            <field name="name">Numero de control</field>
+            <field name="code">retention.islr.control.number</field>
+            <field name="padding">5</field>
+        </record>
 
     </data>
 </odoo>

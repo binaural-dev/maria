@@ -26,20 +26,48 @@ class AccountRetentionBinauralFacturacion(models.Model):
     _name = 'account.retention'
     _rec_name = 'number'
 
+    def sequence_iva_retention(self):
+        sequence = self.env['ir.sequence'].search([('code', '=', 'retention.iva.control.number')])
+        if not sequence:
+            sequence = self.env['ir.sequence'].create({
+                'name': 'Numero de control',
+                'code': 'retention.iva.control.number',
+                'padding': 5
+            })
+        return sequence
+    
+    def sequence_islr_retention(self):
+        sequence = self.env['ir.sequence'].search([('code', '=', 'retention.islr.control.number')])
+        if not sequence:
+            sequence = self.env['ir.sequence'].create({
+                'name': 'Numero de control',
+                'code': 'retention.islr.control.number',
+                'padding': 5
+            })
+        return sequence
+
     @api.onchange('partner_id')
     def partner_id_onchange(self):
         data = []
         self.retention_line = False
-        if self.type == 'out_invoice' and self.partner_id:  # Rentention of client
+        if self.type in ['out_invoice', 'in_invoice'] and self.partner_id:  # Rentention of client
             if self.partner_id.taxpayer != 'ordinary':
                 funtions_retention.load_line_retention(self, data)
                 if len(data) != 0:
                     return {'value': {'retention_line': data}}
                 else:
-                    raise exceptions.UserError(
-                        "Disculpe, este cliente no tiene facturas registradas al que registrar retenciones")
+                    if self.type in ['out_invoice']:
+                        raise exceptions.UserError(
+                            "Disculpe, este cliente no tiene facturas registradas al que registrar retenciones")
+                    else:
+                        raise exceptions.UserError(
+                            "Disculpe, este proveedor no tiene facturas registradas al que registrar retenciones")
             else:
-                raise exceptions.UserError("Disculpe, este cliente es ordinario y no se le pueden aplicar retenciones")
+                if self.type in ['out_invoice']:
+                    raise exceptions.UserError("Disculpe, este cliente es ordinario y no se le pueden aplicar retenciones")
+                else:
+                    raise exceptions.UserError(
+                        "Disculpe, este proveedor es ordinario y no se le pueden aplicar retenciones")
         else:
             return
 
@@ -52,7 +80,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 self.amount_imp_ret += line.imp_ret
                 self.total_tax_ret += line.amount_tax_ret
             else:
-                if line.invoice_type in ['out_invoice', 'out_debit', 'in_refund']:
+                if line.invoice_type in ['out_invoice', 'out_debit', 'in_invoice', 'in_debit']:
                     self.amount_total_facture += line.facture_amount
                     self.amount_imp_ret += line.iva_amount
                     self.total_tax_ret += line.retention_amount
@@ -69,7 +97,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
             self.date = str(today)
         if self.type in ['in_invoice', 'in_refund', 'in_debit']:
             #REVISAR CUANDO TOQUE EL FLUJO
-            sequence = self.sequence()
+            sequence = self.sequence_iva_retention()
             self.correlative = sequence.next_by_code('retention.iva.control.number')
             today = datetime.now()
             self.number = str(today.year) + today.strftime("%m") + self.correlative
@@ -154,9 +182,12 @@ class AccountRetentionBinauralFacturacion(models.Model):
         decimal_places = self.company_id.currency_id.decimal_places
         journal_sale_id = int(self.env['ir.config_parameter'].sudo().get_param('journal_retention_client'))
         journal_sale = self.env['account.journal'].search([('id', '=', journal_sale_id)], limit=1)
-        if not journal_sale:
+        journal_purchase_id = int(self.env['ir.config_parameter'].sudo().get_param('journal_retention_supplier'))
+        journal_purchase = self.env['account.journal'].search([('id', '=', journal_purchase_id)], limit=1)
+        if not journal_sale and self.type_retention in ['out_invoice']:
             raise UserError("Por favor configure los diarios de las renteciones")
-    
+        if not journal_purchase and self.type_retention in ['in_invoice']:
+            raise UserError("Por favor configure los diarios de las renteciones")
         if self.type == 'out_invoice':
             for ret_line in self.retention_line:
                 line_ret = []
@@ -165,7 +196,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                         # Crea los apuntes y asiento contable  de las primeras lineas de retencion
                         if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
                                 ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
-                            cxc = funtions_retention.search_account(ret_line)
+                            cxc = funtions_retention.search_account(self, ret_line)
                             if ret_line.invoice_id.move_type not in ['out_refund']:
                                 # Crea los apuntes contables para las facturas, Nota debito
                                 # Apuntes
@@ -193,7 +224,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                         if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
                                 ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
                             # Verifica la cuenta por cobrar de la factura a utilizar en el asiento
-                            cxc = funtions_retention.search_account(ret_line)
+                            cxc = funtions_retention.search_account(self, ret_line)
                             if ret_line.invoice_id.move_type not in ['out_refund']:
                                 # Crea los apuntes contables para las facturas, Nota debito y lo asocia al asiento creado
                                 # (Un solo movimiento por impuestos de factura)
@@ -230,4 +261,78 @@ class AccountRetentionBinauralFacturacion(models.Model):
             for index, move_line in enumerate(move):
                 facture[index].js_assign_outstanding_line(move_line.id)
         else:
-            return
+            for ret_line in self.retention_line:
+                line_ret = []
+                if ret_line.retention_amount > 0:
+                    if ret_line.invoice_id.name not in invoices:
+                        _logger.info('CREO EL MOVIMIENTOOOOOOOOOOOOOOOOOOOOOOO')
+                        # Crea los apuntes y asiento contable  de las primeras lineas de retencion
+                        if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
+                                ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
+                            cxp = funtions_retention.search_account(self, ret_line)
+                            if ret_line.invoice_id.move_type not in ['in_refund']:
+                                # Crea los apuntes contables para las facturas, Nota debito
+                                # Apuntes
+                                move_obj = funtions_retention.create_move_invoice_retention(self, line_ret, ret_line,
+                                                                                            cxp, journal_purchase,
+                                                                                            amount_edit,
+                                                                                            decimal_places, True, False)
+                                move_ids.append(move_obj.id)
+                            else:
+                                # Crea los apuntes contables para las notas de credito
+                                # Apuntes
+                                move_obj = funtions_retention.create_move_refund_retention(self, line_ret, ret_line,
+                                                                                           cxp, journal_purchase,
+                                                                                           amount_edit,
+                                                                                           decimal_places, True, False)
+                                move_ids.append(move_obj.id)
+                            # Va recopilando los IDS de las facturas para la conciliacion
+                            facture.append(ret_line.invoice_id)
+                            # Asocia el apunte al asiento contable creado
+                            ret_line.move_id = move_obj.id
+                        else:
+                            raise UserError("Disculpe, el monto retenido de la factura " + str(
+                                ret_line.invoice_id.name) + ' no debe superar la cantidad de IVA registrado')
+                        invoices.append(ret_line.invoice_id.name)
+                    else:
+                        _logger.info('CREO EL EL SEGUNDO LINEA EN EL MOVIMIENTOOOOOOOOOOOOOOOOOOOOOOO')
+                        # Crea los apuntes contables y los asocia a el asiento contable creado para las primeras lineas de la retencion
+                        if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
+                                ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
+                            # Verifica la cuenta por cobrar de la factura a utilizar en el asiento
+                            cxp = funtions_retention.search_account(self, ret_line)
+                            if ret_line.invoice_id.move_type not in ['in_refund']:
+                                # Crea los apuntes contables para las facturas, Nota debito y lo asocia al asiento creado
+                                # (Un solo movimiento por impuestos de factura)
+                                # Apuntes
+                                funtions_retention.create_move_invoice_retention(self, line_ret, ret_line,
+                                                                                 cxp, journal_purchase,
+                                                                                 amount_edit,
+                                                                                 decimal_places, False, move_obj.id)
+                            else:
+                                funtions_retention.create_move_refund_retention(self, line_ret, ret_line,
+                                                                                cxp, journal_purchase,
+                                                                                amount_edit,
+                                                                                decimal_places, False, move_obj.id)
+                                # Crea los apuntes contables para las notas de credito y lo asocia al asiento contable
+                                # Apuntes
+                            facture.append(ret_line.invoice_id)
+                            ret_line.move_id = move_obj.id
+                        else:
+                            raise UserError("Disculpe, el monto retenido de la factura " + str(
+                                ret_line.invoice_id.name) + ' no debe superar la cantidad de IVA registrado')
+                else:
+                    raise UserError(
+                        "Disculpe, la factura " + str(ret_line.invoice_id.name) + ' no posee el monto retenido')
+        
+                ret_line.invoice_id.write(
+                    {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
+            moves = self.env['account.move.line'].search(
+                [('move_id', 'in', move_ids), ('name', '=', 'Cuentas por Pagar Proveedores (R.IVA)')])
+            for mv in moves:
+                move.append(mv)
+            for rlines in self.retention_line:
+                if rlines.move_id and rlines.move_id.state in 'draft':
+                    rlines.move_id.action_post()
+            for index, move_line in enumerate(move):
+                facture[index].js_assign_outstanding_line(move_line.id)
