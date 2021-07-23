@@ -33,6 +33,8 @@
         'views/account_move_trees_inh.xml',
         'views/account_retention.xml',
         'views/account_retention_islr.xml',
+        'views/account_payment.xml',
+        'wizard/account_payment_register.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
