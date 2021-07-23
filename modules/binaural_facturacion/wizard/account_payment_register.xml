@@ -8,12 +8,8 @@
             <field name="inherit_id" ref="account.view_account_payment_register_form"/>
             <field name="arch" type="xml">
                 <!--add nro control-->
-                <xpath expr="//form/group" position="inside">
-                    <group name="group4">
-                        <!--<field name="foreign_currency_id" />
-                        <field name="foreign_currency_date" widget="date"/>-->
-                        <field name="foreign_currency_rate" />
-                    </group>
+                <xpath expr="//label[@for='amount']" position="before">
+                    <field name="foreign_currency_rate" />
                 </xpath>
 
             </field>

@@ -7,12 +7,10 @@
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="account.view_account_payment_form"/>
             <field name="arch" type="xml">
-                <!--add nro control-->
-                <field name="partner_bank_id" position="after">
-                    <field name="foreign_currency_id" />
-                    <field name="foreign_currency_date" widget="date"/>
+
+                <xpath expr="//label[@for='amount']" position="before">
                     <field name="foreign_currency_rate" />
-                </field>
+                </xpath>
 
             </field>
         </record>
