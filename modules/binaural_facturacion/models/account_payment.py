@@ -68,3 +68,28 @@ class AccountPaymentBinauralFacturacion(models.Model):
                                                      ('name', operator, foreign_currency_date)], limit=1,
                                                     order='name desc')
         return rate
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # OVERRIDE
+        print("------------>", vals_list)
+        flag = False
+        rate = 0
+        for record in vals_list:
+            rate = record.get('foreign_currency_rate', False)
+            if rate:
+                rate = round(rate, 2)
+                alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+                if alternate_currency:
+                    currency = self.env['res.currency.rate'].search([('currency_id', '=', alternate_currency)], limit=1,
+                                                                    order='name desc')
+                    if rate != currency.rate:
+                        flag = True
+        res = super(AccountPaymentBinauralFacturacion, self).create(vals_list)
+        if flag:
+            # El usuario xxxx ha usado una tasa personalizada, la tasa del sistema para la fecha del pago xxx es de xxxx y ha usada la tasa personalizada xxx
+            display_msg = "El usuario " + self.env.user.name + "ha usado una tasa personalizada,"
+            display_msg += " la tasa del sistema para la fecha del pago str(rate) " + str(fields.Date.today())
+            display_msg += " y ha usada la tasa personalizada" + str(rate)
+            res.message_post(body=display_msg)
+        return res
