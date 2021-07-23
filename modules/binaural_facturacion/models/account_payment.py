@@ -29,8 +29,18 @@ class AccountPaymentBinauralFacturacion(models.Model):
         else:
             return False
 
+    def default_currency_rate(self):
+        rate = 0
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+        if alternate_currency:
+            currency = self.env['res.currency.rate'].search([('currency_id', '=', alternate_currency)], limit=1,
+                                                            order='name desc')
+            rate = currency.rate
+
+        return rate
+
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
-    foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", tracking=True, default=default_currency_rate)
     foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
     @api.onchange('foreign_currency_id', 'foreign_currency_date')
