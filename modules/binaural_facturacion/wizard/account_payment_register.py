@@ -17,7 +17,7 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
             return False
 
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
-    foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
+    foreign_currency_rate = fields.Monetary(string="Tasa", tracking=True, currency_field='foreign_currency_id')
     foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
     @api.onchange('foreign_currency_id', 'foreign_currency_date')

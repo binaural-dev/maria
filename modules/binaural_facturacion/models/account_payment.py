@@ -40,7 +40,8 @@ class AccountPaymentBinauralFacturacion(models.Model):
         return rate
 
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
-    foreign_currency_rate = fields.Float(string="Tasa", tracking=True, default=default_currency_rate)
+    foreign_currency_rate = fields.Float(string="Tasa", tracking=True, default=default_currency_rate,
+                                         currency_field='foreign_currency_id')
     foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
     @api.onchange('foreign_currency_id', 'foreign_currency_date')
@@ -72,7 +73,6 @@ class AccountPaymentBinauralFacturacion(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
-        print("------------>", vals_list)
         flag = False
         rate = 0
         for record in vals_list:
@@ -89,7 +89,14 @@ class AccountPaymentBinauralFacturacion(models.Model):
         if flag:
             # El usuario xxxx ha usado una tasa personalizada, la tasa del sistema para la fecha del pago xxx es de xxxx y ha usada la tasa personalizada xxx
             display_msg = "El usuario " + self.env.user.name + "ha usado una tasa personalizada,"
-            display_msg += " la tasa del sistema para la fecha del pago str(rate) " + str(fields.Date.today())
-            display_msg += " y ha usada la tasa personalizada" + str(rate)
+            display_msg += " la tasa del sistema para la fecha del pago " + str(fields.Date.today())
+            display_msg += " y ha usada la tasa personalizada " + str(rate)
             res.message_post(body=display_msg)
         return res
+
+    # def _prepare_move_line_default_vals(self, write_off_line_vals=None):
+    #     """enviar tasa al crear el pago"""
+    #     res = super(AccountPaymentBinauralFacturacion, self)._prepare_move_line_default_vals(write_off_line_vals)
+    #     for record in res:
+    #         record.setdefault('foreign_currency_rate', self.foreign_currency_rate)
+    #     return res
