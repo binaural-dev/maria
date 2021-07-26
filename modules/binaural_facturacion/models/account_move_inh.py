@@ -1,20 +1,12 @@
+import logging
+from collections import defaultdict
+from datetime import timedelta
+
 from odoo import api, fields, models, _
-from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_compare, date_utils, email_split, email_re
+from odoo.exceptions import UserError, ValidationError, AccessError
+from odoo.tools import float_compare
 from odoo.tools.misc import formatLang, format_date, get_lang
 
-from datetime import date, timedelta
-from collections import defaultdict
-from itertools import zip_longest
-from hashlib import sha256
-from json import dumps
-
-import ast
-import json
-import re
-import warnings
-
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -594,7 +586,6 @@ class AccountMoveBinauralFacturacion(models.Model):
         res['context'].setdefault('default_foreign_currency_rate', self.foreign_currency_rate)
         if self.foreign_currency_id:
             res['context'].setdefault('default_foreign_currency_id', self.foreign_currency_id.id)
-        print("res", res)
         return res
 
 
@@ -624,6 +615,6 @@ class AcoountMoveLineBinauralFact(models.Model):
                                          compute='_amount_all_foreign', tracking=4)
     foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True,
                                        compute='_amount_all_foreign', tracking=4)
-    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
-                                          tracking=True)
-
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", related='move_id.payment_id.foreign_currency_rate',
+                                         tracking=True)

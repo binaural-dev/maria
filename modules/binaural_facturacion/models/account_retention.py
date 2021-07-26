@@ -51,7 +51,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
         data = []
         self.retention_line = False
         if self.type in ['out_invoice', 'in_invoice'] and self.partner_id:  # Rentention of client
-            if self.partner_id.taxpayer != 'ordinary':
+            if self.partner_id.taxpayer != 'ordinary' or self.type in ['in_invoice']:
                 funtions_retention.load_line_retention(self, data)
                 if len(data) != 0:
                     return {'value': {'retention_line': data}}

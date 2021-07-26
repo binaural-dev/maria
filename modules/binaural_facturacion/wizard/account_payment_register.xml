@@ -9,7 +9,12 @@
             <field name="arch" type="xml">
                 <!--add nro control-->
                 <xpath expr="//label[@for='amount']" position="before">
-                    <field name="foreign_currency_rate" />
+                    <label for="foreign_currency_rate"/>
+                    <div name="foreign_currency_div" class="o_row">
+                        <field name="foreign_currency_rate" />
+                        <field name="foreign_currency_id" options="{'no_create': True, 'no_open': True}" required="1"
+                               groups="base.group_multi_currency"/>
+                    </div>
                 </xpath>
 
             </field>
