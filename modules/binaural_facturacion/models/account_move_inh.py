@@ -1,20 +1,12 @@
+import logging
+from collections import defaultdict
+from datetime import timedelta
+
 from odoo import api, fields, models, _
-from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_compare, date_utils, email_split, email_re
+from odoo.exceptions import UserError, ValidationError, AccessError
+from odoo.tools import float_compare
 from odoo.tools.misc import formatLang, format_date, get_lang
 
-from datetime import date, timedelta
-from collections import defaultdict
-from itertools import zip_longest
-from hashlib import sha256
-from json import dumps
-
-import ast
-import json
-import re
-import warnings
-
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -65,7 +57,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 
 	def default_alternate_currency(self):
 		alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
-	
+
 		if alternate_currency:
 			return alternate_currency
 		else:
@@ -98,13 +90,13 @@ class AccountMoveBinauralFacturacion(models.Model):
 	business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
 
 	date_reception = fields.Date(string='Fecha de recepción',copy=False)
-	
+
 	days_expired = fields.Integer('Dias vencidos en base a Fecha de recepción', compute='_compute_days_expired',copy=False)
 	filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
 									  string='Filtro de Contacto')
 
 	amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
-	
+
 	apply_retention_iva = fields.Boolean(string="¿Se aplico retención de iva?", default=False, copy=False)
 	apply_retention_islr = fields.Boolean(string="¿Se aplico retención de islr?", default=False, copy=False)
 	iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=True)
@@ -175,7 +167,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 				amounts['amount'],
 				formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
 				formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
-				
+
 				len(res),
 				group.id
 			) for group, amounts in res]
@@ -240,7 +232,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 					days_expired = 0
 				_logger.info("Daysssss expired %s",days_expired)
 			i.days_expired = days_expired if days_expired > 0 else 0
-		
+
 	@api.depends('partner_id')
 	def _get_vat(self):
 		for p in self:
@@ -259,7 +251,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 				'padding': 5
 			})
 		return sequence
-	
+
 	def _post(self, soft=True):
 		"""Post/Validate the documents.
 
@@ -371,12 +363,12 @@ class AccountMoveBinauralFacturacion(models.Model):
 
 		#Binaural facturacion init code
 
-		for move in to_post:  
+		for move in to_post:
 			#cliente
 			if move.is_sale_document(include_receipts=False) and not move.correlative:
 				#incrementar numero de control de factura y Nota de credito de manera automatica
 				sequence = move.sequence()
-				next_correlative = sequence.get_next_char(sequence.number_next_actual) 
+				next_correlative = sequence.get_next_char(sequence.number_next_actual)
 				correlative = sequence.next_by_id(sequence.id)
 				move.write({'correlative':correlative})
 		return to_post
@@ -424,7 +416,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 				record.highest_name = record._get_last_sequence()
 			else:
 				record.highest_name = '/'
-	
+
 	@api.depends('posted_before', 'state', 'journal_id', 'date')
 	def _compute_name(self):
 		#No aplicar para documentos de compras
@@ -515,14 +507,25 @@ class AccountMoveBinauralFacturacion(models.Model):
 				if qty_max and qty_max < len(record.invoice_line_ids):
 					#pass
 					raise UserError("La cantidad de lineas de la factura "+str(len(record.invoice_line_ids))+" es mayor a la cantidad configurada "+str(qty_max))
-				
-				
+
+	def action_register_payment(self):
+		''' Open the account.payment.register wizard to pay the selected journal entries.
+        :return: An action opening the account.payment.register wizard.
+        '''
+		res = super(AccountMoveBinauralFacturacion, self).action_register_payment()
+		context = res.get('context')
+		res['context'].setdefault('default_foreign_currency_rate', self.foreign_currency_rate)
+		if self.foreign_currency_id:
+			res['context'].setdefault('default_foreign_currency_id', self.foreign_currency_id.id)
+		return res
+
+
 class AcoountMoveLineBinauralFact(models.Model):
 	_inherit = 'account.move.line'
 
 	def default_alternate_currency(self):
 		alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
-	
+
 		if alternate_currency:
 			return alternate_currency
 		else:
@@ -543,6 +546,6 @@ class AcoountMoveLineBinauralFact(models.Model):
 										 compute='_amount_all_foreign', tracking=4)
 	foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True,
 									   compute='_amount_all_foreign', tracking=4)
-	foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
-										  tracking=True)
-
+	foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
+	foreign_currency_rate = fields.Float(string="Tasa", related='move_id.payment_id.foreign_currency_rate',
+										 tracking=True)

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_account_payment_form_inh" model="ir.ui.view">
+            <field name="name">account.payment.form.inh</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//label[@for='amount']" position="before">
+                    <label for="foreign_currency_rate"/>
+                    <div name="foreign_currency_div" class="o_row">
+                        <field name="foreign_currency_rate" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="foreign_currency_id" options="{'no_create': True, 'no_open': True}" required="1"
+                               attrs="{'readonly': [('state', '!=', 'draft')]}" groups="base.group_multi_currency"/>
+                    </div>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

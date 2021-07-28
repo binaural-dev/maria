@@ -74,6 +74,11 @@
 	            <xpath expr="//page/field[@name='invoice_line_ids']/tree/field[@name='price_subtotal']" position="after">
                     <field name="foreign_subtotal" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
                 </xpath>
+
+                <!-- Fields Foreing by payment -->
+                <xpath expr="//page/field[@name='line_ids']/tree/field[@name='currency_id']" position="after">
+                    <field name="foreign_currency_rate" />
+                </xpath>
             </field>
         </record>
 
