@@ -8,6 +8,7 @@ from odoo.tools import float_compare
 from odoo.tools.misc import formatLang, format_date, get_lang
 
 _logger = logging.getLogger(__name__)
+from .. models import funtions_retention
 
 
 class AccountMoveBinauralFacturacion(models.Model):
@@ -116,6 +117,11 @@ class AccountMoveBinauralFacturacion(models.Model):
                                             compute='_compute_invoice_taxes_by_group')
     foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo",
                                                  compute='_compute_invoice_taxes_by_group')
+    
+    retention_iva_line_ids = fields.One2many('account.retention.line', 'invoice_id')
+    generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False)
+
+
 
     @api.depends('company_id', 'invoice_filter_type_domain', 'is_contingence')
     def _compute_suitable_journal_ids(self):
@@ -440,6 +446,16 @@ class AccountMoveBinauralFacturacion(models.Model):
                 next_correlative = sequence.get_next_char(sequence.number_next_actual)
                 correlative = sequence.next_by_id(sequence.id)
                 move.write({'correlative':correlative})
+            if move.generate_retencion_iva:
+                retention = self.env['account.retention'].create({
+                    'type': 'in_invoice',
+                    'partner_id': move.partner_id.id,
+                    'type_retention': 'iva'
+                })
+                data = funtions_retention.load_line_retention(retention, [], move.id)
+                retention.write({'retention_line': data})
+                retention.action_emitted()
+                move.write({'iva_voucher_number': retention.number})
         return to_post
 
     #heredar constrain para permitir name duplicado solo en proveedor

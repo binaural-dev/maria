@@ -10,6 +10,10 @@
                 <field name="country_code" position="after">
                     <field name="is_contingence" force_save="1" invisible="1"/>
                 </field>
+	            <field name="journal_id" position="after">
+                    <field name="generate_retencion_iva" force_save="1"/>
+                    <field name="iva_voucher_number" force_save="1"/>
+                </field>
 
                 <xpath expr="//h1[@class='mt0']" position="after">
                     <label for="correlative" string="Nro Control" style="font-weight:bold;" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
