@@ -38,6 +38,7 @@
                                     <field name="invoice_type" force_save="1" readonly="1"/>
                                     <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                    <field name="tax_line" force_save="1" />
                                     <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
                                     <field name="porcentage_retention" required="1"/>
 	                                <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />

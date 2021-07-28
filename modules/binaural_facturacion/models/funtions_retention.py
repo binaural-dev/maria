@@ -126,7 +126,7 @@ def create_move_invoice_retention(self, line_ret, ret_line, account, journal, am
                 [('id', '=', move_id)])
             move.write({'line_ids': line_ret})
     else:
-        if self.type in ['iva']:
+        if self.type_retention in ['iva']:
             cta_conf_supplier = int(self.env['ir.config_parameter'].sudo().get_param('account_retention_iva'))
         else:
             cta_conf_supplier = int(self.env['ir.config_parameter'].sudo().get_param('account_retention_islr'))

@@ -115,17 +115,6 @@
 		                    </div>
 		                </div>
 	                </div>
-			        <div class="col-12 col-lg-6 o_setting_box">
-	                    <div class="o_setting_left_pane">
-	                    </div>
-				        <div class="o_setting_right_pane">
-					        <span class="o_form_label">Diario de Facturas de Contingencia</span>
-	                        <div class="text-muted">
-	                            Ingrese el diario para las facturas de contingencia
-	                        </div>
-                            <field name="journal_contingence_ids"/>
-	                    </div>
-	                </div>
 				</xpath>
 		        <xpath expr="//div[@name='main_currency_setting_container']" position="inside">
 				    <div class="col-12 col-lg-6 o_setting_box" id="alternate_currency">
