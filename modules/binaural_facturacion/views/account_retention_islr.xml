@@ -25,8 +25,8 @@
                         <field name="type" force_save="1" select="2"/>
                         <field name="partner_id" on_change="onchange_partner_id(type,partner_id)" select="1"  attrs="{'invisible':[('type','=', False)],'readonly':[('state','in',['emitted','cancel'])]}"/>
                         <field name="date_accounting" select="1" attrs="{'readonly':[('state','in',['emitted','cancel'])]}"/>
-                        <field name="number" force_save="1" required="1" attrs="{'readonly':['|',('type','=', 'in_invoice'),('state','in', ['emitted','cancel'])] }" />
-                        <field name="correlative" force_save="1" invisible="1" attrs="{'readonly':[('type','=', 'in_invoice')] }"/>
+                        <field name="number" force_save="1" attrs="{'readonly':['|',('type','=', 'in_invoice'),('state','in', ['emitted','cancel'])] }" />
+                        <field name="correlative" force_save="1" invisible="1" attrs="{'readonly':[('type','=', 'in_invoice')], 'required':[('type','=', 'out_invoice')] }"/>
                         <field name="date" attrs="{'readonly':[('state','in',['emitted','cancel'])]}"/>
                     </group>
                     <notebook colspan="4">
@@ -38,6 +38,7 @@
                                     <field name="invoice_type" force_save="1" readonly="1"/>
                                     <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                    <field name="tax_line" force_save="1" />
                                     <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
                                     <field name="porcentage_retention" required="1"/>
 	                                <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
@@ -50,8 +51,9 @@
                             </field>
 
                             <group col="2" colspan="2">
-                                <field name="amount_base_ret" attrs="{'invisible':[('type','in',[False,'out_invoice','out_refund','out_debit']) ]}" />
-                                <field name="amount_total_facture" attrs="{'invisible':[('type','in',[False,'in_invoice','in_refund','in_debit']) ]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+                                <!--field name="amount_base_ret" attrs="{'invisible':[('type','in',[False,'out_invoice','out_refund','out_debit']) ]}" />
+                                <field name="amount_total_facture" attrs="{'invisible':[('type','in',[False,'in_invoice','in_refund','in_debit']) ]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" /-->
+                                <field name="amount_total_facture" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
                                 <field name="amount_imp_ret" attrs="{'invisible':[('type','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"  />
                                 <field name="total_tax_ret" attrs="{'invisible':[('type','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                             </group>
@@ -75,13 +77,26 @@
 	        <field name="view_mode">tree,form</field>
             <!--field name="search_view_id" ref="view_search_retention_iva"/-->
             <field name="context">{"default_type":'out_invoice', "default_type_retention":'islr'}</field>
-	        <field name="domain">[('type_retention', '=', 'islr')]</field>
+	        <field name="domain">[('type_retention', '=', 'islr'), ('type', '=', 'out_invoice')]</field>
+        </record>
+
+	    <!--Configuracion de Vista: Retenciones ISLR Proveedor-->
+        <record id="action_retention_islr_supplier"  model="ir.actions.act_window">
+            <field name="name">Retenciones ISLR Proveedor</field>
+            <field name="res_model">account.retention</field>
+            <field name="binding_view_types">list</field>
+	        <field name="view_mode">tree,form</field>
+            <!--field name="search_view_id" ref="view_search_retention_iva"/-->
+            <field name="context">{"default_type":'in_invoice', "default_type_retention":'islr'}</field>
+	        <field name="domain">[('type_retention', '=', 'islr'), ('type', '=', 'in_invoice')]</field>
         </record>
 
         <!--Menu Lateral: Retenciones-->
         <menuitem name="Retenciones ISLR" id="menu_retention_islr" sequence="4" parent="account_accountant.menu_accounting"/>
 
         <menuitem name="Cliente" id="menu_retention_islr_client" sequence="0" parent="menu_retention_islr" action="action_retention_islr_client"/>
+
+	    <menuitem name="Proveedor" id="menu_retention_islr_supplier" sequence="0" parent="menu_retention_islr" action="action_retention_islr_supplier"/>
 
 
     </data>
