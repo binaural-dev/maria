@@ -7,7 +7,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def load_line_retention(self, data):
+def load_line_retention(self, data, move_id=False):
     #CLIENTE
     if self.type in ['out_invoice']:
         for facture_line_retention in self.env['account.move'].search(
@@ -32,10 +32,17 @@ def load_line_retention(self, data):
     #PROVEEDOR
     else:
         if self.type in ['in_invoice']:
-            for facture_line_retention in self.env['account.move'].search(
+            if move_id:
+                invoices = self.env['account.move'].search(
                     [('partner_id', '=', self.partner_id.id),
                      ('move_type', 'in', ['in_invoice', 'in_debit', 'in_refund']),
-                     ('state', '=', 'posted')]):
+                     ('state', '=', 'posted'), ('id', '=', move_id)])
+            else:
+                invoices = self.env['account.move'].search(
+                    [('partner_id', '=', self.partner_id.id),
+                     ('move_type', 'in', ['in_invoice', 'in_debit', 'in_refund']),
+                     ('state', '=', 'posted')])
+            for facture_line_retention in invoices:
                 if self.type_retention in ['iva']:
                     if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0 \
                             and facture_line_retention.payment_state in ['not_paid', 'partial']:
