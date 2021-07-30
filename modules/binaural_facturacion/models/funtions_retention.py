@@ -22,6 +22,7 @@ def load_line_retention(self, data, move_id=False):
                             data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
                                                 'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount,
                                                 'facture_amount': tax[2],
+                                                'facture_total': facture_line_retention.amount_total,
                                                 'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type}))
             elif self.type_retention in ['islr']:
                 if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in ['not_paid', 'partial']:
@@ -54,23 +55,24 @@ def load_line_retention(self, data, move_id=False):
                                     (0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
                                             'name': 'Retención IVA Proveedor', 'tax_line': tax_id.amount,
                                             'facture_amount': tax[2],
+                                            'facture_total': facture_line_retention.amount_total,
                                             'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type,
                                             'porcentage_retention': facture_line_retention.partner_id.withholding_type.value,
                                             'retention_amount': tax[1] * (facture_line_retention.partner_id.withholding_type.value/100),
                                             }))
-                elif self.type_retention in ['islr']:
-                    if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in [\
-                            'not_paid', 'partial']:
-                        data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
-                                            'name': 'Retención ISLR Proveedor',
-                                            'facture_amount': facture_line_retention.amount_untaxed,
-                                            'facture_total': facture_line_retention.amount_total,
-                                            'iva_amount': facture_line_retention.amount_tax,
-                                            'invoice_type': facture_line_retention.move_type,
-                                            'porcentage_retention': facture_line_retention.partner_id.withholding_type.value,
-                                            'retention_amount': facture_line_retention.amount_tax * (
-                                                        facture_line_retention.partner_id.withholding_type.value / 100),
-                                            }))
+                                """elif self.type_retention in ['islr']:
+        if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in [\
+                'not_paid', 'partial']:
+            data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
+                                'name': 'Retención ISLR Proveedor',
+                                'facture_amount': facture_line_retention.amount_untaxed,
+                                'facture_total': facture_line_retention.amount_total,
+                                'iva_amount': facture_line_retention.amount_tax,
+                                'invoice_type': facture_line_retention.move_type,
+                                'porcentage_retention': facture_line_retention.partner_id.withholding_type.value,
+                                'retention_amount': facture_line_retention.amount_tax * (
+                                            facture_line_retention.partner_id.withholding_type.value / 100),
+                                }))"""
         
     return data
 

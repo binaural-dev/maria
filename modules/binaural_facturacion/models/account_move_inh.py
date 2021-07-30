@@ -121,7 +121,7 @@ class AccountMoveBinauralFacturacion(models.Model):
     retention_iva_line_ids = fields.One2many('account.retention.line', 'invoice_id')
     generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False)
 
-
+    retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id')
 
     @api.depends('company_id', 'invoice_filter_type_domain', 'is_contingence')
     def _compute_suitable_journal_ids(self):

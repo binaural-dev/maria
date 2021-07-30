@@ -9,9 +9,9 @@
             <field name="arch" type="xml">
                 <field name="country_code" position="after">
                     <field name="is_contingence" force_save="1" invisible="1"/>
+	                <field name="generate_retencion_iva" force_save="1"/>
                 </field>
 	            <field name="journal_id" position="after">
-                    <field name="generate_retencion_iva" force_save="1"/>
                     <field name="iva_voucher_number" force_save="1"/>
                 </field>
 
@@ -48,6 +48,68 @@
 
 	            <!-- Fields Foreing Currency -->
                 <xpath expr="//notebook" position="inside">
+	                <page string="Retenciones de IVA" name="alternate_riva">
+                        <group>
+                            <field name="retention_iva_line_ids" nolabel="1">
+		                        <tree editable='bottom'>
+	                                    <field name="name"/>
+	                                    <field name="invoice_id" force_save="1" />
+	                                    <field name="invoice_type" force_save="1" readonly="1"/>
+	                                    <field name="payment_concept_id"/>
+	                                    <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                                    <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                                    <field name="tax_line" force_save="1" />
+	                                    <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+
+		                                <field name="related_pay_from" force_save="1" />
+		                                <field name="related_percentage_tax_base" force_save="1" />
+		                                <field name="related_percentage_tariffs" force_save="1" />
+		                                <field name="related_amount_sustract_tariffs" force_save="1" />
+
+		                                <field name="porcentage_retention" force_save="1"/>
+		                                <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+
+	                                    <field name="currency_id" invisible="1"/>
+	                                    <field name="company_currency_id" invisible="1" />
+	                                    <field name="company_id" invisible="1" />
+	                                    <field name="is_retention_client" invisible="1"/>
+	                                </tree>
+	                        </field>
+                            <div class="oe_clear"/>
+                        </group>
+                    </page>
+		            <page string="Retenciones de ISLR" name="alternate_rislr">
+                        <group>
+                            <field name="retention_islr_line_ids" nolabel="1" context="{'default_stock_picking_id':id}">
+		                        <tree editable='bottom'>
+	                                    <field name="name"/>
+	                                    <field name="invoice_id"/>
+	                                    <field name="invoice_type" readonly="1"/>
+	                                    <field name="payment_concept_id"/>
+	                                    <field name="facture_total" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                                    <field name="facture_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                                    <field name="invoice_id"/>
+	                                    <field name="payment_concept_id"/>
+			                            <field name="tax_line" />
+	                                    <field name="iva_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+
+		                                <field name="related_pay_from" />
+		                                <field name="related_percentage_tax_base"/>
+		                                <field name="related_percentage_tariffs"/>
+		                                <field name="related_amount_sustract_tariffs"/>
+
+		                                <field name="porcentage_retention"/>
+		                                <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+
+	                                    <field name="currency_id" invisible="1"/>
+	                                    <field name="company_currency_id" invisible="1" />
+	                                    <field name="company_id" invisible="1" />
+	                                    <field name="is_retention_client" invisible="1"/>
+	                                </tree>
+	                        </field>
+                            <div class="oe_clear"/>
+                        </group>
+                    </page>
                     <page string="Moneda alterna" name="alternate_coin">
                         <group>
                             <group colspan="4" col="6" name="goreing_grup">
