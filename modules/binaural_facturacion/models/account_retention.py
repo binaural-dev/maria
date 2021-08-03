@@ -73,21 +73,22 @@ class AccountRetentionBinauralFacturacion(models.Model):
 
     @api.depends('retention_line')
     def amount_ret_all(self):
-        self.amount_base_ret = self.amount_imp_ret = self.total_tax_ret = self.amount_total_facture = self.amount_imp_ret = self.total_tax_ret = 0
-        for line in self.retention_line:
-            if not line.is_retention_client:
-                self.amount_base_ret += line.base_ret
-                self.amount_imp_ret += line.imp_ret
-                self.total_tax_ret += line.amount_tax_ret
-            else:
-                if line.invoice_type in ['out_invoice', 'out_debit', 'in_invoice', 'in_debit']:
-                    self.amount_total_facture += line.facture_amount
-                    self.amount_imp_ret += line.iva_amount
-                    self.total_tax_ret += line.retention_amount
+        for record in self:
+            record.amount_base_ret = record.amount_imp_ret = record.total_tax_ret = record.amount_total_facture = record.amount_imp_ret = record.total_tax_ret = 0
+            for line in record.retention_line:
+                if not line.is_retention_client:
+                    record.amount_base_ret += line.base_ret
+                    record.amount_imp_ret += line.imp_ret
+                    record.total_tax_ret += line.amount_tax_ret
                 else:
-                    self.amount_total_facture -= line.facture_amount
-                    self.amount_imp_ret -= line.iva_amount
-                    self.total_tax_ret -= line.retention_amount
+                    if line.invoice_type in ['out_invoice', 'out_debit', 'in_invoice', 'in_debit']:
+                        record.amount_total_facture += line.facture_amount
+                        record.amount_imp_ret += line.iva_amount
+                        record.total_tax_ret += line.retention_amount
+                    else:
+                        record.amount_total_facture -= line.facture_amount
+                        record.amount_imp_ret -= line.iva_amount
+                        record.total_tax_ret -= line.retention_amount
 
     def action_emitted(self):
         today = datetime.now()

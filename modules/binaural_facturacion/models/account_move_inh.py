@@ -82,6 +82,35 @@ class AccountMoveBinauralFacturacion(models.Model):
                 'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
             })
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        obj_retention_islr = False
+        if 'retention_islr_line_ids' in vals_list:
+            obj_retention_islr = vals_list['retention_islr_line_ids']
+        res = super(AccountMoveBinauralFacturacion, self).create(vals_list)
+        _logger.info('resssssssssssssssssssssssssssssssssssssssss')
+        _logger.info(res)
+        if obj_retention_islr:
+            vals_list['retention_islr_line_ids'] = obj_retention_islr
+        _logger.info('vals_lisssssssssssssssssstttttttttttttttt')
+        _logger.info(vals_list)
+        _logger.info('retenciones linea islr')
+        _logger.info(res.retention_islr_line_ids)
+        if 'retention_islr_line_ids' in vals_list:
+            _logger.info('Paso aqui')
+            for line in vals_list['retention_islr_line_ids']:
+                _logger.info('Paso aqui2')
+                line[2]['invoice_id'] = res['id']
+            self.env['account.retention'].create({
+                'type': 'in_invoice',
+                'type_retention': 'islr',
+                'partner_id': vals_list['partner_id'],
+                'retention_line': vals_list['retention_islr_line_ids'],
+            })
+        _logger.info('resssssssssssssssssssssssssssssssssssssssss')
+        _logger.info(res)
+        return res
+
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
 
@@ -456,6 +485,9 @@ class AccountMoveBinauralFacturacion(models.Model):
                 retention.write({'retention_line': data})
                 retention.action_emitted()
                 move.write({'iva_voucher_number': retention.number})
+            if move.retention_islr_line_ids:
+                for rislr in move.retention_islr_line_ids:
+                    rislr.retention_id.action_emitted()
         return to_post
 
     #heredar constrain para permitir name duplicado solo en proveedor

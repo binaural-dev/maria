@@ -25,6 +25,26 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     _name = 'account.retention.line'
     _rec_name = 'name'
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(AccountRetentionBinauralLineFacturacion, self).create(vals_list)
+        _logger.info('LINEA DE RETENCION DE ISLR')
+        _logger.info(res)
+        _logger.info('LINEA DE RETENCION DE ISLR VALS')
+        _logger.info(vals_list)
+        if not res.retention_id:
+            _logger.info('NO TIENE RETENCION PADRE')
+            retention_id = self.env['account.retention'].create({
+                'state': 'draft',
+                'type': 'in_invoice',
+                'partner_id': res.invoice_id.partner_id.id,
+                'type_retention': 'islr',
+            })
+            res.retention_id = retention_id.id
+        else:
+            _logger.info('SI TIENE RETENCION PADRE')
+        return res
+
     @api.depends('invoice_id')
     def _retention_rate(self):
         for record in self:
@@ -46,7 +66,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     },
                 
                 }
-            if record.retention_amount > record.invoice_id.amount_residual:
+            if record.retention_amount > record.invoice_id.amount_residual and record.retention_id:
                 return {
                     'warning': {
                         'title': 'El monto retenido excedende',

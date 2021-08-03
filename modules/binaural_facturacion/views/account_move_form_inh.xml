@@ -58,9 +58,9 @@
 	                                    <field name="payment_concept_id"/>
 	                                    <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
 	                                    <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
-	                                    <field name="tax_line" force_save="1" />
+			                            <field name="tax_line" force_save="1" />
 	                                    <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
-
+										<field name="payment_concept_id"/>
 		                                <field name="related_pay_from" force_save="1" />
 		                                <field name="related_percentage_tax_base" force_save="1" />
 		                                <field name="related_percentage_tariffs" force_save="1" />
@@ -80,19 +80,16 @@
                     </page>
 		            <page string="Retenciones de ISLR" name="alternate_rislr">
                         <group>
-                            <field name="retention_islr_line_ids" nolabel="1" context="{'default_stock_picking_id':id}">
+                            <field name="retention_islr_line_ids" nolabel="1">
 		                        <tree editable='bottom'>
 	                                    <field name="name"/>
-	                                    <field name="invoice_id"/>
 	                                    <field name="invoice_type" readonly="1"/>
 	                                    <field name="payment_concept_id"/>
 	                                    <field name="facture_total" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
 	                                    <field name="facture_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
-	                                    <field name="invoice_id"/>
-	                                    <field name="payment_concept_id"/>
 			                            <field name="tax_line" />
 	                                    <field name="iva_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
-
+										<field name="payment_concept_id"/>
 		                                <field name="related_pay_from" />
 		                                <field name="related_percentage_tax_base"/>
 		                                <field name="related_percentage_tariffs"/>
