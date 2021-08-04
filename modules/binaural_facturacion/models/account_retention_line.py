@@ -90,13 +90,24 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     @api.depends('payment_concept_id', 'invoice_id')
     def _get_value_related(self):
         for record in self:
+            currency_ut = self.env.ref('base.VEF')
+            _logger.info('Moneda del sistema')
+            _logger.info(record.company_currency_id)
+            _logger.info('Moneda de la ut')
+            _logger.info(currency_ut)
             if record.payment_concept_id:
                 for line in record.payment_concept_id.line_payment_concept_ids:
                     if record.invoice_id.partner_id.type_person_ids.id == line.type_person_ids.id:
+                        if record.company_currency_id.id == currency_ut.id:
+                            amount_sustract = line.tariffs_ids.amount_sustract
+                        else:
+                            amount_sustract = line.tariffs_ids.amount_sustract / 4100000
+                        _logger.info('Sustraendo')
+                        _logger.info(amount_sustract)
                         record.related_pay_from = line.pay_from
                         record.related_percentage_tax_base = line.percentage_tax_base
                         record.related_percentage_tariffs = line.tariffs_ids.percentage
-                        record.related_amount_sustract_tariffs = line.tariffs_ids.amount_sustract
+                        record.related_amount_sustract_tariffs = amount_sustract
             if record.invoice_id:
                 record.facture_total = record.invoice_id.amount_total
                 record.facture_amount = record.invoice_id.amount_untaxed
