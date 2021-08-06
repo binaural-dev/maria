@@ -34,6 +34,7 @@
         'views/account_retention.xml',
         'views/account_retention_islr.xml',
         'views/account_payment.xml',
+        'views/account_journal.xml',
         'wizard/account_payment_register.xml',
     ],
     # only loaded in demonstration mode
