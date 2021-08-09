@@ -100,11 +100,13 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     if record.invoice_id.partner_id.type_person_ids.id == line.type_person_ids.id:
                         if record.company_currency_id.id == currency_ut.id:
                             amount_sustract = line.tariffs_ids.amount_sustract
+                            from_pay = line.pay_from
                         else:
-                            amount_sustract = line.tariffs_ids.amount_sustract / 4100000
+                            amount_sustract = (line.tariffs_ids.amount_sustract / record.invoice_id.foreign_currency_rate) if record.invoice_id.foreign_currency_rate > 0 else 0.00
+                            from_pay = (line.pay_from / record.invoice_id.foreign_currency_rate) if record.invoice_id.foreign_currency_rate > 0 else 0.00
                         _logger.info('Sustraendo')
                         _logger.info(amount_sustract)
-                        record.related_pay_from = line.pay_from
+                        record.related_pay_from = from_pay
                         record.related_percentage_tax_base = line.percentage_tax_base
                         record.related_percentage_tariffs = line.tariffs_ids.percentage
                         record.related_amount_sustract_tariffs = amount_sustract
@@ -114,7 +116,12 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                 record.iva_amount = record.invoice_id.amount_tax
             if record.payment_concept_id and record.invoice_id:
                 if record.facture_amount > record.related_pay_from:
-                    record.retention_amount = record.facture_amount * (record.related_percentage_tax_base/100) * (record.related_percentage_tariffs/100) - record.related_amount_sustract_tariffs
+                    _logger.info('Calculos')
+                    _logger.info(record.facture_amount)
+                    _logger.info(record.related_percentage_tax_base/100)
+                    _logger.info(record.related_percentage_tariffs/100)
+                    _logger.info(record.related_amount_sustract_tariffs)
+                    record.retention_amount = (record.facture_amount * (record.related_percentage_tax_base/100) * (record.related_percentage_tariffs/100)) - record.related_amount_sustract_tariffs
                 
     name = fields.Char('Descripción', size=64, select=True, required=True, default="Retención ISLR")
     currency_id = fields.Many2one(related="retention_id.company_currency_id")

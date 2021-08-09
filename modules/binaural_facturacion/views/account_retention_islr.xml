@@ -35,6 +35,7 @@
                                 <tree editable='bottom'>
                                     <field name="name"/>
                                     <field name="invoice_id" force_save="1" />
+                                    <field name="retention_id" invisible="1" />
                                     <field name="invoice_type" force_save="1" readonly="1"/>
                                     <field name="payment_concept_id" force_save="1"/>
                                     <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
