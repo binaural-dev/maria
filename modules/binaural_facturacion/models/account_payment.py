@@ -72,10 +72,11 @@ class AccountPaymentBinauralFacturacion(models.Model):
                         flag = True
         res = super(AccountPaymentBinauralFacturacion, self).create(vals_list)
         if flag:
+            old_rate = self.default_currency_rate()
             # El usuario xxxx ha usado una tasa personalizada, la tasa del sistema para la fecha del pago xxx es de xxxx y ha usada la tasa personalizada xxx
-            display_msg = "El usuario " + self.env.user.name + "ha usado una tasa personalizada,"
-            display_msg += " la tasa del sistema para la fecha del pago " + str(fields.Date.today())
-            display_msg += " y ha usada la tasa personalizada " + str(rate)
+            display_msg = "El usuario " + self.env.user.name + " ha usado una tasa personalizada,"
+            display_msg += " la tasa del sistema para la fecha del pago " + str(fields.Date.today()) + " es de "
+            display_msg += str(old_rate) + " y ha usada la tasa personalizada " + str(rate)
             res.message_post(body=display_msg)
         return res
 

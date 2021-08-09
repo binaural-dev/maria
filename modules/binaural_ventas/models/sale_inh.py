@@ -68,6 +68,7 @@ class SaleOrderBinauralVentas(models.Model):
 
     @api.onchange('foreign_currency_id', 'foreign_currency_date')
     def _compute_foreign_currency_rate(self):
+        print("pasoooooooooooo")
         for record in self:
             rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
                                                                 ('name', '<=', record.foreign_currency_date)], limit=1,
@@ -152,6 +153,16 @@ class SaleOrderBinauralVentas(models.Model):
             'is_contingence': is_contingencia,
         }
         return invoice_vals
+
+    def default_currency_rate(self):
+        rate = 0
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+        if alternate_currency:
+            currency = self.env['res.currency.rate'].search([('currency_id', '=', alternate_currency)], limit=1,
+                                                            order='name desc')
+            rate = currency.rate
+
+        return rate
         
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
@@ -184,10 +195,6 @@ class SaleOrderBinauralVentas(models.Model):
     foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
     foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
     is_contingence = fields.Boolean(string='Es contingencia', default=False)
-
-    def _inverse_foreign_currency_rate(self):
-        for record in self:
-            record.foreign_currency_rate = record.foreign_currency_rate
 
     @api.depends('partner_id')
     def _get_vat(self):
@@ -290,6 +297,31 @@ class SaleOrderBinauralVentas(models.Model):
          @return list
         """
         return [line.tax_id.id]
+
+    @api.model
+    def create(self, vals):
+        # OVERRIDE
+        flag = False
+        rate = 0
+        print("vals", vals)
+        rate = vals.get('foreign_currency_rate', False)
+        if rate:
+            rate = round(rate, 2)
+            alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+            if alternate_currency:
+                currency = self.env['res.currency.rate'].search([('currency_id', '=', alternate_currency)], limit=1,
+                                                                order='name desc')
+                if rate != currency.rate:
+                    flag = True
+        res = super(SaleOrderBinauralVentas, self).create(vals)
+        if flag:
+            old_rate = self.default_currency_rate()
+            # El usuario xxxx ha usado una tasa personalizada, la tasa del sistema para la fecha del pago xxx es de xxxx y ha usada la tasa personalizada xxx
+            display_msg = "El usuario " + self.env.user.name + " ha usado una tasa personalizada,"
+            display_msg += " la tasa del sistema para la fecha del pago " + str(fields.Date.today()) + " es de "
+            display_msg += str(old_rate) + " y ha usada la tasa personalizada " + str(rate)
+            res.message_post(body=display_msg)
+        return res
 
     def _create_invoices(self, grouped=False, final=False,date=None, contingence=False):
         """
