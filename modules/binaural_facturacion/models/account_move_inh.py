@@ -147,10 +147,10 @@ class AccountMoveBinauralFacturacion(models.Model):
     foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo",
                                                  compute='_compute_invoice_taxes_by_group')
     
-    retention_iva_line_ids = fields.One2many('account.retention.line', 'invoice_id')
+    retention_iva_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'iva')])
     generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False)
 
-    retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id')
+    retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'islr')])
 
     @api.depends('company_id', 'invoice_filter_type_domain', 'is_contingence')
     def _compute_suitable_journal_ids(self):
