@@ -44,25 +44,10 @@ class AccountPaymentBinauralFacturacion(models.Model):
                                          currency_field='foreign_currency_id')
     foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
-    @api.onchange('foreign_currency_id', 'foreign_currency_date')
-    def _compute_foreign_currency_rate(self):
-        for record in self:
-            rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '<=')
-
-            if rate:
-                record.update({
-                    'foreign_currency_rate': rate.rate,
-                })
-            else:
-                rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '>=')
-                if rate:
-                    record.update({
-                        'foreign_currency_rate': rate.rate,
-                    })
-                else:
-                    record.update({
-                        'foreign_currency_rate': 0.00,
-                    })
+    @api.onchange('foreign_currency_id', 'foreign_currency_rate')
+    def _onchange_foreign_currency_rate(self):
+        move_id = self.env['account.move'].browse(self.move_id.ids)
+        move_id.update({'foreign_currency_rate': self.foreign_currency_rate})
 
     def _get_rate(self, foreign_currency_id, foreign_currency_date, operator):
         rate = self.env['res.currency.rate'].search([('currency_id', '=', foreign_currency_id),
@@ -87,10 +72,11 @@ class AccountPaymentBinauralFacturacion(models.Model):
                         flag = True
         res = super(AccountPaymentBinauralFacturacion, self).create(vals_list)
         if flag:
+            old_rate = self.default_currency_rate()
             # El usuario xxxx ha usado una tasa personalizada, la tasa del sistema para la fecha del pago xxx es de xxxx y ha usada la tasa personalizada xxx
-            display_msg = "El usuario " + self.env.user.name + "ha usado una tasa personalizada,"
-            display_msg += " la tasa del sistema para la fecha del pago " + str(fields.Date.today())
-            display_msg += " y ha usada la tasa personalizada " + str(rate)
+            display_msg = "El usuario " + self.env.user.name + " ha usado una tasa personalizada,"
+            display_msg += " la tasa del sistema para la fecha del pago " + str(fields.Date.today()) + " es de "
+            display_msg += str(old_rate) + " y ha usada la tasa personalizada " + str(rate)
             res.message_post(body=display_msg)
         return res
 
