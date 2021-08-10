@@ -3,7 +3,7 @@
 from odoo import api, fields, models, _
 
 
-class AccountJournal(models.Model):
+class AccountJournalBinauralFacturacion(models.Model):
     _inherit = "account.journal"
 
     fiscal = fields.Boolean(string="Fiscal", tracking=True)
