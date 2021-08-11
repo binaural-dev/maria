@@ -129,7 +129,8 @@ class AccountMoveBinauralFacturacion(models.Model):
 
     apply_retention_iva = fields.Boolean(string="¿Se aplico retención de iva?", default=False, copy=False)
     apply_retention_islr = fields.Boolean(string="¿Se aplico retención de islr?", default=False, copy=False)
-    iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=True)
+    iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=True, copy=False)
+    islr_voucher_number = fields.Char(string="Comprobante de Retención de ISLR", readonly=True, copy=False)
     # Foreing cyrrency fields
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
@@ -148,7 +149,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                                                  compute='_compute_invoice_taxes_by_group')
     
     retention_iva_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'iva')])
-    generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False)
+    generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False, copy=False)
 
     retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'islr')])
 
@@ -487,7 +488,9 @@ class AccountMoveBinauralFacturacion(models.Model):
                 move.write({'iva_voucher_number': retention.number})
             if move.retention_islr_line_ids:
                 for rislr in move.retention_islr_line_ids:
-                    rislr.retention_id.action_emitted()
+                    if rislr.retention_id.type_retention in ['islr']:
+                        rislr.retention_id.action_emitted()
+                        move.write({'islr_voucher_number': rislr.retention_id.number})
         return to_post
 
     #heredar constrain para permitir name duplicado solo en proveedor
