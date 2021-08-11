@@ -23,6 +23,7 @@
                     </header>
                     <group colspan="4" col="4">
                         <field name="type" force_save="1" select="2"/>
+                        <field name="type_retention" force_save="1" select="2" invisible="1"/>
                         <field name="partner_id" on_change="onchange_partner_id(type,partner_id)" select="1"  attrs="{'invisible':[('type','=', False)],'readonly':[('state','in',['emitted','cancel'])]}"/>
                         <field name="date_accounting" select="1" attrs="{'readonly':[('state','in',['emitted','cancel'])]}"/>
                         <field name="number" force_save="1" attrs="{'readonly':['|',('type','=', 'in_invoice'),('state','in', ['emitted','cancel'])] }" />
@@ -35,12 +36,20 @@
                                 <tree editable='bottom'>
                                     <field name="name"/>
                                     <field name="invoice_id" force_save="1" />
+                                    <field name="retention_id" invisible="1" />
                                     <field name="invoice_type" force_save="1" readonly="1"/>
+                                    <field name="payment_concept_id" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
                                     <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
-                                    <field name="tax_line" force_save="1" />
+                                    <field name="tax_line" force_save="1" attrs="{'column_invisible':[('parent.type_retention', '=', 'islr')]}"/>
                                     <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
-                                    <field name="porcentage_retention" required="1"/>
+
+	                                <field name="related_pay_from" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+	                                <field name="related_percentage_tax_base" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+	                                <field name="related_percentage_tariffs" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+	                                <field name="related_amount_sustract_tariffs" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+
+	                                <field name="porcentage_retention" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'islr'),'&amp;', ('parent.type_retention', '=', 'iva'),('parent.type', '=', 'out_invoice')]}"/>
 	                                <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
 
                                     <field name="currency_id" invisible="1"/>
