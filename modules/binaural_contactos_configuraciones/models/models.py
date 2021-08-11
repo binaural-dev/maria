@@ -9,7 +9,8 @@ class TypeWithholdingsBinauralContactos(models.Model):
     _name = 'type.withholding'
     _description = 'Tipo de retención'
     _order = 'create_date desc'
-    _sql_constraints = [('unique_name', 'UNIQUE(name)', 'No puedes agregar retenciones con el mismo nombre')]
+    _sql_constraints = [('unique_name', 'UNIQUE(name)', 'No puedes agregar retenciones con el mismo nombre'),
+                        ('unique_value', 'UNIQUE(value)', 'No puedes agregar retenciones con el mismo Valor')]
     
     name = fields.Char(string="Nombre")
     value = fields.Float(string="Valor")
