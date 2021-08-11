@@ -59,7 +59,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                     if self.type in ['out_invoice']:
                         raise exceptions.UserError(
                             "Disculpe, este cliente no tiene facturas registradas al que registrar retenciones")
-                    else:
+                    elif self.type_retention in ['iva']:
                         raise exceptions.UserError(
                             "Disculpe, este proveedor no tiene facturas registradas al que registrar retenciones")
             else:
@@ -73,21 +73,22 @@ class AccountRetentionBinauralFacturacion(models.Model):
 
     @api.depends('retention_line')
     def amount_ret_all(self):
-        self.amount_base_ret = self.amount_imp_ret = self.total_tax_ret = self.amount_total_facture = self.amount_imp_ret = self.total_tax_ret = 0
-        for line in self.retention_line:
-            if not line.is_retention_client:
-                self.amount_base_ret += line.base_ret
-                self.amount_imp_ret += line.imp_ret
-                self.total_tax_ret += line.amount_tax_ret
-            else:
-                if line.invoice_type in ['out_invoice', 'out_debit', 'in_invoice', 'in_debit']:
-                    self.amount_total_facture += line.facture_amount
-                    self.amount_imp_ret += line.iva_amount
-                    self.total_tax_ret += line.retention_amount
+        for record in self:
+            record.amount_base_ret = record.amount_imp_ret = record.total_tax_ret = record.amount_total_facture = record.amount_imp_ret = record.total_tax_ret = 0
+            for line in record.retention_line:
+                if not line.is_retention_client:
+                    record.amount_base_ret += line.base_ret
+                    record.amount_imp_ret += line.imp_ret
+                    record.total_tax_ret += line.amount_tax_ret
                 else:
-                    self.amount_total_facture -= line.facture_amount
-                    self.amount_imp_ret -= line.iva_amount
-                    self.total_tax_ret -= line.retention_amount
+                    if line.invoice_type in ['out_invoice', 'out_debit', 'in_invoice', 'in_debit']:
+                        record.amount_total_facture += line.facture_amount
+                        record.amount_imp_ret += line.iva_amount
+                        record.total_tax_ret += line.retention_amount
+                    else:
+                        record.amount_total_facture -= line.facture_amount
+                        record.amount_imp_ret -= line.iva_amount
+                        record.total_tax_ret -= line.retention_amount
 
     def action_emitted(self):
         today = datetime.now()
@@ -97,10 +98,6 @@ class AccountRetentionBinauralFacturacion(models.Model):
             self.date = str(today)
         if self.type in ['in_invoice', 'in_refund', 'in_debit']:
             #REVISAR CUANDO TOQUE EL FLUJO
-            sequence = self.sequence_iva_retention()
-            self.correlative = sequence.next_by_code('retention.iva.control.number')
-            today = datetime.now()
-            self.number = str(today.year) + today.strftime("%m") + self.correlative
             self.make_accounting_entries(False)
         elif self.type in ['out_invoice', 'out_refund', 'out_debit']:
             if not self.number:
@@ -270,6 +267,12 @@ class AccountRetentionBinauralFacturacion(models.Model):
                         if self.round_half_up(ret_line.retention_amount, decimal_places) <= self.round_half_up(
                                 ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
                             cxp = funtions_retention.search_account(self, ret_line)
+                            if cxp and journal_purchase:
+                                sequence = self.sequence_iva_retention()
+                                correlative = sequence.next_by_code('retention.iva.control.number')
+                                today = datetime.now()
+                                number = str(today.year) + today.strftime("%m") + correlative
+                                self.write({'correlative': correlative, 'number': number})
                             if ret_line.invoice_id.move_type not in ['in_refund']:
                                 # Crea los apuntes contables para las facturas, Nota debito
                                 # Apuntes
