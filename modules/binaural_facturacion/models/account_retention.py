@@ -75,20 +75,32 @@ class AccountRetentionBinauralFacturacion(models.Model):
     def amount_ret_all(self):
         for record in self:
             record.amount_base_ret = record.amount_imp_ret = record.total_tax_ret = record.amount_total_facture = record.amount_imp_ret = record.total_tax_ret = 0
+            invoices = []
             for line in record.retention_line:
                 if not line.is_retention_client:
                     record.amount_base_ret += line.base_ret
                     record.amount_imp_ret += line.imp_ret
                     record.total_tax_ret += line.amount_tax_ret
                 else:
+                    total_sum = 0
+                    if line.invoice_id.id not in invoices:
+                        total_sum = line.invoice_id.amount_total
+                        invoices.append(line.invoice_id.id)
                     if line.invoice_type in ['out_invoice', 'out_debit', 'in_invoice', 'in_debit']:
-                        record.amount_total_facture += line.facture_amount
+                        _logger.info('tipo de factura')
+                        _logger.info(line.invoice_type)
+                        record.amount_total_facture += total_sum
                         record.amount_imp_ret += line.iva_amount
                         record.total_tax_ret += line.retention_amount
-                    else:
-                        record.amount_total_facture -= line.facture_amount
+                    elif line.invoice_type in ['out_refund', 'in_refund']:
+                        _logger.info('tipo de factura1')
+                        _logger.info(line.invoice_type)
+                        record.amount_total_facture -= total_sum
                         record.amount_imp_ret -= line.iva_amount
                         record.total_tax_ret -= line.retention_amount
+                    else:
+                        _logger.info('tipo de factura3')
+                        _logger.info(line.invoice_type)
 
     def action_emitted(self):
         today = datetime.now()
@@ -245,9 +257,9 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 else:
                     raise UserError(
                         "Disculpe, la factura " + str(ret_line.invoice_id.name) + ' no posee el monto retenido')
-            
-                ret_line.invoice_id.write(
-                    {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
+                if ret_line.retention_id.type_retention in ['iva']:
+                    ret_line.invoice_id.write(
+                        {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
             moves = self.env['account.move.line'].search(
                 [('move_id', 'in', move_ids), ('name', '=', 'Cuentas por Cobrar Cientes (R)')])
             for mv in moves:
@@ -327,9 +339,9 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 else:
                     raise UserError(
                         "Disculpe, la factura " + str(ret_line.invoice_id.name) + ' no posee el monto retenido')
-        
-                ret_line.invoice_id.write(
-                    {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
+                if ret_line.retention_id.type_retention in ['iva']:
+                    ret_line.invoice_id.write(
+                        {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
             moves = self.env['account.move.line'].search(
                 [('move_id', 'in', move_ids), ('name', '=', 'Cuentas por Pagar Proveedores (R.IVA)')])
             for mv in moves:

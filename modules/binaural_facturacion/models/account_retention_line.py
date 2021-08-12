@@ -119,6 +119,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     record.facture_total = record.invoice_id.amount_total
                     record.facture_amount = record.invoice_id.amount_untaxed
                     record.iva_amount = record.invoice_id.amount_tax
+                    record.invoice_type = record.invoice_id.move_type
                 if record.payment_concept_id and record.invoice_id:
                     if record.facture_amount > record.related_pay_from:
                         _logger.info('Calculos')
@@ -127,6 +128,18 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                         _logger.info(record.related_percentage_tariffs/100)
                         _logger.info(record.related_amount_sustract_tariffs)
                         record.retention_amount = (record.facture_amount * (record.related_percentage_tax_base/100) * (record.related_percentage_tariffs/100)) - record.related_amount_sustract_tariffs
+
+    @api.depends('facture_amount')
+    def _onchange_base_islr(self):
+        for record in self:
+            if (record.retention_id and record.retention_id.type_retention in ['islr'] and record.retention_id.type in [
+                'in_invoice']) or (
+                    record.invoice_id and record.invoice_id.move_type in ['in_invoice'] and not record.retention_id):
+                if record.payment_concept_id and record.invoice_id:
+                    if record.facture_amount > record.related_pay_from:
+                        record.retention_amount = (record.facture_amount * (
+                                    record.related_percentage_tax_base / 100) * (
+                                                               record.related_percentage_tariffs / 100)) - record.related_amount_sustract_tariffs
                 
     name = fields.Char('Descripción', size=64, select=True, required=True, default="Retención ISLR")
     currency_id = fields.Many2one(related="retention_id.company_currency_id")
