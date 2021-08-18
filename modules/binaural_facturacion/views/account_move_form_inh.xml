@@ -67,6 +67,11 @@
                                     <field name="company_currency_id" invisible="1" />
                                     <field name="company_id" invisible="1" />
                                     <field name="is_retention_client" invisible="1"/>
+		                            <field name="foreign_currency_rate" optional="show" />
+	                                <field name="foreign_facture_amount" optional="show"/>
+	                                <field name="foreign_facture_total" optional="show"/>
+	                                <field name="foreign_iva_amount" optional="show"/>
+	                                <field name="foreign_retention_amount" optional="show"/>
                                 </tree>
                         </field>
                     </page>
@@ -88,6 +93,11 @@
 	                                    <field name="company_currency_id" invisible="1" />
 	                                    <field name="company_id" invisible="1" />
 	                                    <field name="is_retention_client" invisible="1"/>
+				                        <field name="foreign_currency_rate" optional="show" />
+		                                <field name="foreign_facture_amount" optional="show"/>
+		                                <field name="foreign_facture_total" optional="show"/>
+		                                <field name="foreign_iva_amount" optional="show"/>
+		                                <field name="foreign_retention_amount" optional="show"/>
 	                                </tree>
 	                        </field>
                     </page>
