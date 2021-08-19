@@ -10,7 +10,7 @@ class AccountRetentionBinauralFacturacionReport(models.Model):
         print("------------------------>", self.ensure_one())
         iva = 0
         if self.ensure_one():
-            print("paso", self.retention_line.invoice_id.amount_by_group[-1])
+            print("paso", self.retention_line.invoice_id.amount_by_group)
             if self.retention_line.invoice_id.amount_by_group[-1][0] == 'IVA 0%':
                 iva = self.retention_line.invoice_id.amount_by_group[-1][1]
             return self.env.ref('binaural_reporte_fiscal.retention_iva_voucher').report_action(self)

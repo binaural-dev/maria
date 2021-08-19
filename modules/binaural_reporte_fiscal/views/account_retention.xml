@@ -9,8 +9,7 @@
             <field name="arch" type="xml">
 
                 <xpath expr="//button[@name='action_draft']" position="after">
-                    <button name="islr_report" string="Print pdf" type="object"
-                    attrs="{'invisible':[('type_retention', '!=', 'iva')]}"/>
+                    <button name="islr_report" string="Print pdf" type="object" />
                 </xpath>
 
             </field>

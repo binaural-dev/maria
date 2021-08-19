@@ -1,291 +1,1030 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <template id="report_iva_customer">
+        <!--Header-->
+        <div class="container" style="font-size:12px !important;">
+            <div class="row">
+                <div class="col-3">
+                    <img style="max-height:100px;width:200px;float:left" t-if="res_company.logo"
+                         t-att-src="'data:image/png;base64,%s' % to_text(res_company.logo)"/>
+                </div>
+                <div class="col-8" style="text-align: left;">
+                    <h6>COMPROBANTE DE RETENCIÓN DEL IMPUESTO AL VALOR AGREGADO</h6>
+                    <p>"Decreto con Rango, Valor y Fuerza de Ley de Reforma de la Ley del Impuesto al Valor agregado
+                        Nro 1.436 del 17 de Noviembre del 2014"
+                        Articulo 11: La Administracion Tributaria podra Designar como Responsable del Pago del
+                        Impuesto, en calidad de Agentes de Retencion a quienes por sus
+                        Funciones Publicas o por Razon de sus Actividades Privadas intervengan en operaciones
+                        Gravadas con el Impuesto Establecido en este Decreto con Rango,
+                        Valor y Fuerza de Ley.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row justify-content-end" style="margin-top:5px">
+                <div class="col-4">
+                    <span>Nro Comprobante:</span>
+                    <div>
+                        <span t-esc="retention.number"/>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <span>Fecha de emision:</span>
+                    <div>
+                        <span t-esc="retention.date" t-options='{"widget": "date"}'/>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top:10px">
+
+                <div class="col-4">
+                    <div class="col-12">
+                        <span>Nombre o Razon Social del Agente de Retención</span>
+                        <div style="width:100%">
+                            <span t-esc="res_company.name"/>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <span>Direccion Fiscal del Agente de Retención</span>
+                        <div class="col-12">
+                            <span t-esc="res_company.street"/>
+                            <span t-esc="res_company.street2"/>
+                            <span t-esc="res_company.state_id.name"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="col-12">
+                        <span>Registro de Informacion Fiscal del Agente de Retención:</span>
+                    </div>
+                    <div>
+                        <span t-esc="res_company.vat"/>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <div class="col-12">
+                        <span>Periodo Fiscal:</span>
+                        <div style="width:100%">Año :
+                            <span t-esc="retention.date_accounting.strftime('%Y')"/>
+                            / Mes:
+                            <span t-esc="retention.date_accounting.strftime('%m')"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Body-->
+
+        <!--Separator-->
+        <div class="container">
+            <div class="row">
+                <hr class="" style="color:black"/>
+            </div>
+        </div>
+
+        <!--Information Client-->
+        <div class="container" style="font-size:12px !important;">
+            <div class="row">
+                <div class="col-6">
+                    <span>Nombre o Razon Social del Sujeto Retenido</span>
+                    <div>
+                        <span t-esc="retention.partner_id.business_name"/>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <span>Registro de Información Fiscal del Sujeto Retenido (R.I.F)</span>
+                    <div>
+                        <span style="text-transform:uppercase"
+                              t-esc="retention.partner_id.prefix_vat+retention.partner_id.vat"/>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    <span>Direccion Fiscal del Sujeto Retenido</span>
+                    <div>
+                        <span t-esc="retention.partner_id.street"/>
+                        <t t-if="retention.partner_id.street2">
+                            ,
+                            <span t-esc="retention.partner_id.street2"/>
+                        </t>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!--Line Retention: Description-->
+        <div style="margin-top:20px;font-size:12px !important;" class="container">
+            <div style="border-top:1px solid black; border-bottom:1px solid black" class="row text-center">
+                <div class="col-auto" >
+                    <span>Fecha Factura</span>
+                </div>
+                <div class="col-auto">
+                    <span>Número de Factura</span>
+                </div>
+                <div class="col-auto">
+                    <span>Nro de Control Factura</span>
+                </div>
+                <div class="col-auto">
+                    <span>Nota de Débito</span>
+                </div>
+                <div class="col-auto">
+                    <span>Nota de Crédito</span>
+                </div>
+                <div class="col-auto">
+                    <span>Factura afectada</span>
+                </div>
+                <div class="col-auto">
+                    <span>Total Compras Incluyendo el IVA</span>
+                </div>
+                <div class="col-auto">
+                    <span>Compras sin derecho a Crédito IVA</span>
+                </div>
+                <div class="col-auto">
+                    <span>Base Imponible</span>
+                </div>
+                <div class="col-auto">
+                    <span>% Alic</span>
+                </div>
+                <div class="col-auto">
+                    <span>% Ret</span>
+                </div>
+                <div class="col-auto">
+                    <span>Impuesto IVA</span>
+                </div>
+                <div class="col-auto">
+                    <span>IVA Retenido</span>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!--Line Retention: Line-->
+        <div style="margin-top:5px;margin-bottom:5px;font-size:10px !important;" class="container">
+            <div style="border-bottom:1px solid black" class="text-center">
+
+                <t t-set="total_amount_total" t-value="0"/>
+                <t t-set="total_amount_amount_except" t-value="0"/>
+                <t t-set="total_amount_imponible" t-value="0"/>
+                <t t-set="total_amount_tax" t-value="0"/>
+                <!--retenido-->
+                <t t-set="total_amount_to_pay" t-value="0"/>
+
+
+                <t t-foreach="retention.retention_line" t-as="line">
+                    <div class="row">
+                        <!-- Fecha Factura-->
+                        <div class="col-auto" >
+                            <t t-if="line.invoice_id.invoice_date">
+                                <span t-esc="line.invoice_id.invoice_date.strftime('%d/%m/%Y')"/>
+                            </t>
+                            <t t-else="">
+                                <span>--</span>
+                            </t>
+                        </div>
+                        <!--Número de Factura -->
+                        <div class="col-auto" >
+                            <t t-if="line.invoice_type in ['in_invoice']">
+                                <span t-esc="line.invoice_id.name"/>
+                            </t>
+                            <t t-if="line.invoice_type in ['out_invoice','out_contingence']">
+                                <span t-esc="line.invoice_id.name"/>
+                            </t>
+                            <t t-if="line.invoice_type not in ['out_invoice','out_contingence','in_invoice']">
+                                <span>--</span>
+                            </t>
+                        </div>
+                        <!--Nro de Control Factura -->
+                        <div class="col-auto" >
+                            <span t-esc="line.invoice_id.correlative"/>
+                        </div>
+                        <!--Nota de Débito -->
+                        <div class="col-auto">
+                            <t t-if="line.invoice_type in ['out_debit']">
+                                <span t-esc="line.invoice_id.name"/>
+                            </t>
+                            <t t-if="line.invoice_type not in ['out_debit']">
+                                <span>--</span>
+                            </t>
+                        </div>
+                        <!--Nota de Crédito -->
+                        <div class="col-auto">
+                            <t t-if="line.invoice_type in ['out_refund']">
+                                <span t-esc="line.invoice_id.name"/>
+                            </t>
+                            <t t-if="line.invoice_type in ['in_refund']">
+                                <span t-esc="line.invoice_id.name"/>
+                            </t>
+                            <t t-if="line.invoice_type not in ['out_refund','in_refund']">
+                                <span>--</span>
+                            </t>
+
+                        </div>
+                        <!-- Factura afectada -->
+                        <div class="col-auto">
+                            <t t-if="line.invoice_type in ['out_refund']">
+                                <t t-if="line.invoice_id.origin">
+                                    <span t-esc="line.invoice_id.invoice_origin"/>
+                                </t>
+                                <t t-else="">
+                                    <span>--</span>
+                                </t>
+                            </t>
+                            <t t-if="line.invoice_type in ['in_refund']">
+                                <t t-if="line.invoice_id.invoice_origin">
+
+                                    <t t-set="afectada"
+                                       t-value="line.invoice_id.sudo().search([('name','=',line.invoice_id.invoice_origin)])"/>
+                                    <t t-if="afectada">
+                                        <span t-esc="afectada.name"/>
+
+                                    </t>
+                                    <t t-if="not afectada">
+                                        <span t-esc="line.invoice_id.invoice_origin"/>
+                                    </t>
+                                </t>
+                            </t>
+
+                            <t t-else="">
+                                <span>--</span>
+                            </t>
+
+                        </div>
+`                       <!-- Total Compras Incluyendo el IVA -->
+                        <div class="col-auto">
+                            <span>
+                                <t t-esc="line.facture_total"
+                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                            </span>
+                        </div>
+                        <t t-set="total_amount_total" t-value="total_amount_total+line.facture_total"/>
+
+                        <!-- sin derecho a Crédito IVA -->
+                        <div class="col-auto">
+                            <t t-if="float(line.invoice_id.amount_by_group[-1][1]) == 0.0">
+                                <t t-set="amount_except"
+                                   t-value="total_amount_amount_except+line.invoice_id.amount_by_group[-1][2]"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="amount_except"
+                                   t-value="float(0)"/>
+                            </t>
+                            <span t-esc="amount_except"/>
+                        </div>
+                        <t t-set="total_amount_amount_except"
+                               t-value="total_amount_amount_except + amount_except"/>
+
+                        <!-- Base Imponible -->
+                        <div class="col-auto">
+                            <span t-esc="line.facture_amount"
+                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        </div>
+                        <t t-set="total_amount_imponible" t-value="total_amount_imponible + line.facture_amount"/>
+
+                        <!-- % Alic -->
+                        <div class="col-auto">
+                            <span t-esc="'{0:,.2f}'.format(line.tax_line).replace('.', ',')"/>
+                        </div>
+                        <!-- % Ret -->
+                        <div class="col-auto">
+                            <span t-esc="'{0:,.2f}'.format(line.porcentage_retention).replace('.', ',')"/>
+                        </div>
+
+                        <!-- Impuesto IVA -->
+                        <div class="col-auto">
+                            <span t-esc="line.foreign_iva_amount"
+                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        </div>
+
+                        <t t-set="total_amount_tax" t-value="total_amount_tax + line.foreign_iva_amount"/>
+
+                        <!-- IVA Retenido -->
+                        <div class="col-auto">
+                            <span t-esc="line.foreign_retention_amount"
+                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        </div>
+
+                        <t t-set="total_amount_to_pay" t-value="total_amount_to_pay + line.foreign_retention_amount"/>
+
+
+                    </div>
+                </t>
+            </div>
+        </div>
+
+        <!--Total-->
+        <div class="container" style="font-size:10px !important;">
+            <div>
+                <div class="row text-center">
+
+                    <div class="col-auto" >
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="col-auto">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="col-auto">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="col-auto">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="col-auto">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="col-auto">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+
+                    <div class="col-auto">
+                        <span t-esc="total_amount_total"
+                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                    </div>
+                    <div class="col-auto">
+                        <span t-esc="total_amount_amount_except"
+                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                    </div>
+                    <div class="col-auto">
+                        <span t-esc="total_amount_imponible"
+                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                    </div>
+                    <div class="col-auto">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="col-auto">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="col-auto">
+                        <span t-esc="total_amount_tax"
+                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                    </div>
+                    <div class="col-auto">
+                        <span t-esc="total_amount_to_pay"
+                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!--Firmas-->
+        <div class="container" style="font-size:12px !important;">
+            <div class="row text-center">
+                <div class="col-5" style="width:35%; margin-top:10px;">
+                    <!--Firma digital-->
+                    <div style="height:100px">
+                        <img style="max-height:120px;width:200px" t-if="retention.get_signature()"
+                             t-att-src="'data:image/png;base64,%s' % to_text(retention.get_signature())"/>
+                    </div>
+                    <!--Firma digital fin-->
+                    <h6 style="text-align: center; margin: 30px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
+                        Agente de Retención
+                    </h6>
+                </div>
+                <div class="col-5" style="width:30%; margin-top:10px;">
+
+                </div>
+                <div class="col-5" style="width:35%;margin-top:10px;">
+                    <div style="height:100px"></div>
+                    <h6 style="text-align: center; margin: 30px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
+                        Recibido por:
+                    </h6>
+                    <div style="height:30px"></div>
+                    <h6 style="text-align: center; margin: 5px 0;width:80%; padding-top:10px;">Fecha de entrega:
+                    </h6>
+                </div>
+            </div>
+        </div>
+
+    </template>
+
+    <template id="report_isrl_customer">
+        <!--<div class="page">
+
+            &lt;!&ndash;Header&ndash;&gt;
+            <div class="container" style="font-size:12px !important;">
+                <div class="row">
+
+                    <div class="col-4">
+                        <img style="max-height:100px;width:200px;float:left" t-if="res_company.logo"
+                             t-att-src="'data:image/png;base64,%s' % to_text(res_company.logo)"/>
+                    </div>
+
+                    <div class="col-8">
+                        <div style="width:100%">
+                            <h6>CONSTANCIA DE RETENCIÓN EN MATERIA DEL ISLR</h6>
+                        </div>
+                        <div style="width:100%">
+                            <span>Art. 24 del Drecreto 1808 Según G.O Nro 36.203 de fecha de mayo de 1997</span>
+                        </div>
+                        &lt;!&ndash;<div style="width:100%"><span>Agente de Retención</span></div>
+                        <div style="width:100%;text-transform:uppercase"><span t-esc="res_company.name" /></div>
+                        <div style="width:100%"><span>Dirección</span></div>
+                        <div style="width:100%;text-transform:uppercase"><span t-esc="res_company.street" /></div>&ndash;&gt;
+                        &lt;!&ndash;<div style="width:100%"><span>Teléfono: </span><span t-esc="res_company.phone" /></div>&ndash;&gt;
+                        &lt;!&ndash;<div style="width:100%"><span>Rif: </span> <span t-esc="res_company.vat" /></div>&ndash;&gt;
+                        <div style="width:100%"></div>
+                        <div style="width:100%;text-align:center">
+                            <span>Fecha:</span>
+                            <span t-esc="retention.date" t-options='{"widget": "date"}'/>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            &lt;!&ndash;Body&ndash;&gt;
+            <div class="container" style="font-size:12px !important;margin-top:10px!important">
+                <div class="row">
+                    <div class="col-8">
+                        <div style="width:100%">
+                            <span>Agente de Retención:</span>
+                        </div>
+                        <div style="width:100%;text-transform:uppercase">
+                            <span t-esc="res_company.name"/>
+                        </div>
+                        <div style="width:100%">
+                            <span>Dirección:</span>
+                        </div>
+                        <div style="width:100%;text-transform:uppercase">
+                            <span t-esc="res_company.street"/>
+                        </div>
+                        &lt;!&ndash;<div style="width:100%"><span>Teléfono: </span><span t-esc="res_company.phone" /></div>&ndash;&gt;
+                    </div>
+                    <div class="col-4">
+                        <div style="width:100%">
+                            <span>No. R.I.F.:</span>
+                        </div>
+                        <div style="width:100%;text-transform:uppercase">
+                            <span t-esc="res_company.vat"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            &lt;!&ndash;Separator&ndash;&gt;
+            <div class="container">
+                <div class="row">
+                    <hr class="col-12" style="color:black"/>
+                </div>
+            </div>
+
+            &lt;!&ndash;Information Client&ndash;&gt;
+            <div class="container" style="font-size:12px !important;">
+                <div class="row">
+                    <div class="col-8">
+                        <div style="width:100%">
+                            <span>Contribuyente:</span>
+                        </div>
+                        <div style="width:100%">
+                            <span style="text-transform:uppercase" t-esc="retention.partner_id.business_name"/>
+                        </div>
+                    </div>
+                    <div class="col-4" style="">
+                        <div style="width:100%">
+                            <span>Nro. R.I.F.:</span>
+                        </div>
+
+                        <div style="width:100%">
+                            <span style="text-transform:uppercase"
+                                  t-esc="retention.partner_id.prefix_vat+retention.partner_id.vat"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-8">
+                        <div style="width:100%">
+                            <span>Dirección:</span>
+                        </div>
+                        <div style="width:100%;text-transform:uppercase">
+                            <span t-esc="retention.partner_id.street"/>
+                            <t t-if="retention.partner_id.street2">
+                                ,
+                                <span t-esc="retention.partner_id.street2"/>
+                            </t>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+            &lt;!&ndash;Line Retention: Description&ndash;&gt;
+            &lt;!&ndash;Title&ndash;&gt;
+            <div class="container">
+                <div class="text-center" style="font-weight: bold;margin-top:5px">
+                    <h6 style="text-transform:uppercase">información impuesto retenido</h6>
+                </div>
+            </div>
+            <div style="margin-top:20px; font-size:12px !important;" class="container">
+                <div style="border-top:1px solid black; border-bottom:1px solid black" class="row text-center">
+                    <div class="" style="width:3%">TD</div>
+                    <div class="" style="width:12%">Fact
+                        <br/>
+                        Nro
+                    </div>
+                    <div class="" style="width:7%">Nro de Control</div>
+                    <div class="" style="width:7%">Fecha</div>
+                    <div class="" style="width:13%">Concepto</div>
+                    <div class="" style="width:12%">Total
+                        <br/>
+                        Factura
+                    </div>
+                    <div class="" style="width:12%">Base
+                        <br/>
+                        de Retención
+                    </div>
+                    <div class="" style="width:3%">Tarifa
+                        <br/>
+                        Ret
+                    </div>
+                    <div class="" style="width:7%">Sustraendo</div>
+                    <div class="" style="width:12%">Imp
+                        <br/>
+                        Retenido
+                    </div>
+                    <div class="" style="width:12%">Neto a
+                        <br/>
+                        Pagar
+                    </div>
+                </div>
+            </div>
+
+            &lt;!&ndash;Line Retention: Line &ndash;&gt;
+            <div style="margin-top:5px;margin-bottom:5px;font-size:10px !important;" class="container">
+                <div style="border-bottom:1px solid black" class="text-center">
+                    <t t-foreach="retention.islr_line_ids" t-as="line">
+                        <div class="row">
+                            <div class="" style="width:3%">
+                                <t t-if="line.invoice_id.type in ['out_invoice','in_invoice']">
+                                    <span>FA</span>
+                                </t>
+                                <t t-else="">
+                                    <t t-if="line.invoice_id.type == 'in_refund'">
+                                        <span>NC</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span>ND</span>
+                                    </t>
+                                </t>
+                            </div>
+                            <div class="" style="width:12%">
+                                <t t-if="line.invoice_id.type in ['in_invoice','in_refund']">
+                                    <span t-esc="line.invoice_id.invoice_number"/>
+                                </t>
+                                <t t-if="line.invoice_id.type in ['out_invoice','out_contingence','out_debit']">
+                                    <span t-esc="line.invoice_id.number"/>
+                                </t>
+                                <t t-if="line.invoice_id.type not in ['out_invoice','out_contingence','in_invoice','in_refund']">
+                                    <span>&#45;&#45;</span>
+                                </t>
+
+
+                            </div>
+
+                            <div class="" style="width:7%">
+
+                                <t t-if="line.invoice_id.type in ['in_invoice']">
+                                    <span t-esc="line.invoice_id.reference"/>
+                                </t>
+                                <t t-if="line.invoice_id.type in ['out_invoice','out_contingence','out_debit']">
+                                    <span t-esc="line.invoice_id.correlative"/>
+                                </t>
+                                <t t-if="line.invoice_id.type not in ['out_invoice','out_contingence','in_invoice','out_debit']">
+                                    <span>&#45;&#45;</span>
+                                </t>
+                            </div>
+
+                            <div class="" style="width:7%">
+                                <span t-field="line.invoice_id.date_invoice">&#45;&#45;</span>
+                            </div>
+
+                            <div class="" style="width:13%">
+                                <span t-field="line.payment_concept.name">&#45;&#45;</span>
+                            </div>
+
+
+                            <div class="" style="width:12%">
+                                <span t-field="line.invoice_id.amount_total"
+                                       t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
+                                    &#45;&#45;
+                                </span>
+                            </div>
+
+                            <div class="" style="width:12%">
+                                <span t-field="line.tax_base"
+                                       t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
+                                    &#45;&#45;
+                                </span>
+                            </div>
+
+                            <div class="" style="width:3%">
+                                <t t-if="line.invoice_id.type == 'in_invoice'">
+                                    <span t-field="line.related_percentage_tariffs">&#45;&#45;</span>
+                                    <span>%</span>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="line.retention_islr">&#45;&#45;</span>
+                                    <span>%</span>
+                                </t>
+                            </div>
+
+
+                            <div class="" style="width:7%">
+                                <t t-if="line.invoice_id.type == 'in_invoice'">
+                                    <span t-esc="line.related_amount_sustract_tariffs"></span>
+                                </t>
+                                <t t-else="">
+                                    <span>&#45;&#45;</span>
+                                </t>
+                            </div>
+
+                            <t t-set="retention_amount" t-value="0"/>
+                            <div class="" style="width:12%">
+                                <t t-if="retention.type == 'out_invoice'">
+                                    <span t-field="line.amount"
+                                           t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
+                                        &#45;&#45;
+                                    </span>
+                                    <t t-set="retention_amount" t-value="line.amount"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-field="line.amount_tariffs"
+                                           t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
+                                        &#45;&#45;
+                                    </span>
+                                    <t t-set="retention_amount" t-value="line.amount_tariffs"/>
+                                </t>
+                            </div>
+                            <t t-set="total_to_pay" t-value="line.invoice_id.amount_total - retention_amount"/>
+
+                            <div class="" style="width:12%">
+                                <span>
+                                    <t t-esc="total_to_pay"
+                                       t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                                </span>
+                            </div>
+
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            &lt;!&ndash;Total&ndash;&gt;
+            &lt;!&ndash;<div style="margin-top:20px;font-size:12px !important;" class="container">
+
+                 <div style="width:40%; float:right">
+                     <div style="width:100%; font:14px bold">
+                         <div style="width:40%; float:left">
+                             TOTAL RETENIDO
+                         </div>
+                         <div style="width:60%; float:right"  class="text-right">
+                             <span t-field="retention.amount" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/>
+                         </div>
+                     </div>
+                 </div>
+
+            </div>&ndash;&gt;
+
+            &lt;!&ndash;Firmas&ndash;&gt;
+            <div class="container" style="font-size:12px !important;">
+                <div class="row text-center">
+
+                    <div class="col-5" style="width:35%;margin-top:10px;">
+                        <div style="height:100px"></div>
+                        <h6 style="text-align: center; margin: 30px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
+                            Firma del Agente Retenido
+                        </h6>
+                    </div>
+                    <div class="col-5" style="width:30%; margin-top:10px;">
+
+                    </div>
+                    <div class="col-5" style="width:35%; margin-top:10px;">
+                        &lt;!&ndash;Firma digital&ndash;&gt;
+                        <div style="height:100px">
+                            <img style="max-height:120px;width:200px" t-if="retention.get_signature()"
+                                 t-att-src="'data:image/png;base64,%s' % to_text(retention.get_signature())"/>
+                        </div>
+                        &lt;!&ndash;Firma digital fin&ndash;&gt;
+                        <h6 style="text-align: center; margin: 30px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
+                            Firma del Agente de Retención
+                        </h6>&lt;!&ndash;<span t-esc="res_company.name"/>&ndash;&gt;
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>-->
+        <h1>ISLR</h1>
+    </template>
+    <!--<t t-call="web.inernal_layout">
+        <div class="page">
+
+            &lt;!&ndash;Header&ndash;&gt;
+            <div class="container" style="font-size:12px !important;">
+                <div class="row">
+
+                    <div class="col-3">
+                        <img style="max-height:100px;width:200px;float:left" t-if="res_company.logo"
+                             t-att-src="'data:image/png;base64,%s' % to_text(res_company.logo)"/>
+                    </div>
+
+                    <div class="col-5">
+                        <div style="width:100%">
+                            <span>AGENTE DE RETENCIÓN</span>
+                        </div>
+                        <div style="width:100%">
+                            <span t-esc="retention.company_id.name"/>
+                        </div>
+                        <div style="width:100%">
+                            <span t-esc="retention.company_id.street"/>
+                        </div>
+                        <div style="width:100%">
+                            <span>Teléfono:</span>
+                            <span t-esc="retention.company_id.phone"/>
+                        </div>
+                        <div style="width:100%">
+                            <span>RIF:</span>
+                            <span t-esc="retention.company_id.vat"/>
+                        </div>
+                    </div>
+
+                    <div class="col-4">
+                        <div style="width:100%">
+                            <span>Fecha:</span>
+                            <span t-esc="retention.date_accounting"/>
+                        </div>
+                        <div style="width:100%">
+                            <span>Periodo Fiscal:</span>
+                            <span t-esc="retention.date_accounting"/>
+                        </div>
+                        <div style="width:100%">
+                            <span>Nro Comprobante:</span>
+                            <span t-esc="retention.number"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            &lt;!&ndash;Body&ndash;&gt;
+
+            &lt;!&ndash;Separator&ndash;&gt;
+            <div class="container">
+                <div class="row">
+                    <hr class="col-12"/>
+                </div>
+            </div>
+
+            &lt;!&ndash;Title&ndash;&gt;
+            <div class="container">
+                <div class="text-center" style="font-weight: bold">
+                    <h4>Retenciones de IVA</h4>
+                </div>
+            </div>
+
+            &lt;!&ndash;Information Client&ndash;&gt;
+            <div class="container" style="font-size:12px !important;">
+                <div class="row">
+                    <div class="col-4">
+                        <span>CONTRIBUYENTE</span>
+                    </div>
+                    <div class="col-8">
+                        <span t-esc="retention.partner_id.business_name"/>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        <span>DOMICILIO</span>
+                    </div>
+                    <div class="col-8">
+                        <span t-esc="retention.partner_id.street"/>
+                        <t t-if="retention.partner_id.street2">
+                            ,
+                            <span t-esc="retention.partner_id.street2"/>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        <span>RIF</span>
+                    </div>
+                    <div class="col-8">
+                        <span t-esc="retention.partner_id.prefix_vat+retention.partner_id.vat"/>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        <span>% Retención</span>
+                    </div>
+                    <div class="col-8">
+                        <span>
+                            <t t-esc="'{0:,.2f}'.format(retention.partner_id.withholding_type.value).replace('.', ',')"/>
+                        </span>
+                        <span>%</span>
+                    </div>
+                </div>
+            </div>
+
+            &lt;!&ndash;Line Retention: Description&ndash;&gt;
+            <div style="margin-top:20px;font-size:12px !important;" class="container">
+                <div style="border-top:1px solid black; border-bottom:1px solid black"
+                     class="row text-center">
+                    <div class="col-1">TD</div>
+                    <div class="col-1">Fecha</div>
+                    <div class="col-1">Nro Factura</div>
+                    <div class="col-1">Nro ND</div>
+                    <div class="col-1">Nro NC</div>
+                    <div class="col-1">Nro Control</div>
+                    <div class="col-1">Doc.Afectado</div>
+                    <div class="col-1">Importe Total</div>
+                    <div class="col-1">No gravable</div>
+                    <div class="col-1">Base Imponible</div>
+                    <div class="col-1">% IVA</div>
+                    <div class="col-1">IMPORTE IVA</div>
+                    <div class="col-1">Importe Retenido</div>
+                </div>
+
+            </div>
+
+            &lt;!&ndash;Line Retention: Line&ndash;&gt;
+            <div style="margin-top:5px;margin-bottom:5px;font-size:10px !important;" class="container">
+                <div style="border-bottom:1px solid black" class="text-center">
+                    <t t-foreach="retention.retention_line" t-as="line">
+                        <div class="row">
+                            <div class="col-1"
+                                 style="margin-left:0px !important;margin-right:0px !important;">
+                                <t t-if="line.invoice_type in ['out_invoice','in_invoice']">
+                                    <span>FA</span>
+                                </t>
+                                <t t-else="">
+                                    <t t-if="line.invoice_type == 'in_refund'">
+                                        <span>NC</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span>ND</span>
+                                    </t>
+                                </t>
+                            </div>
+                            &lt;!&ndash; Fecha Factura &ndash;&gt;
+                            <t t-if="line.invoice_id.invoice_date">&lt;!&ndash;date_invoice&ndash;&gt;
+                                <div class="col-1">
+                                    <span t-esc="line.invoice_id.invoice_date.strftime('%d/%m/%Y')"/>
+                                </div>
+                            </t>
+                            &lt;!&ndash; Nro Factura &ndash;&gt;
+                            <div class="col-1"
+                                 style="margin-left:0px !important;margin-right:0px !important;">
+                                <t t-if="line.invoice_type in ['out_invoice','in_invoice']">
+                                    <span t-esc="line.invoice_id.name"/>
+                                </t>
+                            </div>
+                            &lt;!&ndash; Nro ND&ndash;&gt;
+                            <div class="col-1"
+                                 style="margin-left:0px !important;margin-right:0px !important;">
+                                <t t-if="line.invoice_type == 'invoice_id'">
+                                    <span t-esc="line.invoice_id.name"/>
+                                </t>
+                            </div>
+                            &lt;!&ndash; Nro NC &ndash;&gt;
+                            <div class="col-1"
+                                 style="margin-left:0px !important;margin-right:0px !important;">
+                                <t t-if="line.invoice_type == 'in_debit'">
+                                    <span t-esc="line.invoice_id.name"/>
+                                </t>
+                            </div>
+                            &lt;!&ndash; Nro Control &ndash;&gt;
+
+                            <div class="col-1">
+                                <t t-if="line.invoice_id.correlative">
+                                    <span t-esc="line.invoice_id.correlative"/>
+                                </t>
+                            </div>
+                            &lt;!&ndash; Doc. Afectado &ndash;&gt;
+                            <div class="col-1">
+                                <t t-if="line.invoice_id.invoice_origin">
+                                    <span t-esc="line.invoice_id.invoice_origin"/>
+                                </t>
+                            </div>
+
+                            &lt;!&ndash; Importe total &ndash;&gt;
+                            <div class="col-1">
+                                <t t-if="line.invoice_id.amount_total">
+                                    <span t-esc="line.facture_total"/>
+                                </t>
+                            </div>
+
+                            &lt;!&ndash; No gravable &ndash;&gt;
+                            <div class="col-1">
+                                <span>1</span>
+                                <t t-if="line.invoice_id.amount_by_group[-1][0] == 'IVA 0%'">
+
+                                    <span t-esc="line.invoice_id.amount_by_group[-1][1]"/>
+                                </t>
+                            </div>
+
+                            &lt;!&ndash; Base imponible&ndash;&gt;
+                            <div class="col-1">
+                                <t t-if="line.facture_amount">
+                                    <span t-esc="line.facture_amount"/>
+                                </t>
+                            </div>
+
+                            &lt;!&ndash; % IVA&ndash;&gt;
+                            <div class="col-1">
+                                <t t-if="line.tax_line">
+                                    <span t-esc="line.tax_line"/>
+                                </t>
+                            </div>
+
+                            &lt;!&ndash; Importe IVA&ndash;&gt;
+                            <div class="col-1">
+                                <t t-if="line.tax_line">
+                                    <span t-esc="line.tax_line"/>
+                                </t>
+                            </div>
+
+                            &lt;!&ndash; Importe Retenido&ndash;&gt;
+                            <div class="col-1">
+                                <t t-if="line.retention_amount">
+                                    <span t-esc="line.retention_amount"/>
+                                </t>
+                            </div>
+
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            &lt;!&ndash;Total&ndash;&gt;
+            <div style="margin-top:25px" class="container">
+
+                <div style="width:40%; float:right">
+                    <div style="width:100%; font:14px bold">
+                        <div style="width:40%; float:left">
+                            TOTAL RETENIDO
+                        </div>
+                        <div style="width:60%; float:right" class="text-right">
+                            <span t-esc="retention.total_tax_ret"
+                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            &lt;!&ndash;Firmas&ndash;&gt;
+            <div class="container" style="font-size:14px !important;">
+                <div class="row text-center">
+                    <div class="col-5" style="width:35%; margin-top:100px;">
+                        &lt;!&ndash;Firma digital&ndash;&gt;
+                        <div style="height:120px">
+                            <img style="max-height:120px;width:200px" t-if="retention.get_signature()"
+                                 t-att-src="'data:image/png;base64,%s' % to_text(retention.get_signature())"/>
+                        </div>
+                        &lt;!&ndash;Firma digital fin&ndash;&gt;
+                        <h5 style="text-align: center; margin: 5px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
+                            <span t-esc="res_company.name"/>
+                        </h5>
+                    </div>
+                    <div class="col-5" style="width:30%;margin-top:100px;">
+                        <div style="height:120px"></div>
+
+                        <h5 style="text-align: center; margin: 5px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
+                            Recibido por:
+                        </h5>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </t>-->
     <template id="template_retention_iva_voucher">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="retention">
                 <t t-call="web.internal_layout">
                     <div class="page">
-
-                        <!--Header-->
-                        <div class="container" style="font-size:12px !important;">
-                            <div class="row">
-
-                                <div class="col-3">
-                                    <img style="max-height:100px;width:200px;float:left" t-if="res_company.logo"
-                                         t-att-src="'data:image/png;base64,%s' % to_text(res_company.logo)"/>
-                                </div>
-
-                                <div class="col-5">
-                                    <div style="width:100%">
-                                        <span>AGENTE DE RETENCIÓN</span>
-                                    </div>
-                                    <div style="width:100%">
-                                        <span t-esc="retention.company_id.name"/>
-                                    </div>
-                                    <div style="width:100%">
-                                        <span t-esc="retention.company_id.street"/>
-                                    </div>
-                                    <div style="width:100%">
-                                        <span>Teléfono:</span>
-                                        <span t-esc="retention.company_id.phone"/>
-                                    </div>
-                                    <div style="width:100%">
-                                        <span>RIF:</span>
-                                        <span t-esc="retention.company_id.vat"/>
-                                    </div>
-                                </div>
-
-                                <div class="col-4">
-                                    <div style="width:100%">
-                                        <span>Fecha:</span>
-                                        <span t-esc="retention.date_accounting"/>
-                                    </div>
-                                    <div style="width:100%">
-                                        <span>Periodo Fiscal:</span>
-                                        <span t-esc="retention.date_accounting"/>
-                                    </div>
-                                    <div style="width:100%">
-                                        <span>Nro Comprobante:</span>
-                                        <span t-esc="retention.number"/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!--Body-->
-
-                        <!--Separator-->
-                        <div class="container">
-                            <div class="row">
-                                <hr class="col-12"/>
-                            </div>
-                        </div>
-
-                        <!--Title-->
-                        <div class="container">
-                            <div class="text-center" style="font-weight: bold">
-                                <h4>Retenciones de IVA</h4>
-                            </div>
-                        </div>
-
-                        <!--Information Client-->
-                        <div class="container" style="font-size:12px !important;">
-                            <div class="row">
-                                <div class="col-4">
-                                    <span>CONTRIBUYENTE</span>
-                                </div>
-                                <div class="col-8">
-                                    <span t-esc="retention.partner_id.business_name"/>
-                                </div>
-
-                            </div>
-
-                            <div class="row">
-                                <div class="col-4">
-                                    <span>DOMICILIO</span>
-                                </div>
-                                <div class="col-8">
-                                    <span t-esc="retention.partner_id.street"/>
-                                    <t t-if="retention.partner_id.street2">
-                                        ,
-                                        <span t-esc="retention.partner_id.street2"/>
-                                    </t>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-4">
-                                    <span>RIF</span>
-                                </div>
-                                <div class="col-8">
-                                    <span t-esc="retention.partner_id.prefix_vat+retention.partner_id.vat"/>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-4">
-                                    <span>% Retención</span>
-                                </div>
-                                <div class="col-8">
-                                    <spand>
-                                        <t t-esc="'{0:,.2f}'.format(retention.partner_id.withholding_type.value).replace('.', ',')"/>
-                                    </spand>
-                                    <spand>%</spand>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!--Line Retention: Description-->
-                        <div style="margin-top:20px;font-size:12px !important;" class="container">
-                            <div style="border-top:1px solid black; border-bottom:1px solid black"
-                                 class="row text-center">
-                                <div class="col-1">TD</div>
-                                <div class="col-1">Fecha</div>
-                                <div class="col-1">Nro Factura</div>
-                                <div class="col-1">Nro ND</div>
-                                <div class="col-1">Nro NC</div>
-                                <div class="col-1">Nro Control</div>
-                                <div class="col-1">Doc.Afectado</div>
-                                <div class="col-1">Importe Total</div>
-                                <div class="col-1">No gravable</div>
-                                <div class="col-1">Base Imponible</div>
-                                <div class="col-1">% IVA</div>
-                                <div class="col-1">IMPORTE IVA</div>
-                                <div class="col-1">Importe Retenido</div>
-                            </div>
-
-                        </div>
-
-                        <!--Line Retention: Line-->
-                        <div style="margin-top:5px;margin-bottom:5px;font-size:10px !important;" class="container">
-                            <div style="border-bottom:1px solid black" class="text-center">
-                                <t t-foreach="retention.retention_line" t-as="line">
-                                    <div class="row">
-                                        <div class="col-1"
-                                             style="margin-left:0px !important;margin-right:0px !important;">
-                                            <t t-if="line.invoice_type in ['out_invoice','in_invoice']">
-                                                <spand>FA</spand>
-                                            </t>
-                                            <t t-else="">
-                                                <t t-if="line.invoice_type == 'in_refund'">
-                                                    <spand>NC</spand>
-                                                </t>
-                                                <t t-else="">
-                                                    <spand>ND</spand>
-                                                </t>
-                                            </t>
-                                        </div>
-                                        <!-- Fecha Factura -->
-                                        <t t-if="line.invoice_id.invoice_date"><!--date_invoice-->
-                                            <div class="col-1">
-                                                <spand t-esc="line.invoice_id.invoice_date.strftime('%d/%m/%Y')"/>
-                                            </div>
-                                        </t>
-                                        <!-- Nro Factura -->
-                                        <div class="col-1"
-                                             style="margin-left:0px !important;margin-right:0px !important;">
-                                            <t t-if="line.invoice_type in ['out_invoice','in_invoice']">
-                                                <spand t-esc="line.invoice_id.name"/>
-                                            </t>
-                                        </div>
-                                        <!-- Nro ND-->
-                                        <div class="col-1"
-                                             style="margin-left:0px !important;margin-right:0px !important;">
-                                            <t t-if="line.invoice_type == 'invoice_id'">
-                                                <spand t-esc="line.invoice_id.name"/>
-                                            </t>
-                                        </div>
-                                        <!-- Nro NC -->
-                                        <div class="col-1"
-                                             style="margin-left:0px !important;margin-right:0px !important;">
-                                            <t t-if="line.invoice_type == 'in_debit'">
-                                                <spand t-esc="line.invoice_id.name"/>
-                                            </t>
-                                        </div>
-                                        <!-- Nro Control -->
-
-                                        <div class="col-1">
-                                            <t t-if="line.invoice_id.correlative">
-                                                <spand t-esc="line.invoice_id.correlative"/>
-                                            </t>
-                                        </div>
-                                        <!-- Doc. Afectado -->
-                                        <div class="col-1">
-                                            <t t-if="line.invoice_id.invoice_origin">
-                                                <spand t-esc="line.invoice_id.invoice_origin"/>
-                                            </t>
-                                        </div>
-
-                                        <!-- Importe total -->
-                                        <div class="col-1">
-                                            <t t-if="line.invoice_id.amount_total">
-                                                <spand t-esc="line.facture_total"/>
-                                            </t>
-                                        </div>
-
-                                        <!-- No gravable -->
-                                        <div class="col-1">
-                                            <span>1</span>
-                                            <t t-if="line.invoice_id.amount_by_group[-1][0] == 'IVA 0%'">
-
-                                                <spand t-esc="line.invoice_id.amount_by_group[-1][1]"/>
-                                            </t>
-                                        </div>
-
-                                        <!-- Base imponible-->
-                                        <div class="col-1">
-                                            <t t-if="line.facture_amount">
-                                                <spand t-esc="line.facture_amount"/>
-                                            </t>
-                                        </div>
-
-                                        <!-- % IVA-->
-                                        <div class="col-1">
-                                            <t t-if="line.tax_line">
-                                                <spand t-esc="line.tax_line"/>
-                                            </t>
-                                        </div>
-
-                                        <!-- Importe IVA-->
-                                        <div class="col-1">
-                                            <t t-if="line.tax_line">
-                                                <spand t-esc="line.tax_line"/>
-                                            </t>
-                                        </div>
-
-                                        <!-- Importe Retenido-->
-                                        <div class="col-1">
-                                            <t t-if="line.retention_amount">
-                                                <spand t-esc="line.retention_amount"/>
-                                            </t>
-                                        </div>
-
-                                    </div>
-                                </t>
-                            </div>
-                        </div>
-
-                        <!--Total-->
-                        <div style="margin-top:25px" class="container">
-
-                            <div style="width:40%; float:right">
-                                <div style="width:100%; font:14px bold">
-                                    <div style="width:40%; float:left">
-                                        TOTAL RETENIDO
-                                    </div>
-                                    <div style="width:60%; float:right" class="text-right">
-                                        <spand t-esc="retention.total_tax_ret"
-                                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!--Firmas-->
-                        <div class="container" style="font-size:14px !important;">
-                            <div class="row text-center">
-                                <div class="col-5" style="width:35%; margin-top:100px;">
-                                    <!--Firma digital-->
-                                    <div style="height:120px">
-                                        <img style="max-height:120px;width:200px" t-if="retention.get_signature()"
-                                             t-att-src="'data:image/png;base64,%s' % to_text(retention.get_signature())"/>
-                                    </div>
-                                    <!--Firma digital fin-->
-                                    <h5 style="text-align: center; margin: 5px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
-                                        <spand t-esc="res_company.name"/>
-                                    </h5>
-                                </div>
-                                <div class="col-5" style="width:30%;margin-top:100px;">
-                                    <div style="height:120px"></div>
-
-                                    <h5 style="text-align: center; margin: 5px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
-                                        Recibido por:
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-
+                        <t t-if="retention.type_retention == 'iva'">
+                            <t t-call="binaural_reporte_fiscal.report_iva_customer"/>
+                        </t>
+                        <t t-else="">
+                            <t t-call="binaural_reporte_fiscal.report_isrl_customer"/>
+                        </t>
                     </div>
                 </t>
             </t>
