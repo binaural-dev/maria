@@ -43,7 +43,9 @@
 
 	                                <field name="facture_total" readonly="1" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
                                     <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)], 'readonly':['|',('parent.type_retention', '=', 'iva'), '|',  '&amp;',('parent.type_retention', '=', 'islr'), '&amp;',('parent.type', '=', 'in_invoice'),('payment_concept_id', '=', False), '&amp;', ('parent.type_retention', '=', 'islr'), ('parent.type', '=', 'out_invoice')]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
-                                    <field name="tax_line" readonly="1" force_save="1" attrs="{'column_invisible':[('parent.type_retention', '=', 'islr')]}"/>
+                                    <field name="payment_concept_id" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+
+	                                <field name="tax_line" readonly="1" force_save="1" attrs="{'column_invisible':[('parent.type_retention', '=', 'islr')]}"/>
                                     <field name="iva_amount" readonly="1" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
 
 	                                <field name="related_pay_from" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
@@ -59,11 +61,11 @@
                                     <field name="company_id" invisible="1" />
                                     <field name="is_retention_client" invisible="1"/>
 
-	                                <field name="foreign_currency_rate" readonly="1"/>
-	                                <field name="foreign_facture_amount" attrs="{'readonly': [('parent.type_retention', '=', 'iva')]}"/>
-	                                <field name="foreign_facture_total" readonly="1"/>
-	                                <field name="foreign_iva_amount" readonly="1"/>
-	                                <field name="foreign_retention_amount" attrs="{'readonly': [('parent.type', '=', 'in_invoice')]}"/>
+	                                <field name="foreign_currency_rate" force_save="1" readonly="1"/>
+	                                <field name="foreign_facture_amount" force_save="1" attrs="{'readonly': [('parent.type_retention', '=', 'iva')]}"/>
+	                                <field name="foreign_facture_total" force_save="1" readonly="1"/>
+	                                <field name="foreign_iva_amount" force_save="1" readonly="1"/>
+	                                <field name="foreign_retention_amount" force_save="1" attrs="{'readonly': [('parent.type', '=', 'in_invoice')]}"/>
 
                                 </tree>
                             </field>
