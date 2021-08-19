@@ -77,6 +77,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     },
         
                 }
+            record.foreign_retention_amount = record.retention_amount * record.foreign_currency_rate
 
     @api.onchange('porcentage_retention')
     def _onchange_porcentage_retention(self):
@@ -120,6 +121,10 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     record.facture_amount = record.invoice_id.amount_untaxed
                     record.iva_amount = record.invoice_id.amount_tax
                     record.invoice_type = record.invoice_id.move_type
+                    record.foreign_facture_amount = record.invoice_id.amount_untaxed * record.invoice_id.foreign_currency_rate
+                    record.foreign_facture_total = record.invoice_id.amount_total * record.invoice_id.foreign_currency_rate
+                    record.foreign_iva_amount = record.invoice_id.amount_tax * record.invoice_id.foreign_currency_rate
+                    record.foreign_currency_rate = record.invoice_id.foreign_currency_rate
                 if record.payment_concept_id and record.invoice_id:
                     if record.facture_amount > record.related_pay_from:
                         _logger.info('Calculos')
@@ -128,8 +133,9 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                         _logger.info(record.related_percentage_tariffs/100)
                         _logger.info(record.related_amount_sustract_tariffs)
                         record.retention_amount = (record.facture_amount * (record.related_percentage_tax_base/100) * (record.related_percentage_tariffs/100)) - record.related_amount_sustract_tariffs
-
-    @api.depends('facture_amount')
+                        record.foreign_retention_amount = record.retention_amount * record.invoice_id.foreign_currency_rate
+                        
+    @api.onchange('facture_amount')
     def _onchange_base_islr(self):
         for record in self:
             if (record.retention_id and record.retention_id.type_retention in ['islr'] and record.retention_id.type in [
@@ -140,6 +146,22 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                         record.retention_amount = (record.facture_amount * (
                                     record.related_percentage_tax_base / 100) * (
                                                                record.related_percentage_tariffs / 100)) - record.related_amount_sustract_tariffs
+                record.foreign_facture_amount = record.facture_amount * record.foreign_currency_rate
+            else:
+                if record.retention_id and record.retention_id.type in ['in_invoice'] or (record.invoice_id and record.invoice_id.move_type in ['in_invoice'] and not record.retention_id):
+                    record.foreign_facture_amount = record.facture_amount * record.foreign_currency_rate
+
+    @api.onchange('foreign_facture_amount')
+    def _onchange_base_foreigh(self):
+        for record in self:
+            if record.retention_id and record.retention_id.type in ['out_invoice']:
+                record.facture_amount = record.foreign_facture_amount / record.foreign_currency_rate
+
+    @api.onchange('foreign_retention_amount')
+    def _onchange_base_foreigh(self):
+        for record in self:
+            if record.retention_id and record.retention_id.type in ['out_invoice']:
+                record.retention_amount = record.foreign_retention_amount / record.foreign_currency_rate
                 
     name = fields.Char('Descripción', size=64, select=True, required=True, default="Retención ISLR")
     currency_id = fields.Many2one(related="retention_id.company_currency_id")
@@ -186,3 +208,10 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     related_percentage_tax_base = fields.Float(string='% Base Imponible', compute=_get_value_related, store=True)
     related_percentage_tariffs = fields.Float(string='% Tarifa', compute=_get_value_related, store=True)
     related_amount_sustract_tariffs = fields.Float(string='Sustraendo', compute=_get_value_related, store=True)
+    
+    # Moneda Alterna
+    foreign_facture_amount = fields.Float(string='Base Imponible Anterna')
+    foreign_facture_total = fields.Float(string='Total Facturado Alterno')
+    foreign_iva_amount = fields.Float(string='Iva factura Alterno')
+    foreign_retention_amount = fields.Float(string='Monto Retenido Alterno')
+    foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
