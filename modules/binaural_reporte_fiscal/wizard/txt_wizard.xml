@@ -1,0 +1,24 @@
+<odoo>
+    <data>
+        <record id='library_rent_wizard_form' model='ir.ui.view'>
+            <field name='name'>Generate txt of the Value Added Tax</field>
+            <field name='model'>txt.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Generate txt">
+                    <sheet>
+                        <group>
+                            <field name='date_start'/>
+                        </group>
+                        <group>
+                            <field name='date_end'/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button string='Generate txt' type='object' name='generte_txt' class='btn-primary'/>
+                        <button string='Cancel' class='btn-default' special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
