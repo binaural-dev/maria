@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+      <record id="wizard_binaural_facturacion_reportes_view" model="ir.ui.view">
+            <field name="name">wizard.accounting.reports.view</field>
+            <field name="model">wizard.accounting.reports</field>
+            <field name="arch" type="xml">
+                <form string="Reportes Contables">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="report" invisible="1"/>
+                                <field name="company_id" string="Compañia" invisible="1"/>
+                                <field name="date_start"/>
+                                <field name="date_end"/>
+                                <field name="type_report"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="generate_report" type="object" string="Generar Informe"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="wizard_accounting_report_excel_view" model="ir.ui.view">
+            <field name="name">wizard.accounting.report.excel.view</field>
+            <field name="model">wizard.accounting.reports.excel</field>
+            <field name="arch" type="xml">
+                <form string="Descargar excel">                    
+                    <sheet>
+                        <group>
+                            <field name="filename" invisible="1"/>
+                            <field string="Link de descarga" name="file" widget="binary" filename="filename" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <act_window id="action_accounting_report_purchase" name="Libro de Compras" res_model="wizard.accounting.reports" view_mode="form" target="new" context="{'default_report': 'purchase'}"/>
+        <act_window id="action_accounting_report_sale" name="Libro de Ventas" res_model="wizard.accounting.reports" view_mode="form" target="new" context="{'default_report': 'sale'}"/>
+
+        <menuitem id="account_report_menu" parent="account.menu_finance_reports" groups="account.group_account_manager" sequence="5" name="Reportes Contables"/>
+        <menuitem action="action_accounting_report_purchase" id="account_report_purchase" parent="binaural_facturacion_reportes.account_report_menu" groups="account.group_account_manager" sequence="5"/>
+        <menuitem action="action_accounting_report_sale" id="account_report_sale" parent="binaural_facturacion_reportes.account_report_menu" groups="account.group_account_manager" sequence="5"/>
+
+    </data>
+</odoo>
