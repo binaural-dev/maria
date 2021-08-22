@@ -20,5 +20,17 @@
                 </form>
             </field>
         </record>
+
+        <record id="action_generate_txt" model="ir.actions.act_window">
+            <field name="name">Generate txt</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">txt.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem action="action_generate_txt" id="account_report_purchase"
+                  parent="binaural_facturacion_reportes.account_report_menu" groups="account.group_account_manager"
+                  sequence="6"/>
     </data>
 </odoo>

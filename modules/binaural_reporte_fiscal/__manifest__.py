@@ -30,6 +30,9 @@
         'views/account_retention.xml',
         'wizard/txt_wizard.xml',
     ],
+    'external_dependencies': {
+       'python': ['pandas'],
+    },
     # only loaded in demonstration mode
     'demo': [],
     'application': False,
