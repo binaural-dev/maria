@@ -261,7 +261,7 @@
                         `                       <!-- Total Compras Incluyendo el IVA -->
                         <div class="col-auto">
                             <span>
-                                <t t-esc="line.facture_total"
+                                <t t-esc="line.foreign_facture_total"
                                    t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                             </span>
                         </div>
@@ -284,7 +284,7 @@
 
                         <!-- Base Imponible -->
                         <div class="col-auto">
-                            <span t-esc="line.facture_amount"
+                            <span t-esc="line.foreign_facture_amount"
                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                         </div>
                         <t t-set="total_amount_imponible" t-value="total_amount_imponible + line.facture_amount"/>
