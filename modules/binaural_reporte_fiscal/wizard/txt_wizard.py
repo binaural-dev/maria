@@ -82,12 +82,12 @@ class TxtWizard(models.TransientModel):
                 if li.invoice_id.foreign_amount_by_group[-1][1] == 0.0:
                      exento = li.invoice_id.foreign_amount_by_group[-1][2]
                 if not i.type == 'in_refund':
-                    dict['Monto total del documento'] = li.foreign_facture_total or 0.00
+                    dict['Monto total del documento'] = li.foreign_facture_total + li.iva_amount + exento or 0.00
                     dict['Base imponible'] = li.foreign_facture_amount or 0.00
                     dict['Monto del Iva Retenido'] = li.foreign_retention_amount or 0.00
                     dict['Monto exento del IVA'] = exento
                 else:
-                    dict['Monto total del documento'] = -li.foreign_retention_amount
+                    dict['Monto total del documento'] = -li.foreign_facture_total + li.iva_amount + exento
                     dict['Base imponible'] = -li.foreign_facture_amount or 0.00
                     dict['Monto del Iva Retenido'] = -li.amount_tax_ret or 0.00
                     dict['Monto exento del IVA'] = -exento or 0.00
