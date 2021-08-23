@@ -1,22 +1,23 @@
 version: '3.5'
 services:
-  web-integra14:
+  web-cumming:
     #image: odoo:14
     build:
       context: .
-    container_name: integra14_container
+    container_name: cumming_container
     depends_on:
-      - db-integra14
+      - db-cumming
     ports:
-      - "15000:8069"
+      - "15100:8069"
     volumes:
-      - odoo-web-integra14:/var/lib/odoo
+      - odoo-web-cumming:/var/lib/odoo
       - ./config:/etc/odoo
       - ./enterprise:/mnt/extra-addons
       - ./modules:/mnt/custom-addons
+      - ./custom:/mnt/another-addons
     environment:
       - PYTHONUNBUFFERED=0
-  db-integra14:
+  db-cumming:
     image: postgres:13
     environment:
       - POSTGRES_DB=postgres
@@ -24,7 +25,7 @@ services:
       - POSTGRES_USER=odoo
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - odoo-db-integra14:/var/lib/postgresql/data/pgdata
+      - odoo-db-cumming:/var/lib/postgresql/data/pgdata
 volumes:
-  odoo-web-integra14:
-  odoo-db-integra14:
+  odoo-web-cumming:
+  odoo-db-cumming:
