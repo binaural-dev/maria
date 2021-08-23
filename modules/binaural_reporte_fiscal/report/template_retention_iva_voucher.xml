@@ -123,43 +123,43 @@
         <!--Line Retention: Description-->
         <div style="margin-top:20px;font-size:12px !important;" class="container">
             <div style="border-top:1px solid black; border-bottom:1px solid black" class="row text-center">
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Fecha Factura</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Número de Factura</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Nro de Control Factura</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Nota de Débito</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Nota de Crédito</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Factura afectada</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Total Compras Incluyendo el IVA</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>Compras sin derecho a Crédito IVA</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:10%">
                     <span>Base Imponible</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>% Alic</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:7%">
                     <span>% Ret</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:10%">
                     <span>Impuesto IVA</span>
                 </div>
-                <div class="col-auto">
+                <div class="" style="width:10%">
                     <span>IVA Retenido</span>
                 </div>
             </div>
@@ -173,16 +173,19 @@
 
                 <t t-set="total_amount_total" t-value="0"/>
                 <t t-set="total_amount_amount_except" t-value="0"/>
-                <t t-set="total_amount_imponible" t-value="0"/>
+                <t t-set="amount_except" t-value="0"/>
+
+                <t t-set="foreign_facture_amount" t-value="0"/>
                 <t t-set="total_amount_tax" t-value="0"/>
                 <!--retenido-->
+                <t t-set="porcentage_retention" t-value="0"/>
                 <t t-set="total_amount_to_pay" t-value="0"/>
 
 
                 <t t-foreach="retention.retention_line" t-as="line">
                     <div class="row">
                         <!-- Fecha Factura-->
-                        <div class="col-auto">
+                        <div class="" style="width:7%;">
                             <t t-if="line.invoice_id.invoice_date">
                                 <span t-esc="line.invoice_id.invoice_date.strftime('%d/%m/%Y')"/>
                             </t>
@@ -191,7 +194,7 @@
                             </t>
                         </div>
                         <!--Número de Factura -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%;">
                             <t t-if="line.invoice_type in ['in_invoice']">
                                 <span t-esc="line.invoice_id.name"/>
                             </t>
@@ -203,11 +206,11 @@
                             </t>
                         </div>
                         <!--Nro de Control Factura -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%;">
                             <span t-esc="line.invoice_id.correlative"/>
                         </div>
                         <!--Nota de Débito -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%">
                             <t t-if="line.invoice_type in ['out_debit']">
                                 <span t-esc="line.invoice_id.name"/>
                             </t>
@@ -216,7 +219,7 @@
                             </t>
                         </div>
                         <!--Nota de Crédito -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%;">
                             <t t-if="line.invoice_type in ['out_refund']">
                                 <span t-esc="line.invoice_id.name"/>
                             </t>
@@ -229,7 +232,7 @@
 
                         </div>
                         <!-- Factura afectada -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%;">
                             <t t-if="line.invoice_type in ['out_refund']">
                                 <t t-if="line.invoice_id.origin">
                                     <span t-esc="line.invoice_id.invoice_origin"/>
@@ -259,7 +262,7 @@
 
                         </div>
                         `                       <!-- Total Compras Incluyendo el IVA -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%">
                             <span>
                                 <t t-esc="line.foreign_facture_total"
                                    t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
@@ -268,7 +271,7 @@
                         <t t-set="total_amount_total" t-value="total_amount_total+line.facture_total"/>
 
                         <!-- sin derecho a Crédito IVA -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%">
                             <t t-if="float(line.invoice_id.foreign_amount_by_group[-1][1]) == 0.0">
                                 <t t-set="amount_except"
                                    t-value="total_amount_amount_except+line.invoice_id.foreign_amount_by_group[-1][2]"/>
@@ -278,28 +281,29 @@
                                    t-value="float(0)"/>
                             </t>
                             <span t-esc="amount_except"/>
+                            <t t-set="amount_except" t-value="total_amount_amount_except + amount_except"/>
                         </div>
-                        <t t-set="total_amount_amount_except"
-                           t-value="total_amount_amount_except + amount_except"/>
+
 
                         <!-- Base Imponible -->
-                        <div class="col-auto">
+                        <div class="" style="width:10%">
                             <span t-esc="line.foreign_facture_amount"
                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                            <t t-set="foreign_facture_amount" t-value="foreign_facture_amount + line.foreign_facture_amount"/>
                         </div>
-                        <t t-set="total_amount_imponible" t-value="total_amount_imponible + line.facture_amount"/>
 
                         <!-- % Alic -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%">
                             <span t-esc="'{0:,.2f}'.format(line.tax_line).replace('.', ',')"/>
                         </div>
                         <!-- % Ret -->
-                        <div class="col-auto">
+                        <div class="" style="width:7%">
                             <span t-esc="'{0:,.2f}'.format(line.porcentage_retention).replace('.', ',')"/>
+                            <t t-set="porcentage_retention" t-value="porcentage_retention + line.porcentage_retention"/>
                         </div>
 
                         <!-- Impuesto IVA -->
-                        <div class="col-auto">
+                        <div class="" style="width:10%">
                             <span t-esc="line.foreign_iva_amount"
                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                         </div>
@@ -307,7 +311,7 @@
                         <t t-set="total_amount_tax" t-value="total_amount_tax + line.foreign_iva_amount"/>
 
                         <!-- IVA Retenido -->
-                        <div class="col-auto">
+                        <div class="" style="width:10%">
                             <span t-esc="line.foreign_retention_amount"
                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                         </div>
@@ -325,48 +329,47 @@
             <div>
                 <div class="row text-center">
 
-                    <div class="col-auto">
+                    <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
-                    <div class="col-auto">
+                    <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
-                    <div class="col-auto">
+                    <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
-                    <div class="col-auto">
+                    <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
-                    <div class="col-auto">
+                    <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
-                    <div class="col-auto">
+                    <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
-
-                    <div class="col-auto">
-                        <span t-esc="total_amount_total"
+                    <div class="col-auto" style="width:7%">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="" style="width:7%">
+                        <span t-esc="amount_except"
                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                     </div>
-                    <div class="col-auto">
-                        <span t-esc="total_amount_amount_except"
+                    <div class="" style="width:10%">
+                        <span t-esc="foreign_facture_amount"
                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                     </div>
-                    <div class="col-auto">
-                        <span t-esc="total_amount_imponible"
+                    <div class="" style="width:7%">
+                        <span style="visibility:hidden">--</span>
+                    </div>
+                    <div class="" style="width:7%">
+                        <span t-esc="porcentage_retention"
                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                     </div>
-                    <div class="col-auto">
-                        <span style="visibility:hidden">--</span>
-                    </div>
-                    <div class="col-auto">
-                        <span style="visibility:hidden">--</span>
-                    </div>
-                    <div class="col-auto">
+                    <div class="" style="width:10%">
                         <span t-esc="total_amount_tax"
                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                     </div>
-                    <div class="col-auto">
+                    <div class="" style="width:10%">
                         <span t-esc="total_amount_to_pay"
                               t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                     </div>
