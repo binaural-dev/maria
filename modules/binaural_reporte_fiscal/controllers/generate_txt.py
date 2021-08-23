@@ -8,13 +8,9 @@ class GenerateTxt(http.Controller):
 
     @http.route('/web/binary/download_txt', type='http', auth='user')
     def download_txt(self, date_start, date_end, **kw):
-        print("***************CONTROLADOR*****************")
         retention = request.env['account.retention'].search([('date', '>=', date_start), ('date', '<=', date_end)])
         data = request.env['txt.wizard']
         tabla, lista = data._retention_iva(retention)
-        print("salioooooooooooooooooooooooooooooooo")
-        print("TAble", tabla)
-        print("lista", lista)
         f = StringIO()
         for l in lista:
             f.write(l.get('RIF del agente de retención') + "\t")

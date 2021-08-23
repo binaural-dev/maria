@@ -269,9 +269,9 @@
 
                         <!-- sin derecho a Crédito IVA -->
                         <div class="col-auto">
-                            <t t-if="float(line.invoice_id.amount_by_group[-1][1]) == 0.0">
+                            <t t-if="float(line.invoice_id.foreign_amount_by_group[-1][1]) == 0.0">
                                 <t t-set="amount_except"
-                                   t-value="total_amount_amount_except+line.invoice_id.amount_by_group[-1][2]"/>
+                                   t-value="total_amount_amount_except+line.invoice_id.foreign_amount_by_group[-1][2]"/>
                             </t>
                             <t t-else="">
                                 <t t-set="amount_except"
