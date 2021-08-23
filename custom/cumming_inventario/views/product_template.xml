@@ -5,6 +5,7 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
+
                 <field name="categ_id" position="after">
                     <field name="pattern_id" string="Modelo"/>
                 </field>
@@ -16,9 +17,16 @@
                 <field name="seller_ids" position="attributes">
                     <attribute name="groups">base.group_system</attribute>
                 </field>
-              
+                <xpath expr="//div[hasclass('oe_title')]/label" position="before">
+                    <h1>
+                        <field name="default_code" readonly="1" force_save="1"/>
+                    </h1>
+                </xpath>
             </field>
         </record>
+
+
+
 
         <record id="product_pattern_action" model="ir.actions.act_window">
             <field name="name">Modelos de productos</field>
