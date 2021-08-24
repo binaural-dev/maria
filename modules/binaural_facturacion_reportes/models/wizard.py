@@ -29,6 +29,7 @@ class WizardAccountingReports(models.TransientModel):
         ('pdf', 'PDF'),
         ('excel', 'EXCEL'),
     ], 'Formato', required=True, default='excel')
+    currency_sistem = fields.Boolean(string='Reporte en moneda del sistema', default=False)
 
     def download_format(self):
         ext = ''

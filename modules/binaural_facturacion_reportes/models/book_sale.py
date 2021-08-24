@@ -54,7 +54,10 @@ class BookSaleReport(models.TransientModel):
             retention_lines = self.env['account.retention.line'].search(search_domain_rt)
             for x in retention_lines:
                 if x.retention_id.state in ['emitted']:
-                    amount_retention += x.retention_amount
+                    if self.currency_sistem:
+                        amount_retention += x.retention_amount
+                    else:
+                        amount_retention += x.foreign_retention_amount
                     retention_number = x.retention_id.number
                     retention_date = x.retention_id.date_accounting
             dict = OrderedDict()
@@ -65,19 +68,34 @@ class BookSaleReport(models.TransientModel):
             imp16 = 0.00
             imp8 = 0.00
             not_gravable = 0.00
-            for line in i.amount_by_group:
-                tax_id = self.env['account.tax'].search(
-                    [('tax_group_id', '=', line[6]), ('type_tax_use', '=', 'sale')], limit=1)
-                if tax_id.amount > 0:
-                    if tax_id.amount == 16:
-                        base16 = line[2]
-                        imp16 = line[1]
-                    if tax_id.amount == 8:
-                        base8 = line[2]
-                        imp8 = line[1]
-                    base += line[2]
-                else:
-                    not_gravable += line[2]
+            if self.currency_sistem:
+                for line in i.amount_by_group:
+                    tax_id = self.env['account.tax'].search(
+                        [('tax_group_id', '=', line[6]), ('type_tax_use', '=', 'sale')], limit=1)
+                    if tax_id.amount > 0:
+                        if tax_id.amount == 16:
+                            base16 = line[2]
+                            imp16 = line[1]
+                        if tax_id.amount == 8:
+                            base8 = line[2]
+                            imp8 = line[1]
+                        base += line[2]
+                    else:
+                        not_gravable += line[2]
+            else:
+                for line in i.foreign_amount_by_group:
+                    tax_id = self.env['account.tax'].search(
+                        [('tax_group_id', '=', line[6]), ('type_tax_use', '=', 'sale')], limit=1)
+                    if tax_id.amount > 0:
+                        if tax_id.amount == 16:
+                            base16 = line[2]
+                            imp16 = line[1]
+                        if tax_id.amount == 8:
+                            base8 = line[2]
+                            imp8 = line[1]
+                        base += line[2]
+                    else:
+                        not_gravable += line[2]
             dict['Nª de Ope'] = 0
             f = i.invoice_date
             fn = datetime.strptime(str(f), '%Y-%m-%d')
@@ -101,16 +119,34 @@ class BookSaleReport(models.TransientModel):
             if i.move_type in ['out_refund','out_debit'] and i.state in ['cancel']:
                 dict['Tipo Transacción'] = '03-ANU'
             dict['Nª de Doc. Afectado'] = i.reversed_entry_id.name if i.reversed_entry_id else ''
+            
+            
             if i.state in ['posted']:
-                dict['Total Ventas incluye IVA'] = i.amount_total if i.move_type in ['out_invoice','out_debit'] else -i.amount_total
-                dict['Total Ventas Exentas'] = not_gravable if i.move_type in ['out_invoice','out_debit'] else -not_gravable
-                dict['Imponible16'] = base16 if i.move_type in ['out_invoice','out_debit'] else -base16
-                dict['%16'] = 0.16
-                dict['Impuesto16'] = imp16 if i.move_type in ['out_invoice','out_debit'] else -imp16
-                dict['Imponible8'] = base8 if i.move_type in ['out_invoice', 'out_debit'] else -base8
-                dict['%8'] = 0.08
-                dict['Impuesto8'] = imp8 if i.move_type in ['out_invoice', 'out_debit'] else -imp8
-                dict['Retenciones'] = amount_retention if i.move_type in ['out_invoice', 'out_debit'] else -amount_retention
+                if self.currency_sistem:
+                    dict['Total Ventas incluye IVA'] = i.amount_total if i.move_type in ['out_invoice','out_debit'] else -i.amount_total
+                    dict['Total Ventas Exentas'] = not_gravable if i.move_type in ['out_invoice','out_debit'] else -not_gravable
+                    dict['Imponible16'] = base16 if i.move_type in ['out_invoice','out_debit'] else -base16
+                    dict['%16'] = 0.16
+                    dict['Impuesto16'] = imp16 if i.move_type in ['out_invoice','out_debit'] else -imp16
+                    dict['Imponible8'] = base8 if i.move_type in ['out_invoice', 'out_debit'] else -base8
+                    dict['%8'] = 0.08
+                    dict['Impuesto8'] = imp8 if i.move_type in ['out_invoice', 'out_debit'] else -imp8
+                    dict['Retenciones'] = amount_retention if i.move_type in ['out_invoice', 'out_debit'] else -amount_retention
+                else:
+                    dict['Total Ventas incluye IVA'] = i.foreign_amount_total if i.move_type in ['out_invoice',
+                                                                                         'out_debit'] else -i.foreign_amount_total
+                    dict['Total Ventas Exentas'] = not_gravable if i.move_type in ['out_invoice',
+                                                                                   'out_debit'] else -not_gravable
+                    dict['Imponible16'] = base16 if i.move_type in ['out_invoice', 'out_debit'] else -base16
+                    dict['%16'] = 0.16
+                    dict['Impuesto16'] = imp16 if i.move_type in ['out_invoice', 'out_debit'] else -imp16
+                    dict['Imponible8'] = base8 if i.move_type in ['out_invoice', 'out_debit'] else -base8
+                    dict['%8'] = 0.08
+                    dict['Impuesto8'] = imp8 if i.move_type in ['out_invoice', 'out_debit'] else -imp8
+                    dict['Retenciones'] = amount_retention if i.move_type in ['out_invoice',
+                                                                              'out_debit'] else -amount_retention
+                
+                
                 dict['Comprobante de Ret.'] = retention_number
                 if retention_date:
                     fr = retention_date
