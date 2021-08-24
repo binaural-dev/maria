@@ -6,13 +6,25 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
 
+                <xpath expr="//form" position="attributes">
+                    <attribute name="class">cumming_product_form</attribute>
+                </xpath>
+                
+
                 <field name="categ_id" position="after">
                     <field name="pattern_id" string="Modelo"/>
                 </field>
 
                 <field name="standard_price" position="attributes">
                     <attribute name="groups">base.group_system</attribute>
+                    <attribute name="string">Costo CIF</attribute>
                 </field>
+                <field name="company_id" position="before">
+                    <field name="fob_cost" groups="base.group_system" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
+                    <field name="percent_dif_cost"  groups="base.group_system" widget="percentage"/>
+                    
+                </field>
+               
                 
                 <field name="seller_ids" position="attributes">
                     <attribute name="groups">base.group_system</attribute>
@@ -22,11 +34,16 @@
                         <field name="default_code" readonly="1" force_save="1"/>
                     </h1>
                 </xpath>
+               
+               
+                
             </field>
         </record>
 
-
-
+        <!--ocultar menu de variantes, dejar solo para admin-->
+        <record model="ir.ui.menu" id="stock.product_product_menu">
+            <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+        </record>
 
         <record id="product_pattern_action" model="ir.actions.act_window">
             <field name="name">Modelos de productos</field>
