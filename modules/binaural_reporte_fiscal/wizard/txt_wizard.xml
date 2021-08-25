@@ -1,10 +1,10 @@
 <odoo>
     <data>
         <record id='library_rent_wizard_form' model='ir.ui.view'>
-            <field name='name'>Generate txt of the Value Added Tax</field>
+            <field name='name'>Generar Comprobante</field>
             <field name='model'>txt.wizard</field>
             <field name='arch' type='xml'>
-                <form string="Generate txt">
+                <form string="Generar txt">
                     <sheet>
                         <group>
                             <field name='date_start'/>
@@ -14,7 +14,7 @@
                         </group>
                     </sheet>
                     <footer>
-                        <button string='Generate txt' type='object' name='generte_txt' class='btn-primary'/>
+                        <button string='Generar txt' type='object' name='generte_txt' class='btn-primary'/>
                         <button string='Cancel' class='btn-default' special='cancel'/>
                     </footer>
                 </form>
@@ -22,7 +22,7 @@
         </record>
 
         <record id="action_generate_txt" model="ir.actions.act_window">
-            <field name="name">Generate txt</field>
+            <field name="name">Generar txt</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">txt.wizard</field>
             <field name="view_mode">form</field>

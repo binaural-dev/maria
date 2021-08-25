@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record id="retention_iva_voucher" model="ir.actions.report">
-            <field name="name">retention iva voucher</field>
+            <field name="name">Comprobante de retención</field>
             <field name="model">account.retention</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">binaural_reporte_fiscal.template_retention_iva_voucher</field>

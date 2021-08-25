@@ -18,12 +18,11 @@ class TxtWizard(models.TransientModel):
     date_end = fields.Date('Fecha de termino', default=date.today().replace(day=1) + relativedelta(months=1, days=-1))
 
     def generte_txt(self):
-        print("holaaaaaaaaaaaaa")
         if self.date_start and self.date_end:
             retention_count = len(
                 self.env['account.retention'].search([('date', '>=', self.date_start),
-                                                      ('date', '<=', self.date_end)]).ids)
-            print("retention_count ->", retention_count)
+                                                      ('date', '<=', self.date_end),
+                                                      ('state', '=', 'emitted')]).ids)
             if retention_count == 0:
                 raise UserError("Facturas a pagar obligatorias")
         else:
@@ -82,12 +81,12 @@ class TxtWizard(models.TransientModel):
                 if li.invoice_id.foreign_amount_by_group[-1][1] == 0.0:
                      exento = li.invoice_id.foreign_amount_by_group[-1][2]
                 if not i.type == 'in_refund':
-                    dict['Monto total del documento'] = li.foreign_facture_total + li.iva_amount + exento or 0.00
+                    dict['Monto total del documento'] = li.foreign_facture_amount + li.foreign_iva_amount + exento or 0.00
                     dict['Base imponible'] = li.foreign_facture_amount or 0.00
                     dict['Monto del Iva Retenido'] = li.foreign_retention_amount or 0.00
                     dict['Monto exento del IVA'] = exento
                 else:
-                    dict['Monto total del documento'] = -li.foreign_facture_total + li.iva_amount + exento
+                    dict['Monto total del documento'] = -li.foreign_facture_amount + li.foreign_iva_amount + exento or 0.00
                     dict['Base imponible'] = -li.foreign_facture_amount or 0.00
                     dict['Monto del Iva Retenido'] = -li.amount_tax_ret or 0.00
                     dict['Monto exento del IVA'] = -exento or 0.00
