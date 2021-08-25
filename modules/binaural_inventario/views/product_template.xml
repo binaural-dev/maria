@@ -1,0 +1,28 @@
+<odoo>
+    <data>
+
+        <record id="product_template_only_form_view_product_adD_header_buttom" model="ir.ui.view">
+            <field name="name">product.template.form.inherit.button.header</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.product_template_form_view_procurement_button"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_open_quants']" position="before">
+                    <button type="object" name="button_dummy" attrs="{'invisible':[('type', '!=', 'product')]}"
+                            class="oe_stat_button"
+                            icon="fa-cube"
+                            groups="base.group_system">
+                        <div class="o_field_widget o_stat_info" name="available_qty">
+                            <span class="o_stat_value" widget="statinfo">
+                                <field name="available_qty" widget="statinfo" nolabel="1" class="mr4"/>
+                                <field name="uom_name"/>
+                                
+                                
+                            </span>
+                            <span class="o_stat_text">Disponible</span>
+                        </div>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
