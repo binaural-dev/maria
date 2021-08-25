@@ -28,6 +28,7 @@
         'report/template_retention_iva_voucher.xml',
         'report/retention_iva_voucher.xml',
         'views/account_retention.xml',
+        'views/mail_template.xml',
         'wizard/txt_wizard.xml',
     ],
     'external_dependencies': {
