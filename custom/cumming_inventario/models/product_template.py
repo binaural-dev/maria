@@ -62,5 +62,9 @@ class ProductTemplateCummingInventario(models.Model):
 		self.write({'price_by_pricelist':price_list})
 
 
+	def trigger_onchange_pricelist(self):
+		all_products = self.env['product.template'].search([])
+		for p in all_products:
+			p._onchange_list_price_price_pricelist()
 
 
