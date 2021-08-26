@@ -277,10 +277,10 @@
                                    t-value="total_amount_amount_except+line.invoice_id.foreign_amount_by_group[-1][2]"/>
                             </t>
                             <t t-else="">
-                                <t t-set="amount_except"
-                                   t-value="float(0)"/>
+                                <t t-set="amount_except" t-value="float(0)" />
                             </t>
-                            <span t-esc="amount_except"/>
+                            <span t-esc="amount_except"
+                                  t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
                             <t t-set="amount_except" t-value="total_amount_amount_except + amount_except"/>
                         </div>
 
