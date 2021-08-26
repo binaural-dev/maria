@@ -16,7 +16,7 @@
             <field name="inherit_id" ref="product.product_template_tree_view"/>
             <field name="arch" type="xml">
                 <field name="list_price" position="before">
-                    <field name="brand_id"/>
+                    <field name="brand_id" string="Marca"/>
                     
                 </field>
  
