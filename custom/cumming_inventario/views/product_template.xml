@@ -13,6 +13,11 @@
 
                 <field name="categ_id" position="after">
                     <field name="pattern_id" string="Modelo"/>
+                    
+                        <button groups="base.group_system" invisible="1" name="trigger_onchange_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Sync">
+                            
+                        </button>
+                    
                 </field>
 
                 <field name="standard_price" position="attributes">
