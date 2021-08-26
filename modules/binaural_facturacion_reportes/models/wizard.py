@@ -9,6 +9,7 @@ from datetime import datetime
 from collections import OrderedDict
 _logger = logging.getLogger(__name__)
 from odoo.http import request
+import os
 
 
 class WizardAccountingReports(models.TransientModel):
@@ -432,9 +433,131 @@ class WizardAccountingReports(models.TransientModel):
         return data2
 
 
+class WizardRetentionIslr(models.TransientModel):
+    _name = 'wizard.retention.islr'
+    _description = 'Wizard reportes islr'
+    
+    report = fields.Selection([
+        ('islr', 'Retencion Islr'),
+    ], 'Tipo de informe', required=True)
+    date_start = fields.Date('Fecha de inicio', default=date.today().replace(day=1))
+    date_end = fields.Date('Fecha de termino', default=date.today().replace(day=1) + relativedelta(months=1, days=-1))
+    file = fields.Binary(readonly=True)
+    filename = fields.Char()
+    company_id = fields.Many2one('res.company', default=lambda self: self.env.user.company_id.id)
+    
+    def download_format(self):
+        ext = ''
+        if self.report == 'islr':
+            # ext = '.xlsx'
+            # macro
+            ext = '.xlsm'
+        else:
+            ext = '.xlsx'
+        return ext
+    
+    def _get_domain(self):
+        search_domain = []
+        search_domain += [('date_accounting', '>=', self.date_start)]
+        search_domain += [('date_accounting', '<=', self.date_end)]
+        return search_domain
+    
+    def imprimir_excel(self):
+        report = self.report
+        filecontent = '5'
+        report_obj = request.env['wizard.retention.islr']
+        if report == 'islr':
+            table = report_obj._table_retention_islr(int(self.id))
+            name = 'XML Retencion de ISLR'
+            start = str(self.date_start)
+            end = str(self.date_end)
+        if not table.empty and name:
+            if report == 'islr':
+                filecontent = report_obj._excel_file_retention_islr(table, name, start, end)
+        if not filecontent:
+            print("\nAAAAAAAAAAAAAA\n")
+            raise exceptions.Warning('No hay datos para mostrar en reporte')
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/web/get_excel?report=%s&wizard=%s&start=%s&end=%s' % (
+                self.report, self.id, str(self.date_start), str(self.date_end)),
+            'target': 'self'
+        }
+    
+    def _excel_file_retention_islr(self, table, name, start, end):
+        company = self.env['res.company'].search([], limit=1)
+        data2 = BytesIO()
+        workbook = xlsxwriter.Workbook(data2, {'in_memory': True})
+        merge_format = workbook.add_format({
+            'bold': 1,
+            'border': 1,
+            'align': 'center',
+            'valign': 'vcenter',
+            'fg_color': 'gray'})
+        datos = table
+        # range_start = 'Desde: ' + datetime.strptime(start, '%Y-%m-%d').strftime('%d/%m/%Y')
+        # range_end = 'Hasta: ' + datetime.strptime(end, '%Y-%m-%d').strftime('%d/%m/%Y')
+        company_vat = company.vat if company.vat else ''
+        range_month = datetime.strptime(start, '%Y-%m-%d').strftime('%Y%m')
+        
+        worksheet2 = workbook.add_worksheet(name)
+        worksheet2.set_column('A:Z', 20)
+        # worksheet2.write('A1', company.name)
+        # worksheet2.write('A1', name)
+        worksheet2.merge_range('A1:F1', name, merge_format)
+        worksheet2.write('G1', 'Rif Agente:')
+        worksheet2.write('H1', company_vat)
+        worksheet2.write('G2', 'Periodo')
+        worksheet2.write('H2', range_month)
+        worksheet2.merge_range('A2:B2', 'Ruta de descarga:', merge_format)
+        worksheet2.write('C2', 'C:\Users\Public')
+        # worksheet2.write('A4', range_start)
+        # worksheet2.write('A5', range_end)
+        # worksheet2.set_row(5, 20, merge_format)
+        columnas = list(datos.columns.values)
+        columns2 = [{'header': r} for r in columnas]
+        data = datos.values.tolist()
+        # para macro, cantidad de lineas
+        print("cantidad de data", len(data))
+        worksheet2.write('I1', len(data))
+        
+        currency_format = workbook.add_format({'num_format': '#,###0.00'})
+        porcent_format = workbook.add_format({'num_format': '#,###0.00" "%'})
+        date_format = workbook.add_format()
+        date_format.set_num_format('d-mmm-yy')  # Format string.
+        col3 = len(columns2) - 1
+        # col2 = len(data) + 6
+        col2 = len(data) + 4
+        for record in columns2[6:8]:
+            record.update({'format': currency_format})
+        cells = xlsxwriter.utility.xl_range(3, 0, col2, col3)
+        worksheet2.add_table(cells, {'data': data, 'total_row': False, 'columns': columns2})
+        # macro
+        url = os.path.dirname(os.path.abspath(__file__))
+        print("URL", url)
+        
+        workbook.add_vba_project(url + '/vbaProject.bin')
+        worksheet2.insert_button('I2', {'macro': 'MakeXML',
+                                        'caption': 'Generar XML',
+                                        'width': 120,
+                                        'height': 30})
+        
+        workbook.close()
+        data2 = data2.getvalue()
+        return data2
+
+
 class WizardAccountingReportsExcel(models.TransientModel):
     _name = 'wizard.accounting.reports.excel'
     _description = 'Formato excel reportes contables'
+
+    file = fields.Binary()
+    filename = fields.Char()
+    
+    
+class WizardRetentionIslrExcel(models.TransientModel):
+    _name = 'wizard.retention.islr.excel'
+    _description = 'Formato excel islr'
 
     file = fields.Binary()
     filename = fields.Char()
@@ -449,6 +572,8 @@ class AccountingReportsController(http.Controller):
         filecontent = ''
         if report in ['purchase', 'sale', 'other']:
             report_obj = request.env['wizard.accounting.reports']
+        if report in ['islr']:
+            report_obj = request.env['wizard.retention.islr']
         if report == 'purchase':
             table = report_obj._table_shopping_book(int(wizard))
             name = 'Libro de Compras'
@@ -461,16 +586,24 @@ class AccountingReportsController(http.Controller):
             table_resumen = report_obj._table_resumen_sale_book(int(wizard))
         if report == 'other':
             raise exceptions.Warning('Reporte no establecido')
+        if report == 'islr':
+            table = report_obj._table_retention_islr(int(wizard))
+            name = 'XML Retencion de ISLR'
         if not table.empty and name:
             if report == 'purchase':
                 filecontent = report_obj._excel_file_purchase(table, name, start, end, table_resumen)
             if report == 'sale':
                 filecontent = report_obj._excel_file_sale(table, name, start, end, table_resumen)
+            if report == 'islr':
+                filecontent = report_obj._excel_file_retention_islr(table, name, start, end)
         if not filecontent:
             print("noy filecontent")
             report_obj.imprimir_excel(int(wizard))
             return
-        format = '.xlsx'
+        if report == 'islr':
+            format = '.xlsm'
+        else:
+            format = '.xlsx'
         return request.make_response(filecontent,
         [('Content-Type', 'application/pdf'), ('Content-Length', len(filecontent)),
         ('Content-Disposition', content_disposition(name+format))])
