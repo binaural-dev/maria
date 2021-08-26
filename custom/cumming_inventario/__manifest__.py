@@ -24,6 +24,7 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'security/cumming_security.xml',
         'views/product_template.xml',
         'views/assets.xml',
     ],

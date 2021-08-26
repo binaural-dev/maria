@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
 from odoo import models,fields,api
+import logging
+_logger = logging.getLogger(__name__)
 
 
-class ProductModelCummingInventario(models.Model):
-	_name = 'product.pattern'
+class PriceByPricelistbinauralInventario(models.Model):
+	_name = 'price.by.pricelist'
+	_rec_name = 'combination'
 
-	name= fields.Char(String="Nombre")
-	member_ids = fields.One2many('product.template', 'pattern_id')
-	product_count = fields.Char(String='Cantidad de productos', compute='get_count_products', store=True)
+	price = fields.Float(string='Precio')
+	pricelist_name = fields.Char(string='Lista de precios')
+	product_template_id = fields.Many2one('product.template', string='Producto')
+	combination = fields.Char(string='Combination', compute='_compute_fields_combination')
+	
+	@api.depends('price', 'pricelist_name')
+	def _compute_fields_combination(self):
+		for test in self:
+			test.combination = str(test.pricelist_name) + ' ' + str(test.price)
 
-	@api.depends('member_ids')
-	def get_count_products(self):
-		self.product_count = len(self.member_ids)
 
 class ProductTemplateCummingInventario(models.Model):
 	_inherit = 'product.template'
@@ -28,10 +34,33 @@ class ProductTemplateCummingInventario(models.Model):
 		Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
 		Used to compute margins on sale orders.""")
 
-class PatternReportStock(models.Model):
-	_inherit = 'stock.quant'
 
-	pattern_id  = fields.Many2one(related='product_id.pattern_id',
-		string='Modelo', store=True, readonly=True)
+	price_by_pricelist = fields.One2many('price.by.pricelist', 'product_template_id', string='Listas de precios')
+
+	@api.onchange('list_price')
+	def _onchange_list_price_price_pricelist(self):
+		_logger.info("llnear listadto")
+		price_list = []
+		for p in self:
+			all_pricelist = self.env['product.pricelist'].sudo().search([])
+			
+			all_pricelist_price = self.env['product.pricelist'].sudo().price_get(p.product_variant_id.id,1)
+			_logger.info("toda la lista %s",type(all_pricelist))
+			for pr in all_pricelist:
+				_logger.info("LISTA DE PRECIOS %s",pr)
+				price = all_pricelist_price.get(pr.id)
+				_logger.info("PRECIO %s",price)
+				price_list.append(
+					(
+					0,0,{
+					'price': price if price else 0,
+					'pricelist_name':pr.name,
+					}
+					)
+				)
+		self.write({'price_by_pricelist':[(5,0,0)]})
+		self.write({'price_by_pricelist':price_list})
+
+
 
 

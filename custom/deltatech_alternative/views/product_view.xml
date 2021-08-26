@@ -55,10 +55,10 @@
                     </group>
                 </group>
                 <notebook position="inside">
-                    <page string="Productos Alternativos">
-                        <separator string="Productos Alternativos" colspan="4" />
+                    <page string="Equivalencias">
+                        <separator string="Equivalencias" colspan="4" />
                         <field name="alternative_ids" colspan="4" nolabel="1">
-                            <tree string="Productos Alternativos" editable="bottom" widget="many2many_tags">
+                            <tree string="Equivalencias" editable="bottom" widget="many2many_tags">
                                 <field name="sequence" widget="handle" />
                                 <field name="name" />
                                 <field name="product_tmpl_id_select" />
@@ -74,7 +74,7 @@
             <field name="model">product.alternative</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="Productos Alternativos" editable="bottom">
+                <tree string="Equivalencias" editable="bottom">
                     <field name="product_tmpl_id" />
                     <field name="sequence" widget="handle" />
                     <field name="name" />
@@ -87,7 +87,7 @@
             <field name="model">product.alternative</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form string="Productos Alternativos">
+                <form string="Equivalencias">
                     <field name="product_tmpl_id" />
                     <field name="name" />
                     <field name="hide" />
