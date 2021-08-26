@@ -160,7 +160,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     @api.onchange('foreign_retention_amount')
     def _onchange_base_foreigh(self):
         for record in self:
-            if record.retention_id and record.retention_id.type in ['out_invoice']:
+            if record.retention_id and record.retention_id.type in ['out_invoice'] and record.foreign_currency_rate > 0:
                 record.retention_amount = record.foreign_retention_amount / record.foreign_currency_rate
                 
     name = fields.Char('Descripción', size=64, select=True, required=True, default="Retención ISLR")

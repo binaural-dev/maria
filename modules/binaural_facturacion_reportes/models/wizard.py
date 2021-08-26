@@ -510,7 +510,7 @@ class WizardRetentionIslr(models.TransientModel):
         worksheet2.write('G2', 'Periodo')
         worksheet2.write('H2', range_month)
         worksheet2.merge_range('A2:B2', 'Ruta de descarga:', merge_format)
-        worksheet2.write('C2', 'C:\Users\Public')
+        worksheet2.write('C2', 'C:/Users/Public')
         # worksheet2.write('A4', range_start)
         # worksheet2.write('A5', range_end)
         # worksheet2.set_row(5, 20, merge_format)
