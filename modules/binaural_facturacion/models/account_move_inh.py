@@ -480,7 +480,8 @@ class AccountMoveBinauralFacturacion(models.Model):
                 retention = self.env['account.retention'].create({
                     'type': 'in_invoice',
                     'partner_id': move.partner_id.id,
-                    'type_retention': 'iva'
+                    'type_retention': 'iva',
+                    'date_accounting': move.date,
                 })
                 data = funtions_retention.load_line_retention(retention, [], move.id)
                 retention.write({'retention_line': data})
