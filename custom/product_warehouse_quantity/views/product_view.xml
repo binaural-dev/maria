@@ -14,7 +14,7 @@
                     <h2>
                         <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
                     </h2>
-                </xpath>
+                </xpath>  
         </field>
     </record>
 
