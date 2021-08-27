@@ -12,7 +12,7 @@ def load_line_retention(self, data, move_id=False):
     if self.type in ['out_invoice']:
         for facture_line_retention in self.env['account.move'].search(
                 [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_invoice', 'out_debit', 'out_refund']),
-                 ('state', '=', 'posted')]):
+                 ('state', '=', 'posted'), ('journal_id.fiscal', '=', True)]):
             if self.type_retention in ['iva']:
                 if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0\
                         and facture_line_retention.payment_state in ['not_paid', 'partial']:
@@ -49,12 +49,12 @@ def load_line_retention(self, data, move_id=False):
                 invoices = self.env['account.move'].search(
                     [('partner_id', '=', self.partner_id.id),
                      ('move_type', 'in', ['in_invoice', 'in_debit', 'in_refund']),
-                     ('state', '=', 'posted'), ('id', '=', move_id)])
+                     ('state', '=', 'posted'), ('id', '=', move_id), ('journal_id.fiscal', '=', True)])
             else:
                 invoices = self.env['account.move'].search(
                     [('partner_id', '=', self.partner_id.id),
                      ('move_type', 'in', ['in_invoice', 'in_debit', 'in_refund']),
-                     ('state', '=', 'posted')])
+                     ('state', '=', 'posted'), ('journal_id.fiscal', '=', True)])
             for facture_line_retention in invoices:
                 if self.type_retention in ['iva']:
                     if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0 \
