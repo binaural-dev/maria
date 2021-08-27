@@ -29,6 +29,14 @@
                     <field name="percent_dif_cost"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
                     
                 </field>
+
+                <field name="list_price" position="after" >
+                    
+                        <button name="onchange_list_price_price_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Recalcular Precios">
+                            
+                        </button>
+                    
+                </field>
                
                 
                 <field name="seller_ids" position="attributes">
