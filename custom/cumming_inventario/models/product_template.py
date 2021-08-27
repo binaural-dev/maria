@@ -38,7 +38,7 @@ class ProductTemplateCummingInventario(models.Model):
 	price_by_pricelist = fields.One2many('price.by.pricelist', 'product_template_id', string='Listas de precios')
 
 	@api.onchange('list_price')
-	def _onchange_list_price_price_pricelist(self):
+	def onchange_list_price_price_pricelist(self):
 		_logger.info("llnear listadto")
 		for p in self:
 			price_list = []
@@ -62,7 +62,7 @@ class ProductTemplateCummingInventario(models.Model):
 						)
 				p.write({'price_by_pricelist':[(5,0,0)]})
 				p.write({'price_by_pricelist':price_list})
-				
+
 	#falta ejecutar esta funcion cuando se agregue una nueva lista de precios o sea modificada
 	def trigger_onchange_pricelist(self):
 		all_products = self.env['product.template'].search([])
