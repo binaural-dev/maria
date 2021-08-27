@@ -24,7 +24,7 @@ class ProductTemplateCummingInventario(models.Model):
 
 	pattern_id = fields.Many2one('product.pattern',string='Modelo')
 	fob_cost = fields.Float(string='Costo FOB')
-	percent_dif_cost = fields.Float(string='% DIF CIF y FOB')
+	percent_dif_cost = fields.Float(string='% DIF CIF y FOB',compute="_compute_margin_cost",store=True)
 	standard_price = fields.Float(
 		'Costo CIF', compute='_compute_standard_price',
 		inverse='_set_standard_price', search='_search_standard_price',
@@ -40,31 +40,39 @@ class ProductTemplateCummingInventario(models.Model):
 	@api.onchange('list_price')
 	def _onchange_list_price_price_pricelist(self):
 		_logger.info("llnear listadto")
-		price_list = []
 		for p in self:
-			all_pricelist = self.env['product.pricelist'].sudo().search([])
-			
-			all_pricelist_price = self.env['product.pricelist'].sudo().price_get(p.product_variant_id.id,1)
-			_logger.info("toda la lista %s",type(all_pricelist))
-			for pr in all_pricelist:
-				_logger.info("LISTA DE PRECIOS %s",pr)
-				price = all_pricelist_price.get(pr.id)
-				_logger.info("PRECIO %s",price)
-				price_list.append(
-					(
-					0,0,{
-					'price': price if price else 0,
-					'pricelist_name':pr.name,
-					}
-					)
-				)
-		self.write({'price_by_pricelist':[(5,0,0)]})
-		self.write({'price_by_pricelist':price_list})
-
-
+			price_list = []
+			if p.product_variant_id:
+				_logger.info("variant %s",p.product_variant_id.id)
+				all_pricelist = self.env['product.pricelist'].sudo().search([])
+				
+				all_pricelist_price = self.env['product.pricelist'].sudo().price_get(p.product_variant_id.id,1)
+				_logger.info("toda la lista %s",type(all_pricelist))
+				for pr in all_pricelist:
+					_logger.info("LISTA DE PRECIOS %s",pr)
+					price = all_pricelist_price.get(pr.id)
+					_logger.info("PRECIO %s",price)
+					price_list.append(
+						(
+						0,0,{
+						'price': price if price else 0,
+						'pricelist_name':pr.name,
+						}
+						)
+						)
+				p.write({'price_by_pricelist':[(5,0,0)]})
+				p.write({'price_by_pricelist':price_list})
+				
+	#falta ejecutar esta funcion cuando se agregue una nueva lista de precios o sea modificada
 	def trigger_onchange_pricelist(self):
 		all_products = self.env['product.template'].search([])
 		for p in all_products:
 			p._onchange_list_price_price_pricelist()
 
 
+	@api.depends('fob_cost', 'standard_price')
+	def _compute_margin_cost(self):
+		#standard = cif
+		for line in self:
+			margin = line.standard_price - line.fob_cost
+			line.percent_dif_cost = line.standard_price and margin/line.standard_price
