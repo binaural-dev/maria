@@ -54,7 +54,7 @@
 	                                <field name="related_amount_sustract_tariffs" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
 
 	                                <field name="porcentage_retention" readonly="1" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'islr'),'&amp;', ('parent.type_retention', '=', 'iva'),('parent.type', '=', 'out_invoice')]}"/>
-	                                <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)], 'readonly': [('parent.type_retention', '=', 'iva')]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+	                                <field name="retention_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)], 'readonly': [('parent.type_retention', '=', 'iva')]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
 
                                     <field name="currency_id" invisible="1"/>
                                     <field name="company_currency_id" invisible="1" />
