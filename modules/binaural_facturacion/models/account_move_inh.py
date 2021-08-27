@@ -106,6 +106,8 @@ class AccountMoveBinauralFacturacion(models.Model):
                 'type_retention': 'islr',
                 'partner_id': vals_list['partner_id'],
                 'retention_line': vals_list['retention_islr_line_ids'],
+                'date_accounting': vals_list['date'],
+                'date': vals_list['date'],
             })
         _logger.info('resssssssssssssssssssssssssssssssssssssssss')
         _logger.info(res)
@@ -482,6 +484,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                     'partner_id': move.partner_id.id,
                     'type_retention': 'iva',
                     'date_accounting': move.date,
+                    'date': move.date,
                 })
                 data = funtions_retention.load_line_retention(retention, [], move.id)
                 retention.write({'retention_line': data})

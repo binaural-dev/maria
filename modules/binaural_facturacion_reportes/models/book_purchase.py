@@ -15,6 +15,7 @@ class BookPurchaseReport(models.TransientModel):
         search_domain += [
             ('state', 'not in', ['draft']),
             ('move_type', 'in', ['in_invoice', 'in_refund', 'in_debit']),
+            ('journal_id.fiscal', '=', True)
         ]
         docs = self.env['account.move'].search(search_domain, order='id asc')
         dic = OrderedDict([
