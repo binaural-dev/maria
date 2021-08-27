@@ -91,7 +91,7 @@
                 <div class="col-6">
                     <span>Nombre o Razon Social del Sujeto Retenido</span>
                     <div>
-                        <span t-esc="retention.partner_id.business_name"/>
+                        <span t-esc="retention.partner_id.name"/>
                     </div>
                 </div>
                 <div class="col-6">
@@ -480,7 +480,7 @@
                         <span>Contribuyente:</span>
                     </div>
                     <div class="col-12">
-                        <span style="text-transform:uppercase" t-esc="retention.partner_id.business_name"/>
+                        <span style="text-transform:uppercase" t-esc="retention.partner_id.name"/>
                     </div>
                 </div>
                 <div class="col-4" style="">
