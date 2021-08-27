@@ -81,7 +81,7 @@
 	                <field name="partner_id"/>
 	                <field name="date"/>
 	                <field name="date_accounting"/>
-	                <field name="total_tax_ret" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                <field name="total_tax_ret" string="Monto Retenido" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
 	                <field name="state"/>
                 </tree>
             </field>
