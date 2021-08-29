@@ -24,12 +24,15 @@
     # always loaded
     'data': [
         'data/paperformat.xml',
+        'data/sequence_arcv.xml',
         'security/ir.model.access.csv',
         'report/template_retention_iva_voucher.xml',
         'report/retention_iva_voucher.xml',
+        'report/report_arcv.xml',
         'views/account_retention.xml',
         'views/mail_template.xml',
         'wizard/txt_wizard.xml',
+        'wizard/arcv_wizard.xml',
     ],
     'external_dependencies': {
        'python': ['pandas'],
