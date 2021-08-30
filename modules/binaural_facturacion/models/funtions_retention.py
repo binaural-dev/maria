@@ -144,7 +144,10 @@ def create_move_invoice_retention(self, line_ret, ret_line, account, journal, am
                 'journal_id': journal.id,
                 'state': 'draft',
                 'move_type': 'entry',
-                'line_ids': line_ret
+                'line_ids': line_ret,
+                'foreign_currency_id': ret_line.invoice_id.foreign_currency_id.id,
+                'foreign_currency_date': ret_line.invoice_id.foreign_currency_date,
+                'foreign_currency_rate': ret_line.invoice_id.foreign_currency_rate
             })
             return move_obj
         else:
