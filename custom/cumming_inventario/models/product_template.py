@@ -36,6 +36,31 @@ class ProductTemplateCummingInventario(models.Model):
 
 
 	price_by_pricelist = fields.One2many('price.by.pricelist', 'product_template_id', string='Listas de precios')
+	price_pricelist_names = fields.Char(string='Precios',index=True, compute="_compute_price_names")
+
+	provider_names = fields.Char(string='Proveedor',index=True, compute="_compute_provider_names")
+
+	@api.depends("price_by_pricelist")
+	def _compute_price_names(self):
+		for product in self:
+			names = []
+			for test in product.price_by_pricelist:
+				if test.pricelist_name:
+					names += [str(test.pricelist_name) + ' ' + str(test.price)]
+
+			p_name = "; ".join(names)
+			product.price_pricelist_names = p_name
+	@api.depends("seller_ids")
+	def _compute_provider_names(self):
+		for product in self:
+			names = []
+			for partner in product.seller_ids:
+				_logger.info("partner.name %s",partner.name.name)
+				if partner.name:
+					names += [partner.name.name]
+
+			p_name = "; ".join(names)
+			product.provider_names = p_name
 
 	@api.onchange('list_price')
 	def onchange_list_price_price_pricelist(self):
@@ -67,7 +92,7 @@ class ProductTemplateCummingInventario(models.Model):
 	def trigger_onchange_pricelist(self):
 		all_products = self.env['product.template'].search([])
 		for p in all_products:
-			p._onchange_list_price_price_pricelist()
+			p.onchange_list_price_price_pricelist()
 
 
 	@api.depends('fob_cost', 'standard_price')

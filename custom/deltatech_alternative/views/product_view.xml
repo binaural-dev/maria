@@ -25,6 +25,8 @@
                 </field>
             </field>
         </record>
+
+        <!--tree de productos-->
         <record model="ir.ui.view" id="view_product_tree_alternative">
             <field name="name">product.template.product.alternative.tree</field>
             <field name="model">product.template</field>
@@ -32,8 +34,8 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                    <field name="alternative_code" string="Equivalencias"/>
-                    <field name="used_for" />
+                    <field name="alternative_ids" string="Equivalencias" widget="many2many_tags"/>
+                    <field name="used_for" invisible="1" />
                 </field>
             </field>
         </record>

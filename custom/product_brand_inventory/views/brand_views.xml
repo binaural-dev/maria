@@ -35,19 +35,19 @@
                     <sheet>
                         <field name="brand_image"  widget="image" class="oe_avatar"/>
                         <div class="oe_title">
-                            <label for="name" class="oe_edit_only" string="Brand Name"/>
+                            <label for="name" class="oe_edit_only" string="Marca"/>
                             <h1>
-                                <field name="name"/>
+                                <field name="name" string="Nombre"/>
                             </h1>
                             <div name="options_active" />
                         </div>
                         <group>
-                            <field name="product_count" style="width:40px;"/>
+                            <field name="product_count" style="width:40px;" string="Cantidad de Productos"/>
                         </group>
 
 
                         <notebook>
-                            <page string="Products">
+                            <page string="Productos">
                                 <field name="member_ids" widget="many2many" options="{'not_delete': True}">
                                     <kanban quick_create="false" create="true" delete="true">
                                         <field name="id"/>
@@ -92,5 +92,17 @@
                    action="product_brand_action"
                    parent="stock.menu_stock_inventory_control"
                    sequence="2"/>
+
+        <!--agregar marca a vista kanban-->
+        <record id="product_template_kanban_view_inherit_brand" model="ir.ui.view">
+            <field name="name">product.template.kanban.brand</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="arch" type="xml">
+                <div name="product_lst_price" position="after">
+                    <field name="brand_id" />
+                </div>
+            </field>
+        </record>
     </data>
 </odoo>
