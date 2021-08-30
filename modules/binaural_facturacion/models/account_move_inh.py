@@ -112,7 +112,15 @@ class AccountMoveBinauralFacturacion(models.Model):
         _logger.info('resssssssssssssssssssssssssssssssssssssssss')
         _logger.info(res)
         return res
-
+    
+    def _check_origin_invoice(self):
+        sale = self.env['account.journal'].search([('name', '=', self.invoice_orgin)], limit=1)
+        if sale:
+            return {'readonly': {
+                'partner_id': True}}
+        else:
+            return
+        
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
 
@@ -154,6 +162,12 @@ class AccountMoveBinauralFacturacion(models.Model):
     generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False, copy=False)
 
     retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'islr')])
+
+    @api.constrains('foreign_currency_rate')
+    def _check_foreign_currency_rate(self):
+        for record in self:
+            if record.foreign_currency_rate <= 0:
+                raise UserError("La tasa de la factura debe ser mayor que cero ")
 
     @api.depends('company_id', 'invoice_filter_type_domain', 'is_contingence')
     def _compute_suitable_journal_ids(self):
@@ -478,7 +492,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 next_correlative = sequence.get_next_char(sequence.number_next_actual)
                 correlative = sequence.next_by_id(sequence.id)
                 move.write({'correlative':correlative})
-            if move.generate_retencion_iva:
+            if move.generate_retencion_iva and not move.iva_voucher_number:
                 retention = self.env['account.retention'].create({
                     'type': 'in_invoice',
                     'partner_id': move.partner_id.id,
@@ -490,9 +504,10 @@ class AccountMoveBinauralFacturacion(models.Model):
                 retention.write({'retention_line': data})
                 retention.action_emitted()
                 move.write({'iva_voucher_number': retention.number})
-            if move.retention_islr_line_ids:
+            if move.retention_islr_line_ids and not move.islr_voucher_number:
                 for rislr in move.retention_islr_line_ids:
                     if rislr.retention_id.type_retention in ['islr']:
+                        rislr.retention_id.write({'date': move.date, 'date_accounting': move.date})
                         rislr.retention_id.action_emitted()
                         move.write({'islr_voucher_number': rislr.retention_id.number})
         return to_post

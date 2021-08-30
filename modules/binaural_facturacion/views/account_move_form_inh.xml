@@ -22,7 +22,7 @@
 
                 <xpath expr="//h1[@class='mt0']" position="after">
                     <label for="correlative" string="Nro Control" style="font-weight:bold;" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-                    <field name="correlative" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))],'readonly':[('is_contingence','=',False),('move_type','in',('out_invoice','out_refund'))],'required':[('is_contingence','=',True)]}"/>
+                    <field name="correlative" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))],'readonly':[('is_contingence','=',False),('move_type','in',('out_invoice','out_refund'))],'required':['|',('is_contingence','=',True), ('move_type','in',('in_invoice','in_refund'))]}"/>
                 </xpath>
 
                 <xpath expr="//h1[@class='mt0']" position="replace">
