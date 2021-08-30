@@ -1,5 +1,5 @@
-from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo import api, fields, models, _,exceptions
+from odoo.exceptions import UserError,ValidationError
 from odoo.tools import float_is_zero, OrderedSet
 
 
@@ -29,11 +29,13 @@ class StockMoveBinauralInventario(models.Model):
 	@api.constrains('move_line_ids')
 	def _validate_transfer_qty_done(self):
 		"""Validar que la cantidad realizada en la transferencia no sea mayor a la Demanda inicial"""
-
-		for record in self:
-			for ml in record.move_line_ids:
-				qty = record.product_uom_qty
-				qty_done = ml.qty_done
-				if qty_done > qty:
-					raise exceptions.ValidationError(
-						"** La cantidad realizada no debe ser mayor a la cantidad inicial, por favor cambie la cantidad realizada**")
+		#Si esta activa la opcion de no permitir entrar en ciclo
+		if self.env['ir.config_parameter'].sudo().get_param('not_qty_done_higher_initial'):
+			for record in self:
+				for ml in record.move_line_ids:
+					qty = record.product_uom_qty
+					qty_done = ml.qty_done
+					#si cantidad hecha es mayor a inicial 
+					if qty_done > qty:
+						raise ValidationError(
+							"** La cantidad realizada no debe ser mayor a la cantidad inicial, por favor cambie la cantidad realizada**")

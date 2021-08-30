@@ -7,14 +7,14 @@ class StockScrapBinauralInventario(models.Model):
 
 	@api.constrains('product_id', 'location_id')
 	def _validate_scraps(self):
-		"""Validar que la cantidad de productos a desechar sea menor o igual a la cantidad a mano - TestCase#3113"""
-
-		for record in self:
-			quant = record.env['stock.quant'].search([('location_id', '=', record.location_id.id), ('product_id', '=', record.product_id.id)], limit=1)
-			qty = record.scrap_qty
-			qty_available = quant.quantity - quant.reserved_quantity
-			if quant and qty > qty_available:
-				raise exceptions.ValidationError("** La cantidad ingresada es mayor a la cantidad de productos disponibles (" + str(qty_available) +" disponible) ingrese una cantidad menor.**")
+		"""Validar que la cantidad de productos a desechar sea menor o igual a la cantidad a mano"""
+		if self.env['ir.config_parameter'].sudo().get_param('not_qty_on_hand_less_zero'):
+			for record in self:
+				quant = record.env['stock.quant'].search([('location_id', '=', record.location_id.id), ('product_id', '=', record.product_id.id)], limit=1)
+				qty = record.scrap_qty
+				qty_available = quant.quantity - quant.reserved_quantity
+				if quant and qty > qty_available:
+					raise exceptions.ValidationError("** La cantidad ingresada es mayor a la cantidad de productos disponibles (" + str(qty_available) +" disponible) ingrese una cantidad menor.**")
 
 
 class ProductChangeQuantityBinauralInventario(models.TransientModel):

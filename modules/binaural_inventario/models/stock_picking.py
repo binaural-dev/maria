@@ -13,10 +13,11 @@ class StockPickingBinauralInventario(models.Model):
 	foreign_currency_rate = fields.Monetary(string="Tasa", tracking=True, currency_field='foreign_currency_id',
 											compute='_compute_foreign_currency')
 
-	@api.multi
+	
 	def action_confirm(self):
 		#no aplicar para interna y compra
-		if self.picking_type_id.code == 'outgoing':
+		#si esta activa la prohibicion
+		if self.picking_type_id.code in ['outgoing','internal'] and self.env['ir.config_parameter'].sudo().get_param('not_move_qty_higher_store'):
 			for sm in self.move_ids_without_package:
 				quant = self.env['stock.quant'].search(
 					[('location_id', '=', self.location_id.id), ('product_id', '=', sm.product_id.id)], limit=1)
@@ -64,7 +65,7 @@ class StockPickingBinauralInventario(models.Model):
 			Validar que la cantidad realizada en la transferencia no sea mayor a la Demanda inicial"""
 
 		for record in self:
-			if record.picking_type_id.code == 'outgoing':
+			if record.picking_type_id.code in ['outgoing','internal'] and self.env['ir.config_parameter'].sudo().get_param('not_move_qty_higher_store'):
 				for sm in record.move_ids_without_package:
 					quant = record.env['stock.quant'].search([('location_id', '=', record.location_id.id), ('product_id', '=', sm.product_id.id)], limit=1)
 					qty = sm.product_uom_qty
