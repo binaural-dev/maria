@@ -27,7 +27,7 @@
                     <attribute name="string">Costo CIF</attribute>
                 </field>
                 <field name="company_id" position="before">
-                    <field name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
+                    <field name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id'}"/>
                     <field name="percent_dif_cost"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
                     
                 </field>
