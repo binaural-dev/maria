@@ -1,5 +1,7 @@
 <odoo>
     <data>
+
+        <!--form de product template-->
         <record id="product_pattern_id" model="ir.ui.view">
             <field name="name">Nombre de modelo</field>
             <field name="model">product.template</field>
@@ -25,7 +27,7 @@
                     <attribute name="string">Costo CIF</attribute>
                 </field>
                 <field name="company_id" position="before">
-                    <field name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
+                    <field name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id'}"/>
                     <field name="percent_dif_cost"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
                     
                 </field>
@@ -47,6 +49,13 @@
                         <field name="default_code" readonly="1" force_save="1"/>
                     </h1>
                 </xpath>
+
+                <field name="company_id" position="after">
+                    <field name="provider_names" />
+                    <field name="price_pricelist_names"/>
+                    <!--<field name="price_by_pricelist" widget="many2many_tags"/>-->
+                </field>
+              
                 
                 <notebook position="inside">
                     <page string="Precios">
@@ -66,7 +75,7 @@
             </field>
         </record>
 
-
+        <!--tree de product template-->
         <record id="view_stock_product_template_tree_cuming" model="ir.ui.view">
             <field name="name">product.template.stock.tree.inherit.cumming</field>
             <field name="model">product.template</field>
@@ -80,12 +89,39 @@
                     <field name="pattern_id"/>
                     
                 </field>
+                <field name="responsible_id" position="before">
+                    <field name="seller_ids" widget="many2many_tags"/>
+                </field>
+
+                <field name="responsible_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                
+
+             
+
+                <field name="standard_price" position="attributes">
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                    <attribute name="string">Costo CIF</attribute>
+                </field>
+
+                <field name="standard_price" position="after">
+                    <field name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
+                    <field name="percent_dif_cost"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
+                    
+                </field>
             </field>
         </record>
+
         <!--ocultar menu de variantes, dejar solo para admin-->
         <record model="ir.ui.menu" id="stock.product_product_menu">
             <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
         </record>
+        <!--ocultar variantes en ventas-->
+        <record model="ir.ui.menu" id="sale.menu_product_template_action">
+            <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+        </record>
+
 
         <record id="product_pattern_action" model="ir.actions.act_window">
             <field name="name">Modelos de productos</field>
@@ -137,25 +173,45 @@
                 </form>
             </field>
         </record>
-
+        <!--search de produc template-->
         <record id="pattern_group_by" model="ir.ui.view">
             <field name="name">product.template.search.inherit</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_search_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//search" position="inside">
-                      <filter string="Modelo" name="Pattern" context="{'group_by':'pattern_id'}"/>
-                </xpath>
                 <field name="name" position="after">
                     <field string="Modelo" name="pattern_id"/>
+                    <field string="Proveedor" name="seller_ids" />
                 </field>
+
+                <xpath expr="//search" position="inside">
+                    <filter string="Modelo" name="Pattern" context="{'group_by':'pattern_id'}"/>
+                </xpath>
+
             </field>
         </record>
 
-         <menuitem id="product_pattern_inventory"
+        <menuitem id="product_pattern_inventory"
                    name="Modelos de productos"
                    action="product_pattern_action"
                    parent="stock.menu_stock_inventory_control"
                    sequence="2"/>
+
+        <!--heredar kanban y agregar mas informacion-->
+        <record id="product_template_kanban_view_inherit_cumming" model="ir.ui.view">
+            <field name="name">product.template.kanban.cumming</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="arch" type="xml">
+                <div name="product_lst_price" position="after">
+                    <field name="price_by_pricelist" widget="many2many_tags"/>
+                    <field name="seller_ids" widget="many2many_tags"/>
+                    <field name="pattern_id" />
+                </div>
+            </field>
+        </record>
+    
+    
+    
     </data>
 </odoo>

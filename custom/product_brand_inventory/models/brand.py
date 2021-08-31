@@ -25,17 +25,17 @@ from odoo import models,fields,api
 class ProductBrand(models.Model):
     _inherit = 'product.template'
 
-    brand_id = fields.Many2one('product.brand',string='Brand')
+    brand_id = fields.Many2one('product.brand',string='Marca')
 
 
 class BrandProduct(models.Model):
     _name = 'product.brand'
 
 
-    name= fields.Char(String="Name")
+    name= fields.Char(String="Nombre")
     brand_image = fields.Binary()
     member_ids = fields.One2many('product.template', 'brand_id')
-    product_count = fields.Char(String='Product Count', compute='get_count_products', store=True)
+    product_count = fields.Char(String='Cantidad de productos', compute='get_count_products', store=True)
 
     @api.depends('member_ids')
     def get_count_products(self):

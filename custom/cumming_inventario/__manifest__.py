@@ -26,6 +26,7 @@
         'security/ir.model.access.csv',
         'security/cumming_security.xml',
         'views/product_template.xml',
+        'views/product_pricelist.xml',
         'views/assets.xml',
     ],
     # only loaded in demonstration mode

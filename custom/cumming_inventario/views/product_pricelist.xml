@@ -1,0 +1,19 @@
+<odoo>
+    <data>
+
+        <!--form de product template-->
+        <record id="product_pricelist_cumming" model="ir.ui.view">
+            <field name="name">Ajuste en lista de precios cumming</field>
+            <field name="model">product.pricelist</field>
+            <field name="inherit_id" ref="product.product_pricelist_view"/>
+            <field name="arch" type="xml">
+                
+                <field name="company_id" position="after">
+                    <button name="recompute_pricelist_by_product" type="object" class="oe_stat_button" string="Recalcular precios en productos" icon="fa-">
+                    </button>
+                    
+                </field>
+            </field>
+        </record>             
+    </data>
+</odoo>
