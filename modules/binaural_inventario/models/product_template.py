@@ -52,7 +52,7 @@ class ProductTemplateBinauralInventario(models.Model):
 			if len(record.taxes_id)>1 and self.env['ir.config_parameter'].sudo().get_param('not_multiple_tax_product'):
 				raise ValidationError("Solo un impuesto es permitido")
 
-	@api.constrains('qty_available')
+"""	@api.onchange('qty_available')
 	def _check_qty_on_hand_binaural_inventario(self):
 		for record in self:
 			_logger.info("DISPARO EL CANTIDAD A MANO %s",record.qty_available)
@@ -60,8 +60,8 @@ class ProductTemplateBinauralInventario(models.Model):
 			if record.qty_available < 0 and self.env['ir.config_parameter'].sudo().get_param('not_qty_on_hand_less_zero'):
 				raise ValidationError("La cantidad a mano no debe ser menor a cero.")
 
-	@api.constrains('virtual_available')
+	@api.onchange('virtual_available')
 	def _check_qty_on_virtual_binaural_inventario(self):
 		for record in self:
 			if record.virtual_available < 0 and self.env['ir.config_parameter'].sudo().get_param('not_qty_provided_less_zero'):
-				raise ValidationError("La cantidad a mano no debe ser menor a cero.")
+				raise ValidationError("La cantidad a mano no debe ser menor a cero.")"""

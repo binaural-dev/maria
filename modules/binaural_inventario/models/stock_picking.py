@@ -12,6 +12,7 @@ class StockPickingBinauralInventario(models.Model):
 	foreign_currency_id = fields.Many2one('res.currency', compute='_compute_foreign_currency')
 	foreign_currency_rate = fields.Monetary(string="Tasa", tracking=True, currency_field='foreign_currency_id',
 											compute='_compute_foreign_currency')
+	update_cost_inventory = fields.Boolean(string='Actualizar costo del producto',default=False)
 
 	
 	def action_confirm(self):

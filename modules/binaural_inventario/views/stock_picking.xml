@@ -9,6 +9,7 @@
                 <xpath expr="//field[@name='origin']" position="after">
                     <field name="foreign_currency_id"/>
                     <field name="foreign_currency_rate"/>
+                    <field name="update_cost_inventory" attrs="{'invisible': [('picking_type_code', '=', 'internal')]}"/>
                 </xpath>
 
                 <!--restringir boton cancelar reserva a solo los que tienen permiso adecuado-->
