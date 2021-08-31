@@ -503,13 +503,13 @@ class AccountMoveBinauralFacturacion(models.Model):
                 data = funtions_retention.load_line_retention(retention, [], move.id)
                 retention.write({'retention_line': data})
                 retention.action_emitted()
-                move.write({'iva_voucher_number': retention.number})
+                move.write({'iva_voucher_number': retention.number, 'apply_retention_iva': True})
             if move.retention_islr_line_ids and not move.islr_voucher_number:
                 for rislr in move.retention_islr_line_ids:
                     if rislr.retention_id.type_retention in ['islr']:
                         rislr.retention_id.write({'date': move.date, 'date_accounting': move.date})
                         rislr.retention_id.action_emitted()
-                        move.write({'islr_voucher_number': rislr.retention_id.number})
+                        move.write({'islr_voucher_number': rislr.retention_id.number, 'apply_retention_islr': True})
         return to_post
 
     #heredar constrain para permitir name duplicado solo en proveedor
