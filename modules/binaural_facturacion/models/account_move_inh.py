@@ -139,8 +139,8 @@ class AccountMoveBinauralFacturacion(models.Model):
 
     apply_retention_iva = fields.Boolean(string="¿Se aplico retención de iva?", default=False, copy=False)
     apply_retention_islr = fields.Boolean(string="¿Se aplico retención de islr?", default=False, copy=False)
-    iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=True, copy=False)
-    islr_voucher_number = fields.Char(string="Comprobante de Retención de ISLR", readonly=True, copy=False)
+    iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=False, copy=False)
+    islr_voucher_number = fields.Char(string="Comprobante de Retención de ISLR", readonly=False, copy=False)
     # Foreing cyrrency fields
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
@@ -325,6 +325,9 @@ class AccountMoveBinauralFacturacion(models.Model):
         res = super(AccountMoveBinauralFacturacion, self)._write(vals)
         if 'date_reception' in vals:
             self._compute_days_expired()
+        _logger.info('EDITAR FACTURAS')
+        _logger.info(vals)
+        _logger.info('EDITAR FACTURAS')
         return res
 
     @api.depends('date_reception', 'invoice_date_due', 'invoice_payment_term_id', 'state')

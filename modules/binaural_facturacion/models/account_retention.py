@@ -131,9 +131,22 @@ class AccountRetentionBinauralFacturacion(models.Model):
         self.write({'state': 'cancel'})
         return True
     
+    def retention_currency_system(self):
+        self.write({'actual_currency_retention': False})
+        
+    def retention_foreign_currency(self):
+        self.write({'actual_currency_retention': True})
+    
     def action_draft(self):
         self.write({'state': 'draft'})
         return True
+    
+    def _check_group_multi_currency(self):
+        for record in self:
+            if self.env.user.has_group('binaural_facturacion.group_multi_currency_retention'):
+                record.multi_currency_retention = True
+            else:
+                record.multi_currency_retention = False
 
     name = fields.Char('Descripción', size=64, select=True, states={'draft': [('readonly', False)]},
                        help="Descripción del Comprobante")
@@ -183,6 +196,8 @@ class AccountRetentionBinauralFacturacion(models.Model):
         ('iva', 'IVA'),
         ('islr', 'ISLR'),
     ], 'Tipo de retención')
+    multi_currency_retention = fields.Boolean(string='Retenciones multimoneda', compute='_check_group_multi_currency')
+    actual_currency_retention = fields.Boolean(string='Retenciones en moneda alterna', default=False)
     
     def round_half_up(self, n, decimals=0):
         multiplier = 10 ** decimals
