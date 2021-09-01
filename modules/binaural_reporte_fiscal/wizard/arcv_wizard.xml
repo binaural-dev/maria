@@ -1,0 +1,38 @@
+<odoo>
+    <data>
+        <record id='arcv_wizard_form' model='ir.ui.view'>
+            <field name='name'>Generar Comprobante ARCV</field>
+            <field name='model'>arcv.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Comprobante ARCV">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="partner_id"/>
+                            </group>
+                            <group>
+                                <field name='date_init'/>
+                                <field name='date_end'/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button string='Imprimir' type='object' name='print_arcv' class='btn-primary'/>
+                        <button string='Cancel' class='btn-default' special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_arcv_wizard" model="ir.actions.act_window">
+            <field name="name">Generar Comprobante ARCV</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">arcv.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem action="action_arcv_wizard" id="arcv_report_menu"
+                  parent="binaural_facturacion_reportes.account_report_menu" groups="account.group_account_manager"/>
+    </data>
+</odoo>

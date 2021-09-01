@@ -29,8 +29,7 @@
             <field name="target">new</field>
         </record>
 
-        <menuitem action="action_generate_txt" id="account_report_purchase"
-                  parent="binaural_facturacion_reportes.account_report_menu" groups="account.group_account_manager"
-                  sequence="6"/>
+        <menuitem action="action_generate_txt" id="txt_report"
+                  parent="binaural_facturacion_reportes.account_report_menu" groups="account.group_account_manager"/>
     </data>
 </odoo>
