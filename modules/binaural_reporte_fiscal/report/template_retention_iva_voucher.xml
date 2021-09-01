@@ -524,16 +524,16 @@
         </div>
         <div style="margin-top:20px; font-size:12px !important;" class="container">
             <div style="border-top:1px solid black; border-bottom:1px solid black" class="row text-center">
-                <div class="col-1" >TD</div>
-                <div class="col-1">Fact Nro</div>
-                <div class="col-2">Nro de Control</div>
-                <div class="col-1">Fecha</div>
-                <div class="col-2">Concepto</div>
-                <div class="col-1">Total Factura</div>
-                <div class="col-1">Base de Retención</div>
-                <div class="col-1">Tarifa Ret</div>
-                <div class="col-1">Sustraendo</div>
-                <div class="col-1">Imp Retenido</div>
+                <div style="width:5%">TD</div>
+                <div style="width:5%">Fact Nro</div>
+                <div style="width:7%">Nro de Control</div>
+                <div style="width:5%">Fecha</div>
+                <div style="width:15%">Concepto</div>
+                <div style="width:15%">Total Factura</div>
+                <div style="width:15%">Base de Retención</div>
+                <div style="width:5%">Tarifa Ret</div>
+                <div style="width:13%">Sustraendo</div>
+                <div style="width:15%">Imp Retenido</div>
             </div>
         </div>
 
@@ -541,9 +541,9 @@
         <div style="margin-top:5px;margin-bottom:5px;font-size:10px !important;" class="container">
             <div style="border-bottom:1px solid black" class="text-center">
                 <t t-foreach="retention.retention_line" t-as="line">
-                    <div class="row">
+                    <div class="row text-center">
                         <!-- TD -->
-                        <div class="col-1" >
+                        <div style="width:5%">
                             <t t-if="line.invoice_type in ['out_invoice','in_invoice']">
                                 <span>FA</span>
                             </t>
@@ -557,7 +557,7 @@
                             </t>
                         </div>
                         <!-- Fact Nro -->
-                        <div class="col-1">
+                        <div style="width:5%">
                             <t t-if="line.invoice_type in ['in_invoice','in_refund']">
                                 <span t-esc="line.invoice_id.name"/>
                             </t>
@@ -569,7 +569,7 @@
                             </t>
                         </div>
                         <!-- Nro de Control -->
-                        <div class="col-2">
+                        <div style="width:7%">
                             <t t-if="line.invoice_type in ['in_invoice']">
                                 <span t-esc="line.invoice_id.correlative"/>
                             </t>
@@ -581,39 +581,39 @@
                             </t>
                         </div>
                         <!-- Fecha -->
-                        <div class="col-1">
+                        <div style="width:5%">
                             <span t-field="line.invoice_id.invoice_date">--</span>
                         </div>
                         <!-- Concepto-->
-                        <div class="col-2" >
+                        <div style="width:15%">
                             <span t-field="line.payment_concept_id">--</span>
                         </div>
                         <!-- Total Factura -->
-                        <div class="col-1">
-                            <span t-field="line.facture_total"
+                        <div style="width:15%">
+                            <span t-field="line.foreign_facture_total"
                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
                                 --
                             </span>
                         </div>
                         <!-- Base de Retención -->
-                        <div class="col-1">
+                        <div style="width:15%">
                             <span t-field="line.foreign_facture_amount"
                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
                                 --
                             </span>
                         </div>
                         <!-- Tarifa de Retención -->
-                        <div class="col-1">
-                            <span t-field="line.related_percentage_tariffs">--</span>
+                        <div style="width:5%">
+                            <span t-field="line.related_percentage_tariffs"/>
                             <span>%</span>
                         </div>
                         <!-- Sustraendo -->
-                        <div class="col-1">
+                        <div style="width:15%">
                             <span t-field="line.related_amount_sustract_tariffs"/>
                         </div>
                         <!-- imp Retenido -->
                         <t t-set="retention_amount" t-value="0"/>
-                        <div class="col-1">
+                        <div style="width:15%">
                             <span t-field="line.foreign_retention_amount" />
                         </div>
 

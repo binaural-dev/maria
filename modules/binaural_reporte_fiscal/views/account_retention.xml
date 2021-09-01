@@ -10,7 +10,8 @@
 
                 <xpath expr="//button[@name='action_draft']" position="after">
                     <button name="action_retention_send" string="Enviar por correo" type="object" class="btn-primary"/>
-                    <button name="islr_report" string="Print pdf" type="object" />
+                    <button name="islr_report" string="Imprimir" type="object"
+                            attrs="{'invisible':[('number','=',False)]}"/>
                 </xpath>
 
             </field>
