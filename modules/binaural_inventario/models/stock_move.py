@@ -2,6 +2,9 @@ from odoo import api, fields, models, _,exceptions
 from odoo.exceptions import UserError,ValidationError
 from odoo.tools import float_is_zero, OrderedSet
 
+from collections import defaultdict
+import logging
+_logger = logging.getLogger(__name__)
 
 class StockMoveBinauralInventario(models.Model):
 	_inherit = "stock.move"
@@ -39,3 +42,57 @@ class StockMoveBinauralInventario(models.Model):
 					if qty_done > qty:
 						raise ValidationError(
 							"** La cantidad realizada no debe ser mayor a la cantidad inicial, por favor cambie la cantidad realizada**")
+
+	#original desde stock account
+	#duda el costo promedio se calcula solo en entradas solamente, en venfood se hizo que se calculara en salidas tipo descargo
+	def product_price_update_before_done(self, forced_qty=None):
+		tmpl_dict = defaultdict(lambda: 0.0)
+		# adapt standard price on incomming moves if the product cost_method is 'average'
+		std_price_update = {}
+		#is_in() = entradas
+		for move in self.filtered(lambda move: move._is_in() and move.with_company(move.company_id).product_id.cost_method == 'average'):
+			product_tot_qty_available = move.product_id.sudo().with_company(move.company_id).quantity_svl + tmpl_dict[move.product_id.id]
+			rounding = move.product_id.uom_id.rounding
+
+			valued_move_lines = move._get_in_move_lines()
+			qty_done = 0
+			for valued_move_line in valued_move_lines:
+				qty_done += valued_move_line.product_uom_id._compute_quantity(valued_move_line.qty_done, move.product_id.uom_id)
+
+			qty = forced_qty or qty_done
+			if float_is_zero(product_tot_qty_available, precision_rounding=rounding):
+				new_std_price = move._get_price_unit()
+			elif float_is_zero(product_tot_qty_available + move.product_qty, precision_rounding=rounding) or \
+					float_is_zero(product_tot_qty_available + qty, precision_rounding=rounding):
+				new_std_price = move._get_price_unit()
+			else:
+				amount_unit = std_price_update.get((move.company_id.id, move.product_id.id)) or move.product_id.with_company(move.company_id).standard_price
+				# Get the standard price
+				#no viene de compra o venta ya que no tiene partner
+				if not move.picking_id.partner_id:
+					#si debe calcularse el costo promedio
+					if move.picking_id.update_cost_inventory:
+						#pass
+						#en cargo no hay precio solo se toma en cuenta cantidad
+						new_std_price = (amount_unit * product_tot_qty_available) / (product_tot_qty_available + qty)
+					else:
+						#si no requiere recalcular costo promedio dejar original
+						#pass
+						new_std_price = ((amount_unit * product_tot_qty_available) + (move._get_price_unit() * qty)) / (product_tot_qty_available + qty)
+				else:
+					#si tiene partner es compra o venta dejar flujo normal
+					#pass
+					new_std_price = ((amount_unit * product_tot_qty_available) + (move._get_price_unit() * qty)) / (product_tot_qty_available + qty)
+				
+				#new_std_price = ((amount_unit * product_tot_qty_available) + (move._get_price_unit() * qty)) / (product_tot_qty_available + qty)
+
+			tmpl_dict[move.product_id.id] += qty_done
+			# Write the standard price, as SUPERUSER_ID because a warehouse manager may not have the right to write on products
+			move.product_id.with_company(move.company_id.id).with_context(disable_auto_svl=True).sudo().write({'standard_price': new_std_price})
+			std_price_update[move.company_id.id, move.product_id.id] = new_std_price
+
+		# adapt standard price on incomming moves if the product cost_method is 'fifo'
+		for move in self.filtered(lambda move:
+								  move.with_company(move.company_id).product_id.cost_method == 'fifo'
+								  and float_is_zero(move.product_id.sudo().quantity_svl, precision_rounding=move.product_id.uom_id.rounding)):
+			move.product_id.with_company(move.company_id.id).sudo().write({'standard_price': move._get_price_unit()})
