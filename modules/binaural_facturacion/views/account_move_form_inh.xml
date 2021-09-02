@@ -13,11 +13,11 @@
 
 	            <xpath expr="//div[@name='journal_div']" position="after">
 		            <label for="generate_retencion_iva" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-		            <field name="generate_retencion_iva" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','in_debit'))]}"/>
+		            <field name="generate_retencion_iva" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
                     <label for="iva_voucher_number" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-                    <field name="iva_voucher_number" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','in_debit'))]}"/>
+                    <field name="iva_voucher_number" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
 		            <label for="islr_voucher_number" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-                    <field name="islr_voucher_number" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','in_debit'))]}"/>
+                    <field name="islr_voucher_number" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
                 </xpath>
 
                 <xpath expr="//h1[@class='mt0']" position="after">
