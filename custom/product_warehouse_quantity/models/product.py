@@ -26,6 +26,9 @@ class ProductTemplate(models.Model):
 
     warehouse_quantity = fields.Char(compute='_get_warehouse_quantity', string='Cantidad por almacén')
 
+    def button_dummy_ware(self):
+        pass
+
     def _get_warehouse_quantity(self):
         for record in self:
             warehouse_quantity_text = ''
@@ -51,9 +54,9 @@ class ProductTemplate(models.Model):
                             warehouse = False
                         location1 = location1.location_id
                     if warehouse_id:
-                        if warehouse_id.name not in tt_warehouses:
-                            tt_warehouses.update({warehouse_id.name:0})
-                        tt_warehouses[warehouse_id.name] += t_warehouses[location]
+                        if warehouse_id.code not in tt_warehouses:
+                            tt_warehouses.update({warehouse_id.code:0})
+                        tt_warehouses[warehouse_id.code] += t_warehouses[location]
 
                 for item in tt_warehouses:
                     if tt_warehouses[item] != 0:
