@@ -54,13 +54,13 @@
             <field name="arch" type="xml">
                 
                 <xpath expr="//button[@name='action_open_quants']" position="before">
-                    <!--<button type="object" name="button_dummy_ware" attrs="{'invisible':[('type', '!=', 'product')]}"
-                            class="oe_stat_button"
-                            icon="fa-cube"
-                            groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">-->
+                    <button type="object" name="button_dummy_ware" attrs="{'invisible':[('type', '!=', 'product')]}"
+                            class="oe_stat_button btn-cumming-stat"
+                            
+                            groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse" style="white-space:break-spaces !important">
                         <div class="o_field_widget o_stat_info oe_stat_button" name="warehouse_qty_all">
                             <!--<span class="o_stat_value" widget="statinfo">-->
-                                <field name="warehouse_quantity" widget="statinfo" class="mr4" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
+                                <field name="warehouse_quantity" widget="statinfo" nolabel="0" class="mr4" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
                                 <!--<field name="available_qty" widget="statinfo" nolabel="0" class="mr4"/>-->
                                 
                                 
@@ -68,7 +68,7 @@
                            <!-- </span>-->
                           
                         </div>
-                    <!--</button>-->
+                    </button>
                 </xpath>
               
             </field>

@@ -51,8 +51,8 @@
                 </xpath>
 
                 <field name="company_id" position="after">
-                    <field name="provider_names" />
-                    <field name="price_pricelist_names"/>
+                    <field name="provider_names" style="white-space:break-spaces !important"/>
+                    <field name="price_pricelist_names" style="white-space:break-spaces !important"/>
                     <!--<field name="price_by_pricelist" widget="many2many_tags"/>-->
                 </field>
               
