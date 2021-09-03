@@ -39,7 +39,8 @@
                             <field colspan="4" name="retention_line" nolabel="1" attrs="{'invisible':[('partner_id','=',False)],'readonly':[('state','in',['emitted','cancel'])]}">
                                 <tree editable='bottom'>
                                     <field name="name" readonly="1"/>
-                                    <field name="invoice_id" force_save="1" attrs="{'readonly':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+                                    <field name="invoice_id" domain="[('apply_retention_islr', '=', False), ('move_type', 'in', ['in_invoice','in_refund'])]"
+                                           force_save="1" attrs="{'readonly':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
                                     <field name="retention_id" invisible="1" />
                                     <field name="invoice_type" force_save="1" readonly="1"/>
                                     <field name="payment_concept_id" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
