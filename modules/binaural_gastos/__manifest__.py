@@ -19,7 +19,7 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'hr_expense', 'binaural_contactos_configuraciones'],
+    'depends': ['base', 'hr_expense', 'binaural_contactos_configuraciones', 'binaural_facturacion'],
 
     'data': [
         'views/hr_expense.xml',

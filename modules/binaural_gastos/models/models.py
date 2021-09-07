@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError, ValidationError
 import logging
 _logger = logging.getLogger(__name__)
+
 
 class HrExpenseBinaural(models.Model):
     _inherit = 'hr.expense'
@@ -144,6 +146,81 @@ class HrExpenseBinaural(models.Model):
         
             move_line_values_by_expense[expense.id] = move_line_values
         return move_line_values_by_expense
+
+    def action_move_create(self):
+        '''
+        main function that is called when trying to create the accounting entries related to an expense
+        '''
+        move_group_by_sheet = self._get_account_move_by_sheet()
+    
+        move_line_values_by_expense = self._get_account_move_line_values()
+    
+        for expense in self:
+            company_currency = expense.company_id.currency_id
+            different_currency = expense.currency_id != company_currency
+        
+            # get the account move of the related sheet
+            move = move_group_by_sheet[expense.sheet_id.id]
+        
+            # get move line values
+            move_line_values = move_line_values_by_expense.get(expense.id)
+            move_line_dst = move_line_values[-1]
+            total_amount = move_line_dst['debit'] or -move_line_dst['credit']
+            total_amount_currency = move_line_dst['amount_currency']
+        
+            # create one more move line, a counterline for the total on payable account
+            if expense.payment_mode == 'company_account':
+                if not expense.sheet_id.bank_journal_id.default_account_id:
+                    raise UserError(_("No account found for the %s journal, please configure one.") % (
+                        expense.sheet_id.bank_journal_id.name))
+                journal = expense.sheet_id.bank_journal_id
+                # create payment
+                payment_methods = journal.outbound_payment_method_ids if total_amount < 0 else journal.inbound_payment_method_ids
+                journal_currency = journal.currency_id or journal.company_id.currency_id
+                payment = self.env['account.payment'].create({
+                    'payment_method_id': payment_methods and payment_methods[0].id or False,
+                    'payment_type': 'outbound' if total_amount < 0 else 'inbound',
+                    'partner_id': expense.employee_id.sudo().address_home_id.commercial_partner_id.id,
+                    'partner_type': 'supplier',
+                    'journal_id': journal.id,
+                    'date': expense.date,
+                    'currency_id': expense.currency_id.id if different_currency else journal_currency.id,
+                    'amount': abs(total_amount_currency) if different_currency else abs(total_amount),
+                    'ref': expense.name,
+                    'foreign_currency_rate': expense.foreign_currency_rate,
+                })
+        
+            # link move lines to move, and move to expense sheet
+            move.write({'line_ids': [(0, 0, line) for line in move_line_values]})
+            expense.sheet_id.write({'account_move_id': move.id})
+        
+            if expense.payment_mode == 'company_account':
+                expense.sheet_id.paid_expense_sheets()
+    
+        # post the moves
+        for move in move_group_by_sheet.values():
+            move._post()
+    
+        return move_group_by_sheet
+
+    def _prepare_move_values(self):
+        """
+        This function prepares move values related to an expense
+        """
+        self.ensure_one()
+        journal = self.sheet_id.bank_journal_id if self.payment_mode == 'company_account' else self.sheet_id.journal_id
+        account_date = self.sheet_id.accounting_date or self.date
+        move_values = {
+            'journal_id': journal.id,
+            'company_id': self.sheet_id.company_id.id,
+            'date': account_date,
+            'ref': self.sheet_id.name,
+            # force the name to the default value, to avoid an eventual 'default_name' in the context
+            # to set it to '' which cause no number to be given to the account.move when posted.
+            'name': '/',
+            'foreign_currency_rate': self.foreign_currency_rate,
+        }
+        return move_values
 
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
