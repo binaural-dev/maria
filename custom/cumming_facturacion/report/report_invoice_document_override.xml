@@ -5,14 +5,16 @@
             <!--<t t-call="web.external_layout">-->
             <t t-call="web.basic_layout">
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
+                <t t-set="invoice" t-value="o"/>
                 <t t-set="address">
-                    <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' />
-                    <div t-if="o.partner_id.vat" class="mt16">
+                    
+                    <address style="d-none" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' />
+                    <div style="d-none" t-if="o.partner_id.vat" class="mt16">
                         <t t-if="o.company_id.country_id.vat_label" t-esc="o.company_id.country_id.vat_label" id="inv_tax_id_label"/>
                         <t t-else="">Tax ID</t>: <span t-field="o.partner_id.vat"/></div>
                 </t>
                 <div class="page">
-                    <h2>
+                    <h2 class="d-none">
                         <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">Invoice</span>
                         <span t-if="o.move_type == 'out_invoice' and o.state == 'draft'">Draft Invoice</span>
                         <span t-if="o.move_type == 'out_invoice' and o.state == 'cancel'">Cancelled Invoice</span>
@@ -21,8 +23,10 @@
                         <span t-if="o.move_type == 'in_invoice'">Vendor Bill</span>
                         <span t-if="o.name != '/'" t-field="o.name"/>
                     </h2>
+                     <link rel="stylesheet" move_type="text/scss"
+                                  href="/web/static/lib/bootstrap/css/bootstrap.css"/>
 
-                    <div id="informations" class="row mt32 mb32">
+                    <div id="informations" class="row mt32 mb32 d-none">
                         <div class="col-auto col-3 mw-100 mb-2" t-if="o.invoice_date" name="invoice_date">
                             <strong>Invoice Date:</strong>
                             <p class="m-0" t-field="o.invoice_date"/>
@@ -44,22 +48,145 @@
                             <p class="m-0" t-field="o.ref"/>
                         </div>
                     </div>
+                                <section id="segmento_2_a"><!--style="height: 170px"-->
+                                    <table name="table_invoice_number_a" class="class_number_a" style="width:100%"><!--style="width:925px"-->
+                                        <!--fila 1-->
+                                        <tr class="row_1 text-nowrap">
+
+                                            <td colspan="8">
+                                                Razón social:
+                                                <span t-field="invoice.partner_id.name"/>
+                                            </td>
+                                           
+                                         
+
+                                            <t t-if="invoice.move_type == 'out_invoice' or invoice.move_type == 'in_invoice' or invoice.move_type == 'out_contingence'  or invoice.move_type == 'in_contingence'">
+                                                <td colspan="4" style="text-align:right;font-weight:bold">
+                                                    <span>Factura:
+                                                        <span t-field="invoice.name"/>
+                                                    </span>
+                                                </td>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-if="invoice.move_type == 'out_refund' or invoice.move_type == 'in_refund'">
+                                                    <td colspan="4" style="text-align:right;font-weight:bold">
+                                                        <span>Nota de crédito:</span>
+                                                        <strong>
+                                                            <span t-field="invoice.name"/>
+                                                        </strong>
+                                                    </td>
+                                                </t>
+                                            </t>
+
+                                        </tr>
+                                        <!--fila 2-->
+                                        <tr>
+                                            <td colspan="6" name="td_vat">
+                                                <span>RIF/Cédula:
+                                                   <!-- <span t-field="invoice.partner_id.prefix_vat"/>-->
+                                                    <span t-field="invoice.partner_id.vat"/>
+                                                </span>
+                                            </td>
+                                           
+                                            <td colspan="6" style="text-align:right">Emisión:
+                                                <span t-field="invoice.invoice_date"/>
+                                            </td>
+                                        </tr>
+
+                                        <!--fila 3-->
+                                        <tr>
+                                            <td colspan="8">
+                                                Domicilio Fiscal:
+                                                <span t-field="invoice.partner_id.street"/>
+                                                <span t-field="invoice.partner_id.street2"/>
+                                                -
+
+                                                Estado:
+                                                <span t-field="invoice.partner_id.state_id.name"/>
+                                                -
+
+                                                Ciudad:
+                                                <span t-field="invoice.partner_id.city"/>
+                                                <!---
+                                                Município:
+                                                <span t-field="invoice.partner_id.municipality"/>-->
+                                                
+                                                <!--o mobile-->
+
+                                            </td>
+                                              <td colspan="4" style="text-align:right">Vencimiento:
+                                                <span t-field="invoice.invoice_date_due"/>
+                                            </td>
+                                            
+                                        </tr>
+                                        <!--fila n+1-->
+                                        <tr t-if="invoice.partner_shipping_id != invoice.partner_id">
+                                            <td colspan="12" class="font-weight-bold">
+                                                Dirección de entrega:
+                                                <span t-field="invoice.partner_shipping_id.street"/>
+                                                <span t-field="invoice.partner_shipping_id.street2"/>
+                                                -
+
+                                                Estado:
+                                                <span t-field="invoice.partner_shipping_id.state_id.name"/>
+                                                -
+
+                                                Ciudad:
+                                                <span t-field="invoice.partner_shipping_id.city"/>
+                                                <!--												-
+                                                                                                Município:
+                                                                                                <span>MUNICIPIO</span>-->
+                                                <!--<span t-field="invoice.partner_id.municipality"/>-->
+                                                -
+                                                Telf:
+                                                <span t-field="invoice.partner_shipping_id.phone"/><!--o mobile-->
+
+                                            </td>
+                                        </tr>
+                                        <!--fila 4-->
+                                        <tr>
+                                            <td colspan="6">
+                                                Telf:
+                                                <span t-field="invoice.partner_id.phone"/>
+                                            </td>
+
+                                          <!--aqui va tipo de documento aunque me parece innecesario-->
+
+                                          
+
+
+                                        </tr>
+                                        <tr>
+                                            <td colspan="6">
+                                                Vendedor:
+                                               <t t-set="seller_name" t-value="invoice.invoice_user_id.name[0:17]"/>
+                                                <span t-esc="seller_name"/>
+                                                
+
+                                            </td>
+                                            
+                                            <!--<td colspan="3" style="text-align:right">Nro Salida:
+                                                t-if="len(invoice.picking_ids) > 0"<span t-field="invoice.picking_ids[0].name"/>
+                                            </td>-->
+                                        </tr>
+                                    </table>
+                                </section>
 
                     <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
 
                     <table class="table table-sm o_main_table" name="invoice_line_table">
                         <thead>
                             <tr>
-                                <th name="th_description" class="text-left"><span>Description</span></th>
-                                <th name="th_quantity" class="text-right"><span>Quantity</span></th>
-                                <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Unit Price</span></th>
+                                <th name="th_description" class="text-left"><span>Descripción</span></th>
+                                <th name="th_quantity" class="text-right"><span>Cantidad</span></th>
+                                <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Precio Unit.</span></th>
                                 <th name="th_price_unit" t-if="display_discount" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                    <span>Disc.%</span>
+                                    <span>Descuento.%</span>
                                 </th>
-                                <th name="th_taxes" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Taxes</span></th>
+                                <th name="th_taxes" t-attf-class="text-left {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Alic</span></th>
                                 <th name="th_subtotal" class="text-right">
-                                    <span groups="account.group_show_line_subtotals_tax_excluded">Amount</span>
-                                    <span groups="account.group_show_line_subtotals_tax_included">Total Price</span>
+                                    <span groups="account.group_show_line_subtotals_tax_excluded">Total</span>
+                                    <span groups="account.group_show_line_subtotals_tax_included">Total</span>
                                 </th>
                             </tr>
                         </thead>
@@ -167,7 +294,7 @@
                                             <t t-else="">
                                                 <td>
                                                     <span t-esc="amount_by_group[0]"/>
-                                                    <span class="text-nowrap"> on
+                                                    <span class="text-nowrap"> sobre
                                                         <t t-esc="amount_by_group[4]"/>
                                                     </span>
                                                 </td>
@@ -178,7 +305,7 @@
                                         </tr>
                                     </t>
                                     <tr class="border-black o_total">
-                                        <td><strong>Total</strong></td>
+                                        <td><strong>Total a pagar</strong></td>
                                         <td class="text-right">
                                            <!-- <span class="text-nowrap" t-field="o.amount_total"/>-->
                                            <span class="text-nowrap" t-esc="o.foreign_amount_total" t-options='{"widget": "monetary", "display_currency": o.foreign_currency_id}'/>
@@ -212,7 +339,7 @@
                             </div>
                         </div>
                     </div>
-                    <p t-if="o.move_type in ('out_invoice', 'in_refund') and o.payment_reference" name="payment_communication">
+                    <p t-if="o.move_type in ('out_invoice', 'in_refund') and o.payment_reference" name="payment_communication" class="d-none">
                         Please use the following communication for your payment : <b><span t-field="o.payment_reference"/></b>
                     </p>
                     <p t-if="o.invoice_payment_term_id" name="payment_term">
