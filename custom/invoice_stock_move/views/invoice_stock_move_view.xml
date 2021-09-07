@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//header" position="inside">
                     <button name="action_stock_move" string="Entrega" type="object" class="oe_highlight"
-                            attrs="{'invisible':['|','|',('state', '=', 'draft'),('picking_count', '=', 1),('move_type', 'not in', ['out_refund','in_refund','in_invoice','out_invoice'])]}"/>
+                            attrs="{'invisible':['|','|',('state', 'in', ['draft','cancel']),('picking_count', '=', 1),('move_type', 'not in', ['out_refund','in_refund','in_invoice','out_invoice'])]}"/>
                 </xpath>
                 <xpath expr="//field[@name='invoice_date']" position="after">
 
