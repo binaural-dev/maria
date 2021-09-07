@@ -19,12 +19,12 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['account'],
+    'depends': ['account','binaural_facturacion'],
 
     # always loaded
     'data': [
         'data/formato_papel.xml',
-        #'report/report_invoice_document.xml',
+        'report/report_invoice_document_override.xml',
         'report/invoice_free_form.xml',
     ],
     # only loaded in demonstration mode
