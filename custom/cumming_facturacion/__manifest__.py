@@ -24,7 +24,7 @@
     # always loaded
     'data': [
         'data/formato_papel.xml',
-        'report/report_invoice_document.xml',
+        #'report/report_invoice_document.xml',
         'report/invoice_free_form.xml',
     ],
     # only loaded in demonstration mode
