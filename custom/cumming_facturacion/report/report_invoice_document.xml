@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="report_account_move_cumming" inherit_id="account.report_invoice_document">
+            <!-- remove  tax th-->
+            <xpath expr="//table[@name='invoice_line_table']/thead/tr/th[@name='th_taxes']" position="replace">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+             <!--remove  tax td-->
+            <xpath expr="//span[@id='line_tax_ids']/.." position="replace">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+        </template>
+
+    </data>
+</odoo>
