@@ -48,7 +48,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     @api.depends('invoice_id')
     def _retention_rate(self):
         for record in self:
-            if record.invoice_id.move_type in ['in_invoice', 'in_refund', 'in_debit']:
+            if record.invoice_id.move_type in ['in_invoice', 'in_refund']:
                 record.retention_rate = record.invoice_id.partner_id.withholding_type.value
                 record.invoice_type = record.invoice_id.move_type
 
@@ -91,7 +91,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     @api.depends('payment_concept_id', 'invoice_id')
     def _get_value_related(self):
         for record in self:
-            if (record.retention_id and record.retention_id.type_retention in ['islr'] and record.retention_id.type in ['in_invoice']) or (record.invoice_id and record.invoice_id.move_type in ['in_invoice'] and not record.retention_id):
+            if (record.retention_id and record.retention_id.type_retention in ['islr'] and record.retention_id.type in ['in_invoice']) or (record.invoice_id and record.invoice_id.move_type in ['in_invoice', 'in_refund'] and not record.retention_id):
                 currency_ut = self.env.ref('base.VEF')
                 _logger.info('Moneda del sistema')
                 _logger.info(record.company_currency_id)
@@ -140,7 +140,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
         for record in self:
             if (record.retention_id and record.retention_id.type_retention in ['islr'] and record.retention_id.type in [
                 'in_invoice']) or (
-                    record.invoice_id and record.invoice_id.move_type in ['in_invoice'] and not record.retention_id):
+                    record.invoice_id and record.invoice_id.move_type in ['in_invoice', 'in_refund'] and not record.retention_id):
                 if record.payment_concept_id and record.invoice_id:
                     if record.facture_amount > record.related_pay_from:
                         record.retention_amount = (record.facture_amount * (
@@ -148,7 +148,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                                                                record.related_percentage_tariffs / 100)) - record.related_amount_sustract_tariffs
                 record.foreign_facture_amount = record.facture_amount * record.foreign_currency_rate
             else:
-                if record.retention_id and record.retention_id.type in ['in_invoice'] or (record.invoice_id and record.invoice_id.move_type in ['in_invoice'] and not record.retention_id):
+                if record.retention_id and record.retention_id.type in ['in_invoice'] or (record.invoice_id and record.invoice_id.move_type in ['in_invoice', 'in_refund'] and not record.retention_id):
                     record.foreign_facture_amount = record.facture_amount * record.foreign_currency_rate
 
     @api.onchange('foreign_facture_amount')
