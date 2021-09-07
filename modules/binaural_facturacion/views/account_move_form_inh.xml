@@ -38,7 +38,9 @@
                     <field name="phone" force_save="1" readonly="1" attrs="{'invisible':['|',('partner_id','=',False),('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
                     <field name="address" force_save="1" readonly="1" attrs="{'invisible':['|',('partner_id','=',False),('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>            
                 </field>
-
+				<field name="partner_id" position="attributes">
+					<attribute name="attrs">{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))], 'readonly': ['|', ('state', 'not in', ('draft')), ('invoice_origin', '!=', False)]}</attribute>
+				</field>
 
                 <field name="invoice_date" position="after">
                     <field name="date_reception" options="{'datepicker': {'warn_future': true}}"

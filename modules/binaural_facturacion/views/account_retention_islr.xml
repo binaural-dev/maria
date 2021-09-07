@@ -24,8 +24,8 @@
                         <field name="state" widget="statusbar" nolabel="1"/>
                     </header>
                     <group colspan="4" col="4">
-                        <field name="multi_currency_retention"/>
-                        <field name="actual_currency_retention"/>
+                        <field name="multi_currency_retention" invisible="1"/>
+                        <field name="actual_currency_retention" invisible="1"/>
                         <field name="type" force_save="1" select="2"/>
                         <field name="type_retention" force_save="1" select="2" invisible="1"/>
                         <field name="partner_id" on_change="onchange_partner_id(type,partner_id)" select="1"  attrs="{'invisible':[('type','=', False)],'readonly':[('state','in',['emitted','cancel'])]}"/>
@@ -39,7 +39,7 @@
                             <field colspan="4" name="retention_line" nolabel="1" attrs="{'invisible':[('partner_id','=',False)],'readonly':[('state','in',['emitted','cancel'])]}">
                                 <tree editable='bottom'>
                                     <field name="name" readonly="1"/>
-                                    <field name="invoice_id" domain="[('apply_retention_islr', '=', False), ('move_type', 'in', ['in_invoice','in_refund'])]"
+                                    <field name="invoice_id" domain="[('apply_retention_islr', '=', False), ('move_type', 'in', ['in_invoice','in_refund']), ('state', 'in', ['posted'])]"
                                            force_save="1" attrs="{'readonly':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
                                     <field name="retention_id" invisible="1" />
                                     <field name="invoice_type" force_save="1" readonly="1"/>
