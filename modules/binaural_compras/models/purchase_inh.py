@@ -12,6 +12,7 @@ from werkzeug.urls import url_encode
 import logging
 _logger = logging.getLogger(__name__)
 
+
 class PurchaseOrderBinauralCompras(models.Model):
     _inherit = 'purchase.order'
 
@@ -88,6 +89,38 @@ class PurchaseOrderBinauralCompras(models.Model):
                 'foreign_amount_tax': foreign_amount_tax,
                 'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
             })
+
+    def _prepare_invoice(self):
+        """Prepare the dict of values to create the new invoice for a purchase order.
+        """
+        self.ensure_one()
+        move_type = self._context.get('default_move_type', 'in_invoice')
+        journal = self.env['account.move'].with_context(default_move_type=move_type)._get_default_journal()
+        if not journal:
+            raise UserError(_('Please define an accounting purchase journal for the company %s (%s).') % (
+            self.company_id.name, self.company_id.id))
+    
+        partner_invoice_id = self.partner_id.address_get(['invoice'])['invoice']
+        invoice_vals = {
+            'ref': self.partner_ref or '',
+            'move_type': move_type,
+            'narration': self.notes,
+            'currency_id': self.currency_id.id,
+            'invoice_user_id': self.user_id and self.user_id.id,
+            'partner_id': partner_invoice_id,
+            'fiscal_position_id': (
+                        self.fiscal_position_id or self.fiscal_position_id.get_fiscal_position(partner_invoice_id)).id,
+            'payment_reference': self.partner_ref or '',
+            'partner_bank_id': self.partner_id.bank_ids[:1].id,
+            'invoice_origin': self.name,
+            'invoice_payment_term_id': self.payment_term_id.id,
+            'invoice_line_ids': [],
+            'company_id': self.company_id.id,
+            'foreign_currency_id': self.foreign_currency_id.id,
+            'foreign_currency_date': self.foreign_currency_date,
+            'foreign_currency_rate': self.foreign_currency_rate,
+        }
+        return invoice_vals
 
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
