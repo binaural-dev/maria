@@ -547,9 +547,136 @@ class WizardRetentionIslr(models.TransientModel):
         return data2
 
 
+class WizardRetentionIva(models.TransientModel):
+    _name = 'wizard.retention.iva'
+    _description = 'Wizard reportes iva'
+    
+    report = fields.Selection([
+        ('iva', 'Retencion Iva'),
+    ], 'Tipo de informe', required=True)
+    date_start = fields.Date('Fecha de inicio', default=date.today().replace(day=1))
+    date_end = fields.Date('Fecha de termino', default=date.today().replace(day=1) + relativedelta(months=1, days=-1))
+    file = fields.Binary(readonly=True)
+    filename = fields.Char()
+    company_id = fields.Many2one('res.company', default=lambda self: self.env.user.company_id.id)
+    
+    def download_format(self):
+        ext = ''
+        if self.report == 'iva':
+            ext = '.xlsx'
+        return ext
+    
+    def _get_domain(self):
+        search_domain = []
+        search_domain += [('date_accounting', '>=', self.date_start)]
+        search_domain += [('date_accounting', '<=', self.date_end)]
+        return search_domain
+    
+    def imprimir_excel(self):
+        report = self.report
+        filecontent = '5'
+        report_obj = request.env['wizard.retention.iva']
+        if report == 'iva':
+            table = report_obj._table_retention_iva(int(self.id))
+            name = 'Retenciones IVA'
+            start = str(self.date_start)
+            end = str(self.date_end)
+        if not table.empty and name:
+            if report == 'iva':
+                filecontent = report_obj._excel_file_retention_iva(table, name, start, end)
+        if not filecontent:
+            print("\nAAAAAAAAAAAAAA\n")
+            raise exceptions.Warning('No hay datos para mostrar en reporte')
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/web/get_excel?report=%s&wizard=%s&start=%s&end=%s' % (
+                self.report, self.id, str(self.date_start), str(self.date_end)),
+            'target': 'self'
+        }
+    
+    def _excel_file_retention_iva(self, table, name, start, end):
+        company = self.env['res.company'].search([], limit=1)
+        data2 = BytesIO()
+        workbook = xlsxwriter.Workbook(data2, {'in_memory': True, 'nan_inf_to_errors': True})
+        merge_format = workbook.add_format({
+            'bold': 1,
+            'border': 1,
+            'align': 'center',
+            'valign': 'vcenter',
+            'fg_color': 'gray'})
+        datos = table
+        total_1 = 0.00
+        total_2 = 0.00
+        total_3 = 0.00
+        total_4 = 0.00
+        total_5 = 0.00
+        total_6 = 0.00
+        range_start = 'Desde: ' + datetime.strptime(start, '%Y-%m-%d').strftime('%d/%m/%Y')
+        range_end = 'Hasta: ' + datetime.strptime(end, '%Y-%m-%d').strftime('%d/%m/%Y')
+        worksheet2 = workbook.add_worksheet(name)
+        worksheet2.set_column('A:Z', 20)
+        worksheet2.write('A1', company.name)
+        worksheet2.write('A2', name)
+        worksheet2.write('A3', company.vat)
+        worksheet2.write('A4', range_start)
+        worksheet2.write('A5', range_end)
+        worksheet2.set_row(5, 20, merge_format)
+        columnas = list(datos.columns.values)
+        columns2 = [{'header': r} for r in columnas]
+        columns2[0].update({'total_string': 'Total'})
+        data = datos.values.tolist()
+        currency_format = workbook.add_format({'num_format': '####0.00'})
+        int_format = workbook.add_format({'num_format': '0.00'})
+        text_format = workbook.add_format({'num_format': '@'})
+
+        int_no_format = workbook.add_format({'num_format': '0'})
+        porcent_format = workbook.add_format({'num_format': '#,###0.00" "%'})
+        date_format = workbook.add_format()
+        date_format.set_num_format('d-mmm-yy')  # Format string.
+        col3 = len(columns2) - 1
+        col2 = len(data) + 6
+        for record in columns2[0:1]:
+            record.update({'format': int_no_format})
+        for record in columns2[1:9]:
+            record.update({'format': text_format})
+        for record in columns2[9:10]:
+            record.update({'format': porcent_format})
+        for record in columns2[10:12]:
+            record.update({'format': currency_format})
+        for record in columns2[12:13]:
+            record.update({'format': porcent_format})
+        for record in columns2[13:14]:
+            record.update({'format': currency_format})
+        for record in columns2[14:15]:
+            record.update({'format': text_format})
+        i = 0
+        while i < len(data):
+            total_2 += data[i][10]
+            total_3 += data[i][11]
+            total_5 += data[i][13]
+            i += 1
+        worksheet2.write_number(col2, 10, float(total_2), currency_format)
+        worksheet2.write_number(col2, 11, float(total_3), currency_format)
+        worksheet2.write_number(col2, 13, float(total_5), currency_format)
+        cells = xlsxwriter.utility.xl_range(5, 0, col2, col3)
+        worksheet2.add_table(cells, {'data': data, 'total_row': True, 'columns': columns2, 'header_row': True})
+    
+        workbook.close()
+        data2 = data2.getvalue()
+        return data2
+
+
 class WizardAccountingReportsExcel(models.TransientModel):
     _name = 'wizard.accounting.reports.excel'
     _description = 'Formato excel reportes contables'
+
+    file = fields.Binary()
+    filename = fields.Char()
+    
+    
+class WizardRetentionIvaExcel(models.TransientModel):
+    _name = 'wizard.retention.iva.excel'
+    _description = 'Formato excel iva'
 
     file = fields.Binary()
     filename = fields.Char()
@@ -561,8 +688,8 @@ class WizardRetentionIslrExcel(models.TransientModel):
 
     file = fields.Binary()
     filename = fields.Char()
-
-
+    
+    
 class AccountingReportsController(http.Controller):
 
     @http.route('/web/get_excel', type='http', auth="user")
@@ -574,6 +701,8 @@ class AccountingReportsController(http.Controller):
             report_obj = request.env['wizard.accounting.reports']
         if report in ['islr']:
             report_obj = request.env['wizard.retention.islr']
+        if report in ['iva']:
+            report_obj = request.env['wizard.retention.iva']
         if report == 'purchase':
             table = report_obj._table_shopping_book(int(wizard))
             name = 'Libro de Compras'
@@ -589,6 +718,9 @@ class AccountingReportsController(http.Controller):
         if report == 'islr':
             table = report_obj._table_retention_islr(int(wizard))
             name = 'XML Retencion de ISLR'
+        if report == 'iva':
+            table = report_obj._table_retention_iva(int(wizard))
+            name = 'Retenciones de IVA'
         if not table.empty and name:
             if report == 'purchase':
                 filecontent = report_obj._excel_file_purchase(table, name, start, end, table_resumen)
@@ -596,6 +728,8 @@ class AccountingReportsController(http.Controller):
                 filecontent = report_obj._excel_file_sale(table, name, start, end, table_resumen)
             if report == 'islr':
                 filecontent = report_obj._excel_file_retention_islr(table, name, start, end)
+            if report == 'iva':
+                filecontent = report_obj._excel_file_retention_iva(table, name, start, end)
         if not filecontent:
             print("noy filecontent")
             report_obj.imprimir_excel(int(wizard))
