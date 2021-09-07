@@ -10,9 +10,11 @@
             <field name="arch" type="xml">
                 <field name="name" position="after">
                     <field name="alternative_ids" string="Equivalencias"/>
+                    <field name="alternative_manual" string="Otras Equivalencias" />
                 </field>
             </field>
         </record>
+
         <record id="product_product_tree_alternative" model="ir.ui.view">
             <field name="name">product.product.alternative.tree</field>
             <field name="model">product.product</field>
@@ -35,6 +37,7 @@
             <field name="arch" type="xml">
                 <field name="name" position="after">
                     <field name="alternative_ids" string="Equivalencias" widget="many2many_tags"/>
+                    <field name="alternative_manual" string="Otras Equivalencias" />
                     <field name="used_for" invisible="1" />
                 </field>
             </field>
@@ -50,12 +53,13 @@
             <field name="inherit_id" ref="product.product_template_form_view" />
             <field name="priority" eval="16" />
             <field name="arch" type="xml">
-                <group name="group_standard_price" position="after">
-                    <group>
+                <field name="categ_id" position="after">
+                    
                         <field name="alternative_code" string="Equivalencias"/>
+                        <field name="alternative_manual" string="Otras Equivalencias" />
                         <field name="used_for" invisible="1"/>
-                    </group>
-                </group>
+                   
+                </field>
                 <notebook position="inside">
                     <page string="Equivalencias">
                         <separator string="Equivalencias" colspan="4" />

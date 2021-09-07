@@ -3,8 +3,10 @@
 # See README.rst file on addons root folder for license details
 
 from odoo import api, fields, models
-
-
+from odoo.osv import expression
+from odoo.exceptions import UserError
+import logging
+_logger = logging.getLogger(__name__)
 class ProductCatalog(models.Model):
     _name = "product.catalog"
     _description = "Product catalog"
@@ -102,6 +104,7 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
 
     alternative_code = fields.Char(string="Equivalencias", index=True, compute="_compute_alternative_code")
+    alternative_manual = fields.Char(string='Otras Equivalencias')
     alternative_ids = fields.One2many("product.alternative", "product_tmpl_id", string="Productos Alternativos")
 
     used_for = fields.Char(string="Usado por")
@@ -147,10 +150,9 @@ class ProductProduct(models.Model):
         res_alt = []
         if name and len(name) > 2:
             alternative_ids = self.env["product.alternative"].search([("name", "ilike", name),('hide','=',False)], limit=10)#si es hide no buscar
-            # ids = []
+
             products = self.env["product.product"]
             for alternative in alternative_ids:
-                # ids += alternative.product_tmpl_id.product_variant_ids.ids
                 products = products | alternative.product_tmpl_id.product_variant_ids
             if products:
                 # recs = self.search([('id', 'in', ids )], limit=limit)
@@ -159,11 +161,19 @@ class ProductProduct(models.Model):
 
         this = self.with_context({"no_catalog": True})
         res = super(ProductProduct, this).name_search(name, args, operator=operator, limit=limit) + res_alt
-
-        if not res:
+        #buscar por codigo alternativo manual
+        if len(name) != 0:
+            operator = 'ilike' #'='
+            args = expression.AND([args, [('alternative_manual', operator, name)]])
+            p = self.search(args, limit=limit)
+            if p:
+                ids = p.name_get()
+                res = res + ids
+        """if not res:
             prod = self.search_in_catalog(name)
             if prod:
-                res = prod.name_get()
+                res = prod.name_get()"""
+        _logger.info("retornara %s",res)
 
         return res
 
