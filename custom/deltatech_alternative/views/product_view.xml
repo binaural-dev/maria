@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <odoo>
     <data>
-        <!-- Product Alternative_ -->
+        <!-- Product Alternative_SEARCH -->
         <record model="ir.ui.view" id="product_alternative_search_form_view">
             <field name="name">product.template.search</field>
             <field name="model">product.template</field>
@@ -9,8 +9,9 @@
             <field name="type">search</field>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                    <field name="alternative_ids" string="Equivalencias"/>
-                    <field name="alternative_manual" string="Otras Equivalencias" />
+                    <!--<field name="alternative_ids" string="Equivalencias"/>
+                    <field name="alternative_manual" string="Otras Equivalencias" />-->
+                    <field name="alternative_full" string="Equivalencias" />
                 </field>
             </field>
         </record>
@@ -57,6 +58,7 @@
                     
                         <field name="alternative_code" string="Equivalencias"/>
                         <field name="alternative_manual" string="Otras Equivalencias" />
+                        <field name="alternative_full" invisible="1"/>
                         <field name="used_for" invisible="1"/>
                    
                 </field>
