@@ -23,7 +23,7 @@ class ProductTemplateCummingInventario(models.Model):
 	_inherit = 'product.template'
 
 	pattern_id = fields.Many2one('product.pattern',string='Modelo')
-	fob_cost = fields.Float(string='Costo FOB')
+	fob_cost = fields.Float(string='Costo FOB',required=True)
 	percent_dif_cost = fields.Float(string='% DIF CIF y FOB',compute="_compute_margin_cost",store=True)
 	standard_price = fields.Float(
 		'Costo CIF', compute='_compute_standard_price',
@@ -33,6 +33,10 @@ class ProductTemplateCummingInventario(models.Model):
 		In FIFO: value of the last unit that left the stock (automatically computed).
 		Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
 		Used to compute margins on sale orders.""")
+
+	default_code = fields.Char(
+		'Código', compute='_compute_default_code',
+		inverse='_set_default_code', store=True)
 
 
 	price_by_pricelist = fields.One2many('price.by.pricelist', 'product_template_id', string='Listas de precios')

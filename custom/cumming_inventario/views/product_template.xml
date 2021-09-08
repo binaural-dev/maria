@@ -1,6 +1,23 @@
 <odoo>
     <data>
 
+        <record id="product_template_only_form_view_cumm" model="ir.ui.view">
+            <field name="name">product.template.product.form.cumm_only</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+             <field name="priority">100</field>
+            <field name="arch" type="xml">
+                <!--codigo -->
+                <xpath expr="//field[@name='default_code']" position="attributes">
+                    <attribute name="required">1</attribute>
+                    <attribute name="string">Código</attribute>
+                </xpath>
+                <field name="default_code"  position="replace">
+                    <field name="default_code" string="Código" attrs="{'invisible': [('product_variant_count', '&gt;', 1)]}"/>
+                </field>
+            </field>
+        </record>
+
         <!--form de product template-->
         <record id="product_pattern_id" model="ir.ui.view">
             <field name="name">Nombre de modelo</field>
@@ -11,14 +28,19 @@
                 <xpath expr="//form" position="attributes">
                     <attribute name="class">cumming_product_form</attribute>
                 </xpath>
-                
+                <xpath expr="//field[@name='categ_id']" position="attributes">
+                    <attribute name="string">Línea</attribute>
+                </xpath>
+                <xpath expr="//field[@name='type']" position="attributes">
+                    <attribute name="string">Tipo concepto</attribute>
+                </xpath> 
 
                 <field name="categ_id" position="after">
-                    <field name="pattern_id" string="Modelo"/>
+                    <field name="pattern_id" string="Modelo" required="1"/>
                     
-                        <button groups="base.group_system" invisible="1" name="trigger_onchange_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Sync">
+                    <button groups="base.group_system" invisible="1" name="trigger_onchange_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Sync">
                             
-                        </button>
+                    </button>
                     
                 </field>
 
@@ -26,18 +48,26 @@
                     <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
                     <attribute name="string">Costo CIF</attribute>
                 </field>
+                <xpath expr="//field[@name='standard_price']" position="attributes">
+                    <attribute name="string">Costo CIF</attribute>
+                    <attribute name="required">1</attribute>
+                </xpath> 
                 <field name="company_id" position="before">
-                    <field name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id'}"/>
+                    <field required="1" name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id'}"/>
                     <field name="percent_dif_cost"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
                     
                 </field>
 
                 <field name="list_price" position="after" >
                     
-                        <button name="onchange_list_price_price_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Recalcular Precios">
+                    <button name="onchange_list_price_price_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Recalcular Precios">
                             
-                        </button>
+                    </button>
                     
+                </field>
+
+                <field name="list_price" position="attributes">
+                     <attribute name="required">1</attribute>
                 </field>
                
                 
