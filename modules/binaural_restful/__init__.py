@@ -95,5 +95,5 @@ def _call_function(self, *args, **kwargs):
     return self.endpoint(*args, **kwargs)
 
 
-JsonRequest._handle_exception = _handle_exception
+#JsonRequest._handle_exception = _handle_exception
 # WebRequest._call_function = _call_function
