@@ -20,18 +20,27 @@
 #################################################################################
 
 from odoo import api, fields, models, _
-
+import logging
+_logger = logging.getLogger(__name__)
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
     warehouse_quantity = fields.Char(compute='_get_warehouse_quantity', string='Cantidad por almacén')
 
+    quantity_csa = fields.Char(compute='_get_warehouse_quantity', string='Cantidad en CSA')
+    quantity_repubus = fields.Char(compute='_get_warehouse_quantity', string='Cantidad en CSA 2')
+
     def button_dummy_ware(self):
+        pass
+
+    def button_dummy_ware_2(self):
         pass
 
     def _get_warehouse_quantity(self):
         for record in self:
             warehouse_quantity_text = ''
+            record.quantity_csa = 0
+            record.quantity_repubus = 0
             product_id = self.env['product.product'].sudo().search([('product_tmpl_id', '=', record.id)])
             if product_id:
                 quant_ids = self.env['stock.quant'].sudo().search([('product_id','=',product_id[0].id),('location_id.usage','=','internal')])
@@ -62,3 +71,15 @@ class ProductTemplate(models.Model):
                     if tt_warehouses[item] != 0:
                         warehouse_quantity_text = warehouse_quantity_text + ' ** ' + item + ': ' + str(tt_warehouses[item])
                 record.warehouse_quantity = warehouse_quantity_text
+                _logger.info(tt_warehouses)
+   
+                cont = 0
+                for item in tt_warehouses:
+                    if cont == 0:
+                        if tt_warehouses[item]:
+                            record.quantity_csa = item + ': ' + str(tt_warehouses[item])
+                    if cont == 1:
+                        if tt_warehouses[item]:
+                            record.quantity_repubus = item + ': ' + str(tt_warehouses[item])
+
+                    cont+=1

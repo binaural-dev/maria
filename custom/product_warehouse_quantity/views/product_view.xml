@@ -26,7 +26,9 @@
             <field name="inherit_id" ref="product.product_template_tree_view"/>
             <field name="arch" type="xml">
                 <field name="qty_available" position="before">
-                    <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
+                    <!--<field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>-->
+                    <field name="quantity_csa" string="Cantidad Almacen"/>
+                    <field name="quantity_repubus" string="Cantidad Almacen"/>
                 </field>
             </field>
         </record>
@@ -55,18 +57,25 @@
                 
                 <xpath expr="//button[@name='action_open_quants']" position="before">
                     <button type="object" name="button_dummy_ware" attrs="{'invisible':[('type', '!=', 'product')]}"
-                            class="oe_stat_button btn-cumming-stat"
-                            
-                            groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse" style="white-space:break-spaces !important">
-                        <div class="o_field_widget o_stat_info oe_stat_button" name="warehouse_qty_all">
-                            <!--<span class="o_stat_value" widget="statinfo">-->
-                                <field name="warehouse_quantity" widget="statinfo" nolabel="0" class="mr4" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
-                                <!--<field name="available_qty" widget="statinfo" nolabel="0" class="mr4"/>-->
-                                
-                                
-                                
-                           <!-- </span>-->
-                          
+                            class="oe_stat_button"
+                            icon="fa-cubes" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
+                        <div class="o_field_widget o_stat_info" name="button_available_qty_1">
+                            <span class="o_stat_value" widget="statinfo">
+                                <field name="quantity_csa" widget="statinfo" nolabel="1" class="mr4"/>
+                                <field name="uom_name"/>
+                            </span>
+                            <span class="o_stat_text"></span>
+                        </div>
+                    </button>
+                    <button type="object" name="button_dummy_ware_2" attrs="{'invisible':[('type', '!=', 'product')]}"
+                            class="oe_stat_button"
+                            icon="fa-cubes" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
+                        <div class="o_field_widget o_stat_info" name="button_available_qty_1">
+                            <span class="o_stat_value" widget="statinfo">
+                                <field name="quantity_repubus" widget="statinfo" nolabel="1" class="mr4"/>
+                                <field name="uom_name"/>
+                            </span>
+                            <span class="o_stat_text"></span>
                         </div>
                     </button>
                 </xpath>
