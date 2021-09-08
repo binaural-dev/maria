@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_binaural_inventario" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.binaural.inventario</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="100"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+	        <xpath expr="//div[@name='operations_setting_container']" position="after">
+                <h2>Configuraciones Binaural</h2>
+                <div class="row mt16 o_settings_container" name="operations_setting_container_binaural">
+                    <div class="col-3 col-lg-3 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <div class="mt16 row">
+                                   <field name="not_cost_higher_price" class="oe_inline" required="1"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">No Permitir Costo Mayor al Precio</span>
+                            
+                        </div>
+                    </div>
+                    <div class="col-3 col-lg-3 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <div class="mt16 row">
+                                   <field name="not_qty_on_hand_less_zero" class="oe_inline" required="1"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">No Permitir Cantidad a mano menor a 0</span>
+                            
+                        </div>
+                    </div>
+                    <!---->
+                    <div class="col-3 col-lg-3 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <div class="mt16 row">
+                                   <field name="not_qty_provided_less_zero" class="oe_inline" required="1"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">No Permitir Cantidad Prevista menor a 0</span>
+                            
+                        </div>
+                    </div>
+                    <div class="col-3 col-lg-3 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <div class="mt16 row">
+                                   <field name="not_qty_done_higher_initial" class="oe_inline" required="1"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">No Permitir Cantidades entregadas mayor a demanda inicial</span>
+                            
+                        </div>
+                    </div>
+
+                    <!---->
+                    <div class="col-3 col-lg-3 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <div class="mt16 row">
+                                   <field name="not_move_qty_higher_store" class="oe_inline" required="1"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">No Permitir mover mas de la cantidad disponible en almacen</span>
+                            
+                        </div>
+                    </div>
+                    <div class="col-3 col-lg-3 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <div class="mt16 row">
+                                   <field name="not_multiple_tax_product" class="oe_inline" required="1"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">No Permitir que el producto pueda tener mas un impuesto asignado</span>
+                            
+                        </div>
+                    </div>
+                </div>
+			</xpath>
+        </field>
+    </record>
+</odoo>
