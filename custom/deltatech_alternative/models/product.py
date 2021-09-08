@@ -103,9 +103,11 @@ class ProductCatalog(models.Model):
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
-    alternative_code = fields.Char(string="Equivalencias", index=True, compute="_compute_alternative_code")
+    alternative_code = fields.Char(string="Equivalencias", index=True, compute="_compute_alternative_code",store=True)
     alternative_manual = fields.Char(string='Otras Equivalencias')
     alternative_ids = fields.One2many("product.alternative", "product_tmpl_id", string="Productos Alternativos")
+
+    alternative_full = fields.Char(string='Equivalencias Full',compute="_compute_alternative_code_full",store=True)
 
     used_for = fields.Char(string="Usado por")
 
@@ -120,6 +122,10 @@ class ProductTemplate(models.Model):
             code = "; ".join(codes)
             product.alternative_code = code
 
+    @api.depends("alternative_code","alternative_manual")
+    def _compute_alternative_code_full(self):
+        for product in self:
+            product.alternative_full = str(product.alternative_code) +" "+str(product.alternative_manual)
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
