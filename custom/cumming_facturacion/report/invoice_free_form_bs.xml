@@ -9,7 +9,7 @@
             <field name="report_file">cumming_facturacion.cumming_invoice_free_form_template_bs</field>
             <field name="attachment">(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')
             </field>
-            <field name="paperformat_id" ref="cumming_facturacion.paperformat_freeform_cumming"/>
+            <field name="paperformat_id" ref="cumming_facturacion.paperformat_freeform_cumming_bs"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="binding_type">report</field>
         </record>
@@ -312,6 +312,7 @@
                                         </tbody>
                                     </table>
                                 </section>
+                                <div style="width:100%;margin-top:20px"></div>
                                 <section id="segmento_4"><!--style="height: 170px"-->
                                     <table name="table_total"><!--style="width:925px"-->
                                         <tr>
