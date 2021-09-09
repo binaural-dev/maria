@@ -23,10 +23,9 @@
 
     # always loaded
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'data/config_sequence.xml',
-        #'views/views.xml',
-        #'views/templates.xml',
         'views/config_views.xml',
         'views/account_move_form_inh.xml',
         'views/account_move_search_inh.xml',

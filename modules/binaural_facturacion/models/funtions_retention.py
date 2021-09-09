@@ -12,7 +12,7 @@ def load_line_retention(self, data, move_id=False):
     if self.type in ['out_invoice']:
         for facture_line_retention in self.env['account.move'].search(
                 [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_invoice', 'out_debit', 'out_refund']),
-                 ('state', '=', 'posted')]):
+                 ('state', '=', 'posted'), ('journal_id.fiscal', '=', True)]):
             if self.type_retention in ['iva']:
                 if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0\
                         and facture_line_retention.payment_state in ['not_paid', 'partial']:
@@ -25,13 +25,23 @@ def load_line_retention(self, data, move_id=False):
                                                 'name': 'Retención IVA Cliente', 'tax_line': tax_id.amount,
                                                 'facture_amount': tax[2],
                                                 'facture_total': facture_line_retention.amount_total,
-                                                'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type}))
+                                                'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type,
+                                                'foreign_facture_amount': tax[2] * facture_line_retention.foreign_currency_rate,
+                                                'foreign_facture_total': facture_line_retention.amount_total * facture_line_retention.foreign_currency_rate,
+                                                'foreign_iva_amount': tax[1] * facture_line_retention.foreign_currency_rate,
+                                                'foreign_currency_rate': facture_line_retention.foreign_currency_rate
+                                                }))
             elif self.type_retention in ['islr']:
                 if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in ['not_paid', 'partial']:
                     data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
                                         'name': 'Retención ISLR Cliente',
                                         'facture_amount': facture_line_retention.amount_untaxed, 'facture_total': facture_line_retention.amount_total,
-                                        'iva_amount': facture_line_retention.amount_tax, 'invoice_type': facture_line_retention.move_type}))
+                                        'iva_amount': facture_line_retention.amount_tax, 'invoice_type': facture_line_retention.move_type,
+                                        'foreign_facture_amount':facture_line_retention.amount_untaxed * facture_line_retention.foreign_currency_rate,
+                                        'foreign_facture_total': facture_line_retention.amount_total * facture_line_retention.foreign_currency_rate,
+                                        'foreign_iva_amount': facture_line_retention.amount_tax * facture_line_retention.foreign_currency_rate,
+                                        'foreign_currency_rate': facture_line_retention.foreign_currency_rate
+                                        }))
     #PROVEEDOR
     else:
         if self.type in ['in_invoice']:
@@ -39,12 +49,12 @@ def load_line_retention(self, data, move_id=False):
                 invoices = self.env['account.move'].search(
                     [('partner_id', '=', self.partner_id.id),
                      ('move_type', 'in', ['in_invoice', 'in_debit', 'in_refund']),
-                     ('state', '=', 'posted'), ('id', '=', move_id)])
+                     ('state', '=', 'posted'), ('id', '=', move_id), ('journal_id.fiscal', '=', True)])
             else:
                 invoices = self.env['account.move'].search(
                     [('partner_id', '=', self.partner_id.id),
                      ('move_type', 'in', ['in_invoice', 'in_debit', 'in_refund']),
-                     ('state', '=', 'posted')])
+                     ('state', '=', 'posted'), ('journal_id.fiscal', '=', True)])
             for facture_line_retention in invoices:
                 if self.type_retention in ['iva']:
                     if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0 \
@@ -61,6 +71,11 @@ def load_line_retention(self, data, move_id=False):
                                             'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type,
                                             'porcentage_retention': facture_line_retention.partner_id.withholding_type.value,
                                             'retention_amount': tax[1] * (facture_line_retention.partner_id.withholding_type.value/100),
+                                            'foreign_facture_amount': tax[2] * facture_line_retention.foreign_currency_rate,
+                                            'foreign_facture_total': facture_line_retention.amount_total * facture_line_retention.foreign_currency_rate,
+                                            'foreign_iva_amount': tax[1] * facture_line_retention.foreign_currency_rate,
+                                            'foreign_retention_amount': tax[1] * (facture_line_retention.partner_id.withholding_type.value/100) * facture_line_retention.foreign_currency_rate,
+                                            'foreign_currency_rate': facture_line_retention.foreign_currency_rate
                                             }))
                                 """elif self.type_retention in ['islr']:
         if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in [\
@@ -129,7 +144,10 @@ def create_move_invoice_retention(self, line_ret, ret_line, account, journal, am
                 'journal_id': journal.id,
                 'state': 'draft',
                 'move_type': 'entry',
-                'line_ids': line_ret
+                'line_ids': line_ret,
+                'foreign_currency_id': ret_line.invoice_id.foreign_currency_id.id,
+                'foreign_currency_date': ret_line.invoice_id.foreign_currency_date,
+                'foreign_currency_rate': ret_line.invoice_id.foreign_currency_rate
             })
             return move_obj
         else:
@@ -173,7 +191,10 @@ def create_move_invoice_retention(self, line_ret, ret_line, account, journal, am
                 'journal_id': journal.id,
                 'state': 'draft',
                 'move_type': 'entry',
-                'line_ids': line_ret
+                'line_ids': line_ret,
+                'foreign_currency_id': ret_line.invoice_id.foreign_currency_id.id,
+                'foreign_currency_date': ret_line.invoice_id.foreign_currency_date,
+                'foreign_currency_rate': ret_line.invoice_id.foreign_currency_rate
             })
             return move_obj
         else:
@@ -213,7 +234,10 @@ def create_move_refund_retention(self, line_ret, ret_line, account, journal, amo
                 'journal_id': journal.id,
                 'state': 'draft',
                 'move_type': 'entry',
-                'line_ids': line_ret
+                'line_ids': line_ret,
+                'foreign_currency_id': ret_line.invoice_id.foreign_currency_id.id,
+                'foreign_currency_date': ret_line.invoice_id.foreign_currency_date,
+                'foreign_currency_rate': ret_line.invoice_id.foreign_currency_rate
             })
             return move_obj
         else:
@@ -251,7 +275,10 @@ def create_move_refund_retention(self, line_ret, ret_line, account, journal, amo
                 'journal_id': journal.id,
                 'state': 'draft',
                 'move_type': 'entry',
-                'line_ids': line_ret
+                'line_ids': line_ret,
+                'foreign_currency_id': ret_line.invoice_id.foreign_currency_id.id,
+                'foreign_currency_date': ret_line.invoice_id.foreign_currency_date,
+                'foreign_currency_rate': ret_line.invoice_id.foreign_currency_rate
             })
             return move_obj
         else:
