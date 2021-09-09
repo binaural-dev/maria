@@ -19,4 +19,6 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from . import res_config
+from . import sale_order
 from . import invoice_stock

@@ -64,9 +64,13 @@ class InvoiceStockMove(models.Model):
         track_visibility='onchange', copy=False)
 
     def action_stock_move(self):
+        self.ensure_one()
         if not self.picking_type_id:
             raise UserError(_(
-                " Please select a picking type"))
+                " Por favor selecciona un tipo de picking"))
+        #si tiene saldo deudor y la configuracion NO permite generar picking con saldo deudor
+        if self.amount_residual >0 and not self.env['ir.config_parameter'].sudo().get_param('picking_with_residual'):
+            raise UserError("La factura no debe tener importe adeudado para emitir la orden de inventario")
         for order in self:
             if not self.invoice_picking_id:
                 pick = {}
