@@ -64,13 +64,13 @@
                 </field>
                 <notebook position="inside">
                     <page string="Equivalencias">
-                        <separator string="Equivalencias" colspan="4" />
-                        <field name="alternative_ids" colspan="4" nolabel="1">
-                            <tree string="Equivalencias" editable="bottom" widget="many2many_tags">
+                       
+                        <field name="alternative_ids" colspan="4" nolabel="0">
+                            <tree string="Equivalencias" editable="bottom" >
                                 <field name="sequence" widget="handle" />
                                 <field name="name" />
-                                <field name="product_tmpl_id_select" />
-                                <field name="hide" />
+                                <field name="product_tmpl_id_select" widget='selection'/>
+                                <field name="hide" string="Ocultar" invisible="1" />
                             </tree>
                         </field>
                     </page>
@@ -96,7 +96,7 @@
             <field name="type">form</field>
             <field name="arch" type="xml">
                 <form string="Equivalencias">
-                    <field name="product_tmpl_id" />
+                    <field name="product_tmpl_id" widget='selection' />
                     <field name="name" />
                     <field name="hide" />
                 </form>
