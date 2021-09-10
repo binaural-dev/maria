@@ -665,6 +665,17 @@ class AccountMoveBinauralFacturacion(models.Model):
 class AcoountMoveLineBinauralFact(models.Model):
     _inherit = 'account.move.line'
 
+
+    #validar que el precio unitario no sea mayor al costo del producto, basado en la configuracion
+    @api.onchange('price_unit','product_id')
+    def onchange_price_unit_check_cost(self):
+        for l in self:
+            if self.env['ir.config_parameter'].sudo().get_param('not_cost_higher_price_invoice') and l.price_unit and l.product_id:
+                _logger.info("costo del producto %s",l.product_id.standard_price)
+                _logger.info("precio unitario %s",l.price_unit)
+                if l.price_unit <= l.product_id.standard_price and l.product_id.type == 'product' and l.move_id.is_sale_document(include_receipts=True):#solo aplica a almacenables
+                    raise ValidationError("Precio unitario no puede ser menor o igual al costo del producto")
+
     def default_alternate_currency(self):
         alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
 
