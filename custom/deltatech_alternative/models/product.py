@@ -122,10 +122,10 @@ class ProductTemplate(models.Model):
             code = "; ".join(codes)
             product.alternative_code = code
 
-    @api.depends("alternative_code","alternative_manual")
+    @api.depends("alternative_code","alternative_manual","default_code")
     def _compute_alternative_code_full(self):
         for product in self:
-            product.alternative_full = str(product.alternative_code) +" "+str(product.alternative_manual)
+            product.alternative_full = str(product.alternative_code) +" "+str(product.alternative_manual) +" "+str(product.default_code)
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
