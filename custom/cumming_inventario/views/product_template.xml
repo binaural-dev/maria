@@ -1,28 +1,28 @@
 <odoo>
     <data>
 
-        <record id="product_template_only_form_view_cumm" model="ir.ui.view">
+        <record id="product_template_only_form_view_cummi" model="ir.ui.view">
             <field name="name">product.template.product.form.cumm_only</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
-             <field name="priority">100</field>
+            <field name="priority" eval="5"/>
             <field name="arch" type="xml">
                 <!--codigo -->
                 <xpath expr="//field[@name='default_code']" position="attributes">
                     <attribute name="required">1</attribute>
                     <attribute name="string">Código</attribute>
+                    <attribute name="invisible">1</attribute>
                 </xpath>
-                <field name="default_code"  position="replace">
-                    <field name="default_code" string="Código" attrs="{'invisible': [('product_variant_count', '&gt;', 1)]}"/>
-                </field>
             </field>
         </record>
+      
 
         <!--form de product template-->
         <record id="product_pattern_id" model="ir.ui.view">
             <field name="name">Nombre de modelo</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="priority">100</field>
             <field name="arch" type="xml">
 
                 <xpath expr="//form" position="attributes">
@@ -44,19 +44,28 @@
                     
                 </field>
 
-                <field name="standard_price" position="attributes">
-                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                
+
+                <!--<field name="standard_price" position="attributes">
+                    
                     <attribute name="string">Costo CIF</attribute>
-                </field>
+                </field>-->
                 <xpath expr="//field[@name='standard_price']" position="attributes">
                     <attribute name="string">Costo CIF</attribute>
                     <attribute name="required">1</attribute>
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
                 </xpath> 
+                <label for="standard_price" position="replace">
+                    <label string="Costo CIF" for="standard_price"  />
+                </label>
+                
                 <field name="company_id" position="before">
                     <field required="1" name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id'}"/>
                     <field name="percent_dif_cost"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
                     
                 </field>
+
+                
 
                 <field name="list_price" position="after" >
                     
