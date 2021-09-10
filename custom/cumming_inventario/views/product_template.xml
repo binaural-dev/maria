@@ -11,7 +11,7 @@
                 <xpath expr="//field[@name='default_code']" position="attributes">
                     <attribute name="required">1</attribute>
                     <attribute name="string">Código</attribute>
-                    <attribute name="invisible">1</attribute>
+                    
                 </xpath>
             </field>
         </record>
