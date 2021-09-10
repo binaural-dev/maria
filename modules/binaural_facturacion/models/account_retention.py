@@ -123,14 +123,30 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 line.move_id.line_ids.remove_move_reconcile()
             if line.move_id and line.move_id.state != 'draft':
                 line.move_id.button_cancel()
-            line.invoice_id.write({'apply_retention_iva': False, 'iva_voucher_number': None})
+            if line.invoice_id.type_retention in ['iva']:
+                line.invoice_id.write({'apply_retention_iva': False, 'iva_voucher_number': None})
+            if line.invoice_id.type_retention in ['islr']:
+                line.invoice_id.write({'apply_retention_islr': False, 'islr_voucher_number': None})
             #line.move_id.unlink()
         self.write({'state': 'cancel'})
         return True
     
+    def retention_currency_system(self):
+        self.write({'actual_currency_retention': False})
+        
+    def retention_foreign_currency(self):
+        self.write({'actual_currency_retention': True})
+    
     def action_draft(self):
         self.write({'state': 'draft'})
         return True
+    
+    def _check_group_multi_currency(self):
+        for record in self:
+            if self.env.user.has_group('binaural_facturacion.group_multi_currency_retention'):
+                record.multi_currency_retention = True
+            else:
+                record.multi_currency_retention = False
 
     name = fields.Char('Descripción', size=64, select=True, states={'draft': [('readonly', False)]},
                        help="Descripción del Comprobante")
@@ -180,6 +196,8 @@ class AccountRetentionBinauralFacturacion(models.Model):
         ('iva', 'IVA'),
         ('islr', 'ISLR'),
     ], 'Tipo de retención')
+    multi_currency_retention = fields.Boolean(string='Retenciones multimoneda', compute='_check_group_multi_currency')
+    actual_currency_retention = fields.Boolean(string='Retenciones en moneda alterna', default=False)
     
     def round_half_up(self, n, decimals=0):
         multiplier = 10 ** decimals
@@ -258,8 +276,18 @@ class AccountRetentionBinauralFacturacion(models.Model):
                     raise UserError(
                         "Disculpe, la factura " + str(ret_line.invoice_id.name) + ' no posee el monto retenido')
                 if ret_line.retention_id.type_retention in ['iva']:
+                    _logger.info('AGREGAR NUMERO DE COMPPOBANTE DE IVA A FACTURA ')
+                    _logger.info(ret_line.invoice_id.name)
+                    _logger.info(ret_line.retention_id.number)
                     ret_line.invoice_id.write(
                         {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
+                elif ret_line.retention_id.type_retention in ['islr']:
+                    _logger.info('AGREGAR NUMERO DE COMPPOBANTE DE ISLR A FACTURA ')
+                    _logger.info(ret_line.invoice_id.name)
+                    _logger.info(ret_line.retention_id.number)
+                    ret_line.invoice_id.write(
+                        {'apply_retention_islr': True, 'islr_voucher_number': ret_line.retention_id.number})
+                
             moves = self.env['account.move.line'].search(
                 [('move_id', 'in', move_ids), ('name', '=', 'Cuentas por Cobrar Cientes (R)')])
             for mv in moves:
@@ -280,8 +308,12 @@ class AccountRetentionBinauralFacturacion(models.Model):
                                 ret_line.invoice_id.amount_tax, decimal_places) or self.type_retention in ['islr']:
                             cxp = funtions_retention.search_account(self, ret_line)
                             if cxp and journal_purchase:
-                                sequence = self.sequence_iva_retention()
-                                correlative = sequence.next_by_code('retention.iva.control.number')
+                                if self.type_retention in ['iva']:
+                                    sequence = self.sequence_iva_retention()
+                                    correlative = sequence.next_by_code('retention.iva.control.number')
+                                else:
+                                    sequence = self.sequence_islr_retention()
+                                    correlative = sequence.next_by_code('retention.islr.control.number')
                                 today = datetime.now()
                                 number = str(today.year) + today.strftime("%m") + correlative
                                 self.write({'correlative': correlative, 'number': number})
@@ -340,8 +372,17 @@ class AccountRetentionBinauralFacturacion(models.Model):
                     raise UserError(
                         "Disculpe, la factura " + str(ret_line.invoice_id.name) + ' no posee el monto retenido')
                 if ret_line.retention_id.type_retention in ['iva']:
+                    _logger.info('AGREGAR NUMERO DE COMPPOBANTE DE IVA A FACTURA ')
+                    _logger.info(ret_line.invoice_id.name)
+                    _logger.info(ret_line.retention_id.number)
                     ret_line.invoice_id.write(
                         {'apply_retention_iva': True, 'iva_voucher_number': ret_line.retention_id.number})
+                elif ret_line.retention_id.type_retention in ['islr']:
+                    _logger.info('AGREGAR NUMERO DE COMPPOBANTE DE ISLR A FACTURA ')
+                    _logger.info(ret_line.invoice_id.name)
+                    _logger.info(ret_line.retention_id.number)
+                    ret_line.invoice_id.write(
+                        {'apply_retention_islr': True, 'islr_voucher_number': ret_line.retention_id.number})
             moves = self.env['account.move.line'].search(
                 [('move_id', 'in', move_ids), ('name', '=', 'Cuentas por Pagar Proveedores (R.IVA)')])
             for mv in moves:

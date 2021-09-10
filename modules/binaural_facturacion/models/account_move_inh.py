@@ -106,11 +106,21 @@ class AccountMoveBinauralFacturacion(models.Model):
                 'type_retention': 'islr',
                 'partner_id': vals_list['partner_id'],
                 'retention_line': vals_list['retention_islr_line_ids'],
+                'date_accounting': vals_list['date'],
+                'date': vals_list['date'],
             })
         _logger.info('resssssssssssssssssssssssssssssssssssssssss')
         _logger.info(res)
         return res
-
+    
+    def _check_origin_invoice(self):
+        sale = self.env['account.journal'].search([('name', '=', self.invoice_orgin)], limit=1)
+        if sale:
+            return {'readonly': {
+                'partner_id': True}}
+        else:
+            return
+        
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
 
@@ -129,8 +139,8 @@ class AccountMoveBinauralFacturacion(models.Model):
 
     apply_retention_iva = fields.Boolean(string="¿Se aplico retención de iva?", default=False, copy=False)
     apply_retention_islr = fields.Boolean(string="¿Se aplico retención de islr?", default=False, copy=False)
-    iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=True, copy=False)
-    islr_voucher_number = fields.Char(string="Comprobante de Retención de ISLR", readonly=True, copy=False)
+    iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=False, copy=False)
+    islr_voucher_number = fields.Char(string="Comprobante de Retención de ISLR", readonly=False, copy=False)
     # Foreing cyrrency fields
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
@@ -152,6 +162,12 @@ class AccountMoveBinauralFacturacion(models.Model):
     generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False, copy=False)
 
     retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'islr')])
+
+    @api.constrains('foreign_currency_rate')
+    def _check_foreign_currency_rate(self):
+        for record in self:
+            if record.foreign_currency_rate <= 0:
+                raise UserError("La tasa de la factura debe ser mayor que cero ")
 
     @api.depends('company_id', 'invoice_filter_type_domain', 'is_contingence')
     def _compute_suitable_journal_ids(self):
@@ -309,6 +325,9 @@ class AccountMoveBinauralFacturacion(models.Model):
         res = super(AccountMoveBinauralFacturacion, self)._write(vals)
         if 'date_reception' in vals:
             self._compute_days_expired()
+        _logger.info('EDITAR FACTURAS')
+        _logger.info(vals)
+        _logger.info('EDITAR FACTURAS')
         return res
 
     @api.depends('date_reception', 'invoice_date_due', 'invoice_payment_term_id', 'state')
@@ -476,21 +495,24 @@ class AccountMoveBinauralFacturacion(models.Model):
                 next_correlative = sequence.get_next_char(sequence.number_next_actual)
                 correlative = sequence.next_by_id(sequence.id)
                 move.write({'correlative':correlative})
-            if move.generate_retencion_iva:
+            if move.generate_retencion_iva and not move.iva_voucher_number:
                 retention = self.env['account.retention'].create({
                     'type': 'in_invoice',
                     'partner_id': move.partner_id.id,
-                    'type_retention': 'iva'
+                    'type_retention': 'iva',
+                    'date_accounting': move.date,
+                    'date': move.date,
                 })
                 data = funtions_retention.load_line_retention(retention, [], move.id)
                 retention.write({'retention_line': data})
                 retention.action_emitted()
-                move.write({'iva_voucher_number': retention.number})
-            if move.retention_islr_line_ids:
+                move.write({'iva_voucher_number': retention.number, 'apply_retention_iva': True})
+            if move.retention_islr_line_ids and not move.islr_voucher_number:
                 for rislr in move.retention_islr_line_ids:
                     if rislr.retention_id.type_retention in ['islr']:
+                        rislr.retention_id.write({'date': move.date, 'date_accounting': move.date})
                         rislr.retention_id.action_emitted()
-                        move.write({'islr_voucher_number': rislr.retention_id.number})
+                        move.write({'islr_voucher_number': rislr.retention_id.number, 'apply_retention_islr': True})
         return to_post
 
     #heredar constrain para permitir name duplicado solo en proveedor
