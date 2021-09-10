@@ -26,6 +26,7 @@
         # 'security/ir.model.access.csv',
         #'views/views.xml',
         #'views/templates.xml',
+        'views/res_config.xml',
         'views/sale_form_inh.xml',
         'views/sale_search_inh.xml',
         'views/sale_trees_inh.xml',

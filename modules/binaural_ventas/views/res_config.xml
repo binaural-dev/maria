@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_binaural_ventas" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.binaural.ventas</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="100"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+	        <xpath expr="//div[@id='pricing_setting_container']" position="after">
+                <h2>Configuraciones Binaural</h2>
+                <div class="row mt16 o_settings_container" name="operations_setting_container_binaural_sales">
+                    <div class="col-3 col-lg-3 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <div class="mt16 row">
+                                   <field name="not_cost_higher_price_sale" class="oe_inline" required="1"/>
+                            </div>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">No permitir costo Mayor o igual al precio de venta en pedidos</span>
+                            
+                        </div>
+                    </div>
+                </div>
+			</xpath>
+        </field>
+    </record>
+</odoo>
