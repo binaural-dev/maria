@@ -149,13 +149,14 @@ class ProductProduct(models.Model):
             else:
                 res = prod_cat.product_id
         return res
-
+    #se cambio operador ilike por =ilike
     @api.model
-    def name_search(self, name="", args=None, operator="ilike", limit=100):
+    def name_search(self, name="", args=None, operator="=ilike", limit=100):
         args = args or []
         res_alt = []
+        operator="=ilike"
         if name and len(name) > 2:
-            alternative_ids = self.env["product.alternative"].search([("name", "ilike", name),('hide','=',False)], limit=10)#si es hide no buscar
+            alternative_ids = self.env["product.alternative"].search([("name", "=ilike", name),('hide','=',False)], limit=10)#si es hide no buscar
 
             products = self.env["product.product"]
             for alternative in alternative_ids:
@@ -169,7 +170,7 @@ class ProductProduct(models.Model):
         res = super(ProductProduct, this).name_search(name, args, operator=operator, limit=limit) + res_alt
         #buscar por codigo alternativo manual
         if len(name) != 0:
-            operator = 'ilike' #'='
+            operator = '=ilike' #'='
             args = expression.AND([args, [('alternative_manual', operator, name)]])
             p = self.search(args, limit=limit)
             if p:
