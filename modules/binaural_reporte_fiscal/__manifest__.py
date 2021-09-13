@@ -19,7 +19,7 @@
     'version': '14.0.1.0.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['binaural_facturacion'],
+    'depends': ['binaural_facturacion', 'account_reports'],
 
     # always loaded
     'data': [
@@ -31,6 +31,8 @@
         'report/report_arcv.xml',
         'views/account_retention.xml',
         'views/mail_template.xml',
+        'views/search_template_view.xml',
+        'views/assets.xml',
         'wizard/txt_wizard.xml',
         'wizard/arcv_wizard.xml',
     ],
