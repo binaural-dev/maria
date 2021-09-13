@@ -16,7 +16,7 @@ class PriceByPricelistbinauralInventario(models.Model):
 	@api.depends('price', 'pricelist_name')
 	def _compute_fields_combination(self):
 		for test in self:
-			test.combination = str(test.pricelist_name) + ' ' + str(test.price)
+			test.combination = str(test.pricelist_name) + ' ' + str(round(test.price),2)
 
 
 class ProductTemplateCummingInventario(models.Model):

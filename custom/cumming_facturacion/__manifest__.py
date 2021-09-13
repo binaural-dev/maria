@@ -27,6 +27,7 @@
         'report/report_invoice_document_override.xml',
         'report/invoice_free_form.xml',
         'report/invoice_free_form_bs.xml',
+        'views/res_partner.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
