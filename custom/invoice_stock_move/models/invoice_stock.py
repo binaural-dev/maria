@@ -45,6 +45,11 @@ class InvoiceStockMove(models.Model):
             for line in data:
                 if line.code == 'outgoing':
                     return line
+        #en caso de que context no tenga nada dentro de los tipos permitidos retornar por defecto outgoing
+        if self._context.get('default_move_type') not in ['out_invoice','in_invoice','out_refund','in_refund']:
+            for line in code:
+                if line.code == 'outgoing':
+                    return line
     picking_count = fields.Integer(string="Count",copy=False)
     invoice_picking_id = fields.Many2one('stock.picking', string="Picking Id",copy=False)
 
@@ -62,6 +67,11 @@ class InvoiceStockMove(models.Model):
         ('done', 'Received'),
     ], string='Status', index=True, readonly=True, default='draft',
         track_visibility='onchange', copy=False)
+
+    def button_cancel(self):
+        if any(m.invoice_picking_id and m.invoice_picking_id.state !='cancel' for m in self):
+            raise UserError("No puedes cancelar una factura con orden de entrega sin cancelar.")
+        return super(InvoiceStockMove, self).button_cancel()
 
     def action_stock_move(self):
         self.ensure_one()

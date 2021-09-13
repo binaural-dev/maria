@@ -79,10 +79,10 @@
             <field name="inherit_id" ref="product.product_template_search_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//search" position="inside">
-                      <filter string="Marca" name="brand" context="{'group_by':'brand_id'}"/>
+                      <filter string="Marca" name="brand" context="{'group_by':'brand_id'}" invisible="1"/>
                 </xpath>
                 <field name="name" position="after">
-                    <field string="Marca" name="brand_id"/>
+                    <field string="Marca" name="brand_id" invisible="1"/>
                 </field>
             </field>
         </record>

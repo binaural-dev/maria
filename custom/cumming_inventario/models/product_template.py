@@ -22,9 +22,9 @@ class PriceByPricelistbinauralInventario(models.Model):
 class ProductTemplateCummingInventario(models.Model):
 	_inherit = 'product.template'
 
-	pattern_id = fields.Many2one('product.pattern',string='Modelo')
-	fob_cost = fields.Float(string='Costo FOB',required=True)
-	percent_dif_cost = fields.Float(string='% DIF CIF y FOB',compute="_compute_margin_cost",store=True)
+	pattern_id = fields.Many2one('product.pattern',string='Modelo',tracking=True)
+	fob_cost = fields.Float(string='Costo FOB',required=True,tracking=True)
+	percent_dif_cost = fields.Float(string='% DIF CIF y FOB',compute="_compute_margin_cost",store=True,tracking=True)
 	standard_price = fields.Float(
 		'Costo CIF', compute='_compute_standard_price',
 		inverse='_set_standard_price', search='_search_standard_price',
@@ -36,7 +36,7 @@ class ProductTemplateCummingInventario(models.Model):
 
 	default_code = fields.Char(
 		'Código', compute='_compute_default_code',
-		inverse='_set_default_code', store=True)
+		inverse='_set_default_code', store=True,tracking=True)
 
 
 	price_by_pricelist = fields.One2many('price.by.pricelist', 'product_template_id', string='Listas de precios')
