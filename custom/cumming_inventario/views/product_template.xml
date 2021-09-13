@@ -219,12 +219,12 @@
             <field name="inherit_id" ref="product.product_template_search_view"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                    <field string="Modelo" name="pattern_id"/>
-                    <field string="Proveedor" name="seller_ids" />
+                    <field string="Modelo" name="pattern_id" invisible="1"/>
+                    <field string="Proveedor" name="seller_ids" invisible="1"/>
                 </field>
 
                 <xpath expr="//search" position="inside">
-                    <filter string="Modelo" name="Pattern" context="{'group_by':'pattern_id'}"/>
+                    <filter string="Modelo" name="Pattern" context="{'group_by':'pattern_id'}" invisible="1"/>
                 </xpath>
 
             </field>

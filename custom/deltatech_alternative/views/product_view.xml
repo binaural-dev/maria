@@ -9,9 +9,15 @@
             <field name="type">search</field>
             <field name="arch" type="xml">
                 <field name="name" position="before">
-                    <field name="alternative_full" string="Equivalencias" />
-                    <field name="default_code" string="Codigo" filter_domain="['|', '|', ('default_code', '=ilike', self), ('name', '=ilike', self), ('barcode', '=ilike', self)]"/>
-                    
+                    <field name="alternative_full" string="Productos" filter_domain="['|', '|','|',('default_code', 'ilike', self), ('name', 'ilike', self), ('barcode', 'ilike', self),('alternative_full', 'ilike', self)]"/>
+                    <field name="default_code" string="Codigo" filter_domain="['|', '|', ('default_code', 'ilike', self), ('name', 'ilike', self), ('barcode', 'ilike', self)]"/>
+                    <field name="alternative_full" string="Equivalencias" />  
+                    <field name="name" position="attributes">
+                        <attribute name="invisible">1</attribute>
+                    </field>
+                    <field name="categ_id" position="attributes">
+                        <attribute name="invisible">1</attribute>
+                    </field>
                 </field>
             </field>
         </record>
