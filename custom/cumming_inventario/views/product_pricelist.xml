@@ -14,6 +14,23 @@
                     
                 </field>
             </field>
-        </record>             
+        </record>        
+
+        <!--formulario de item-->
+        <record id="product_pricelist_cumming_item" model="ir.ui.view">
+            <field name="name">Ajuste en item lista de precios cumming</field>
+            <field name="model">product.pricelist.item</field>
+            <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+            <field name="arch" type="xml">
+                
+                <field name="product_id" position="after">
+                   <field name="product_cost_cumming" attrs="{'invisible':[('applied_on', '!=', '0_product_variant')]}"/>
+                </field>
+                <field name="product_tmpl_id" position="after">
+                   <field name="product_cost_cumming_tmpl" attrs="{'invisible':[('applied_on', '!=', '1_product')]}"/>
+                </field>
+            </field>
+        </record>       
+             
     </data>
 </odoo>

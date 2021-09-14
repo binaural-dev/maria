@@ -22,3 +22,9 @@ class ProductPricelistCummingInventario(models.Model):
 		#trigger recalcular lista de precios por producto
 		self.env['product.template'].sudo().trigger_onchange_pricelist()
 		return res"""
+
+class ProductPricelistItemCummingInventario(models.Model):
+	_inherit = 'product.pricelist.item'
+
+	product_cost_cumming_tmpl = fields.Float(string='Costo',related="product_tmpl_id.standard_price")
+	product_cost_cumming = fields.Float(string='Costo',related="product_id.standard_price")
