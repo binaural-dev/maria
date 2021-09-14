@@ -75,7 +75,7 @@
                             <tree string="Equivalencias" editable="bottom" >
                                 <field name="sequence" widget="handle" />
                                 <field name="name" />
-                                <field name="product_tmpl_id_select" widget='selection'/>
+                                <field name="product_tmpl_id_select" options="{'no_open': True, 'no_create_edit': True, 'no_create': True}" required="1"/>
                                 <field name="hide" string="Ocultar" invisible="1" />
                             </tree>
                         </field>
