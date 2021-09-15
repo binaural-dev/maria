@@ -12,7 +12,17 @@
                     <attribute name="required">1</attribute>
                     <attribute name="string">Código</attribute>
                     
+                    
                 </xpath>
+                
+
+                <xpath expr="//field[@name='barcode']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath> 
+                <!--<xpath expr="//field[@name='type']" position="before">
+                    <xpath expr="//field[@name='default_code'][1]" position="move">
+                    </xpath>
+                </xpath>--> 
             </field>
         </record>
       
@@ -35,14 +45,26 @@
                     <attribute name="string">Tipo concepto</attribute>
                 </xpath> 
 
+
+                <xpath expr="//field[@name='type']" position="before">
+                    <field name="default_code"></field>
+                </xpath> 
+
                 <field name="categ_id" position="after">
+                    <field name="alternative_code" string="Equivalencias"/>
+                    <field name="alternative_manual" string="Otras Equivalencias" />
+                    <field name="alternative_full" invisible="1"/>
+                    <field name="used_for" invisible="1"/>
+                    <field name="brand_id" string="Marca" required="1"/>
                     <field name="pattern_id" string="Modelo" required="1"/>
                     
                     <button groups="base.group_system" invisible="1" name="trigger_onchange_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Sync">
                             
                     </button>
+                    <field name="barcode" />
                     
                 </field>
+           
 
                 
 
@@ -83,12 +105,13 @@
                 <field name="seller_ids" position="attributes">
                     <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
                 </field>
+
                 <xpath expr="//div[hasclass('oe_title')]/label" position="before">
                     <h1>
                         <field name="default_code" readonly="1" force_save="1"/>
                     </h1>
                 </xpath>
-
+            
                 <field name="company_id" position="after">
                     <field name="provider_names" style="white-space:break-spaces !important"/>
                     <field name="price_pricelist_names" style="white-space:break-spaces !important"/>
