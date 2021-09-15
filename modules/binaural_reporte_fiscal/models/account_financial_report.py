@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
 from pprint import pprint
+from collections import OrderedDict
 
 
 class ReportAccountFinancialReport(models.Model):
@@ -7,13 +8,26 @@ class ReportAccountFinancialReport(models.Model):
 
     @api.model
     def _get_options(self, previous_options=None):
-        res = super(ReportAccountFinancialReport, self)._get_options(previous_options)
+        """
+        Obtenemos las opciones de moneda,
+        verificamos la opciones anteriores o agregamos las opciones si no existen
+        """
         alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
         alternate_currency = self.env['res.currency'].browse(alternate_currency)
-        res.update({'currency': [{'name': alternate_currency.name, 'id': alternate_currency.id, 'selected': False},
-                                 {'name': self.env.user.company_id.currency_id.name, 'id': self.env.user.currency_id.id,
-                                  'selected': True}]})
-        return res
+        handlers = OrderedDict({'currency': [
+            {'name': alternate_currency.name, 'id': alternate_currency.id, 'selected': False},
+            {'name': self.env.user.company_id.currency_id.name, 'id': self.env.user.currency_id.id, 'selected': True}]}
+        )
+        current_options = super(ReportAccountFinancialReport, self)._get_options(previous_options)
+
+        for key, handler in handlers.items():
+            currency_previus = previous_options.get('currency', False)
+            if currency_previus:
+                previous_handler_value = previous_options[key]
+            else:
+                previous_handler_value = handler
+            current_options[key] = previous_handler_value
+        return current_options
 
 
 class AccountFinancialReportLineBinaural(models.Model):
@@ -58,12 +72,7 @@ class AccountFinancialReportLineBinaural(models.Model):
             line_domain = self._get_domain(new_options, parent_financial_report)
 
             tables, where_clause, where_params = AccountFinancialReportHtml._query_get(new_options, domain=line_domain)
-            # currency_id = {currency.get('id') for currency in options['currency'] if currency.get('selected')}
             currency_id = self.get_option_currency(options['currency'])
-            print("currency_id", currency_id)
-            print("self.env.user.company_id.currency_id.id", self.env.user.company_id.currency_id.id)
-            pprint(options['currency'])
-            currency = ''
             if currency_id != self.env.user.company_id.currency_id.id:
                 currency = 'account_move_line.foreign_currency_rate'
             else:

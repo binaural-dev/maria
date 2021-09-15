@@ -12,7 +12,6 @@
 
         <template id="search_template_currency_bin">
             <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle" data-toggle="dropdown">
-                <span class="fa fa-money-bill"/>
                 Moneda:
                 <t t-set="selected_currency" t-value="', '.join(currency.get('name') for currency in options['currency'] if currency.get('selected'))"/>
                 <!--<t t-set="selected_currency" t-value="options.get('currency')"/>-->
