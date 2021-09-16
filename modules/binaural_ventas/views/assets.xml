@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assets_backend" name="ventas assetss" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/binaural_ventas/static/src/js/tours/ventas.js"></script>
+        </xpath>
+    </template>
+    <!-- Test true -->
+    <!-- <template id="assets_test" name="ventas assets tours" inherit_id="web.assets_test">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/binaural_ventas/static/tests/tours/ventas_tours.js"></script>
+        </xpath>
+    </template> -->
+</odoo>

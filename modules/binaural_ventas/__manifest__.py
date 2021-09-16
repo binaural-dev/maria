@@ -19,17 +19,19 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','sale','binaural_contactos_configuraciones'],
+    'depends': ['base','sale','binaural_contactos_configuraciones', 'web_tour'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         #'views/views.xml',
         #'views/templates.xml',
+        'views/assets.xml',
         'views/res_config.xml',
         'views/sale_form_inh.xml',
         'views/sale_search_inh.xml',
         'views/sale_trees_inh.xml',
+        
     ],
     # only loaded in demonstration mode
     'demo': [
