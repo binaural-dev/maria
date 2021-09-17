@@ -162,7 +162,6 @@ class AccountFinancialReportLineBinaural(models.Model):
         if groupby_in_formula and self.groupby and self.groupby not in all_groupby_list:
             all_groupby_list.append(self.groupby)
         groupby_clause = ','.join('account_move_line.%s' % gb for gb in all_groupby_list)
-        pprint(options_list[0])
         ct_query = self.env['res.currency']._get_query_currency_table(options_list[0])
         parent_financial_report = self._get_financial_report()
 
