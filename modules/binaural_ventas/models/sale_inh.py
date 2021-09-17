@@ -500,6 +500,17 @@ class SaleOrderLineBinauralVentas(models.Model):
                 'foreign_price_unit': order.price_unit * order.order_id.foreign_currency_rate,
                 'foreign_subtotal': order.price_subtotal * order.order_id.foreign_currency_rate,
             })
+
+    #validar que el precio unitario no sea mayor al costo del producto, basado en la configuracion
+    @api.onchange('price_unit','product_id')
+    def onchange_price_unit_check_cost(self):
+        for l in self:
+            if self.env['ir.config_parameter'].sudo().get_param('not_cost_higher_price_sale') and l.price_unit and l.product_id:
+                _logger.info("costo del producto %s",l.product_id.standard_price)
+                _logger.info("precio unitario %s",l.price_unit)
+                if l.price_unit <= l.product_id.standard_price and l.product_id.type == 'product':#solo aplica a almacenables
+                    raise ValidationError("Precio unitario no puede ser menor o igual al costo del producto")
+
     
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,
