@@ -26,6 +26,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/config_sequence.xml',
+        'views/res_config.xml',
         'views/config_views.xml',
         'views/account_move_form_inh.xml',
         'views/account_move_search_inh.xml',

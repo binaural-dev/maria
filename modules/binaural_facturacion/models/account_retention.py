@@ -123,9 +123,9 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 line.move_id.line_ids.remove_move_reconcile()
             if line.move_id and line.move_id.state != 'draft':
                 line.move_id.button_cancel()
-            if line.invoice_id.type_retention in ['iva']:
+            if line.retention_id.type_retention in ['iva']:
                 line.invoice_id.write({'apply_retention_iva': False, 'iva_voucher_number': None})
-            if line.invoice_id.type_retention in ['islr']:
+            if line.retention_id.type_retention in ['islr']:
                 line.invoice_id.write({'apply_retention_islr': False, 'islr_voucher_number': None})
             #line.move_id.unlink()
         self.write({'state': 'cancel'})
