@@ -1,7 +1,40 @@
 <odoo>
     <data>
+        <record id="product_pricelist_action_cumming" model="ir.actions.act_window">
+            <field name="name">Pricelists</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.pricelist.item</field>
+            <field name="view_mode">tree,form</field>
+            <!--<field name="search_view_id" ref="product_pricelist_view_search" />-->
+            <!--<field name="context">{"default_base":'list_price'}</field>-->
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a new pricelist
+              </p><p>
+                A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.
+                This is the perfect tool to handle several pricings, seasonal discounts, etc.
+              </p><p>
+                You can assign pricelists to your customers or select one when creating a new sales quotation.
+              </p>
+            </field>
+        </record>
 
+        <!---->
+        <menuitem id="menu_product_pricelist_item" name="Precios de productos" parent="stock.menu_stock_inventory_control" action="product_pricelist_action_cumming"  sequence="3" active=""/><!--<menuitem id="menu_product_pricelist_main" name="Pricelists" parent="product_menu_catalog" action="product.product_pricelist_action2" groups="product.group_product_pricelist" sequence="3" active="False"/>-->
         <!--lista de items-->
+
+        <record id="item_price_search_cummin" model="ir.ui.view">
+            <field name="name">product.template.search.inherit.pricelist.item</field>
+            <field name="model">product.pricelist.item</field>
+            <field name="inherit_id" ref="product.product_pricelist_item_view_search"/>
+            <field name="arch" type="xml">
+                <field name="pricelist_id" position="before">
+                    <field string="Producto" name="alternative_full" />
+                </field>
+            </field>
+        </record>
+
+        
         
         <record id="product_pricelist_item_tree_view_cummin" model="ir.ui.view">
             <field name="name">Lista de pricelist items</field>

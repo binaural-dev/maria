@@ -33,6 +33,8 @@ class ProductPricelistItemCummingInventario(models.Model):
 	product_fob_cumming_tmpl = fields.Float(string='Costo Fob',related="product_tmpl_id.fob_cost",store=True)
 	percent_profit = fields.Float(string='% Ganancias',compute="_compute_margin_profit",store=True)
 
+	alternative_full = fields.Char(string='Productos full',related="product_tmpl_id.alternative_full",store=True)
+
 
 	applied_on = fields.Selection([
 		('3_global', 'All Products'),
