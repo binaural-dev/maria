@@ -8,7 +8,7 @@ class ResConfigSettingsInvoiceStockMove(models.TransientModel):
 	_inherit = 'res.config.settings'
 
 	picking_with_residual = fields.Boolean(string='Permitir generar orden de inventario desde factura con saldo deudor')
-	picking_from_sale_orer = fields.Boolean(string='Permitir generar orden de invetario automatica desde pedido de ventas')
+	picking_from_sale_orer = fields.Boolean(string='Permitir generar orden de inventario automatica desde pedido de ventas')
 
 
 	def set_values(self):
