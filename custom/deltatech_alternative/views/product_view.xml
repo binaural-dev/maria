@@ -60,14 +60,16 @@
             <field name="inherit_id" ref="product.product_template_form_view" />
             <field name="priority" eval="16" />
             <field name="arch" type="xml">
-                <field name="categ_id" position="after">
+                <!--
+                    Manejar directo en cumming inventario
+                    <field name="categ_id" position="after">
                     
                         <field name="alternative_code" string="Equivalencias"/>
                         <field name="alternative_manual" string="Otras Equivalencias" />
                         <field name="alternative_full" invisible="1"/>
                         <field name="used_for" invisible="1"/>
                    
-                </field>
+                </field>-->
                 <notebook position="inside">
                     <page string="Equivalencias">
                        

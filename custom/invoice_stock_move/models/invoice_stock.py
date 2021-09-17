@@ -47,7 +47,7 @@ class InvoiceStockMove(models.Model):
                     return line
         #en caso de que context no tenga nada dentro de los tipos permitidos retornar por defecto outgoing
         if self._context.get('default_move_type') not in ['out_invoice','in_invoice','out_refund','in_refund']:
-            for line in code:
+            for line in data:
                 if line.code == 'outgoing':
                     return line
     picking_count = fields.Integer(string="Count",copy=False)
