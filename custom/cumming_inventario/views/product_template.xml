@@ -265,12 +265,28 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_kanban_view"/>
             <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='name']" position="before">
+                    <xpath expr="//field[@name='default_code']" position="move"/>
+                </xpath> 
+
+
                 <div name="product_lst_price" position="after">
-                    <field name="pattern_id" />
-                    <field name="price_by_pricelist" widget="many2many_tags"/>
-                    <field name="seller_ids" widget="many2many_tags"/>
-                    
+                    <div>
+                        <field name="price_by_pricelist" widget="many2many_tags"/>
+                    </div>
+                    <div>
+                        <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
+                    </div>
+                    <div>
+                        <div t-if="record.type.raw_value == 'product'">Disp por Vender: <field name="available_qty"/> <field name="uom_id"/></div>
+                        <field name="pattern_id" />
+                        <field name="seller_ids" widget="many2many_tags"/>
+                    </div>
                 </div>
+             
+
+
             </field>
         </record>
     

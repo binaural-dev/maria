@@ -29,7 +29,7 @@
     'company': 'Cybrosys Techno Solutions',
     'website': "https://www.cybrosys.com",
     'category': 'Accounting',
-    'depends': ['base', 'account', 'stock', 'payment','sale_stock'],
+    'depends': ['base', 'account', 'stock', 'payment','sale_stock','binaural_inventario'],
     'data': [
         'security/invoice_stock_move_security.xml',
         'views/invoice_stock_move_view.xml',
