@@ -91,7 +91,7 @@
 
                 <field name="list_price" position="after" >
                     
-                    <button name="onchange_list_price_price_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Recalcular Precios">
+                    <button  invisible="1" name="onchange_list_price_price_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Recalcular Precios">
                             
                     </button>
                     
@@ -112,15 +112,19 @@
                     </h1>
                 </xpath>
             
-                <field name="company_id" position="after">
+                <field name="company_id" position="before">
+                    <field name="price_a" string="Lista de precios A" force_save="1" readonly="1"/>
+                    <field name="price_b" string="Lista de precios B" force_save="1" readonly="1"/>
+                    <field name="price_c" string="Lista de precios C" force_save="1" readonly="1"/>
+                    <field name="price_d" string="Lista de precios D" force_save="1" readonly="1"/>
                     <field name="provider_names" style="white-space:break-spaces !important"/>
-                    <field name="price_pricelist_names" style="white-space:break-spaces !important"/>
+                    <field name="price_pricelist_names" style="white-space:break-spaces !important" invisible="1"/>
                     <!--<field name="price_by_pricelist" widget="many2many_tags"/>-->
                 </field>
               
                 
                 <notebook position="inside">
-                    <page string="Precios">
+                    <page string="Precios" invisible="1">
                         <separator string="Precios" colspan="4" />
                         <field name="price_by_pricelist" colspan="4" nolabel="1">
                             <tree string="Precios">
@@ -144,7 +148,11 @@
             <field name="inherit_id" ref="product.product_template_tree_view"/>
             <field name="arch" type="xml">
                 <field name="list_price" position="after">
-                    <field name="price_by_pricelist" widget="many2many_tags"/>
+                    <field name="price_a" />
+                    <field name="price_b" />
+                    <field name="price_c" />
+                    <field name="price_d" />
+                    <field name="price_by_pricelist" widget="many2many_tags" invisible="1"/>
                     
                 </field>
                  <field name="list_price" position="before">
@@ -270,19 +278,40 @@
                     <xpath expr="//field[@name='default_code']" position="move"/>
                 </xpath> 
 
-
+                <div name="product_lst_price" position="attributes">
+                    <attribute name="class">d-none</attribute>
+                </div>
                 <div name="product_lst_price" position="after">
                     <div>
-                        <field name="price_by_pricelist" widget="many2many_tags"/>
+                        <field name="price_by_pricelist" widget="many2many_tags" invisible="1"/>
+                        
                     </div>
                     <div>
-                        <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
+                        Precio A: <field name="price_a"/>
                     </div>
+                    <div>
+                        Precio B: <field name="price_b" string="Precio B"/>
+                    </div>
+                   <!-- <div>
+                        Precio C: <field name="price_c" string="Precio C"/>
+                    </div>
+                    <div>
+                        Precio D: <field name="price_d" string="Precio "/>
+                    </div>-->
+                    <!--csa y repubus estan en el modulo de quantity by location-->
                     <div>
                         <div t-if="record.type.raw_value == 'product'">Disp por Vender: <field name="available_qty"/> <field name="uom_id"/></div>
-                        <field name="pattern_id" />
-                        <field name="seller_ids" widget="many2many_tags"/>
+                        <!--<field name="pattern_id" invisible="1"/>-->
+                       <!-- <field name="seller_ids" widget="many2many_tags" invisible="1"/>-->
                     </div>
+                    <div>
+                        <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse" invisible="1"/>
+                        CSA: <field name="quantity_csa" />
+                    </div>
+                    <div>
+                        REP: <field name="quantity_repubus" />
+                    </div>
+            
                 </div>
              
 

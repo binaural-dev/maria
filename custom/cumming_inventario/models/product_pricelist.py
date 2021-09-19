@@ -6,24 +6,32 @@ _logger = logging.getLogger(__name__)
 class ProductPricelistCummingInventario(models.Model):
 	_inherit = 'product.pricelist'
 
-
+	cumming_list = fields.Selection([
+		('a', 'A'),
+		('b', 'B'),
+		('c', 'C'),
+		('d', 'D'),
+	], string='Identificador de lista')
 	def recompute_pricelist_by_product(self):
 		self.env['product.template'].sudo().trigger_onchange_pricelist()
 		return True
 
-	"""@api.model
-	def create(self,values):
-		res = super(ProductPricelistCummingInventario, self).create(values)
-		#trigger recalcular lista de precios por producto
-		self.env['product.template'].sudo().trigger_onchange_pricelist()
-		return res
-
-	def write(self,values):
-		res = super(ProductPricelistCummingInventario, self).write(values)
-		#trigger recalcular lista de precios por producto
-		self.env['product.template'].sudo().trigger_onchange_pricelist()
-		return res"""
-
+	def show_item_by_list(self):
+		#enviar a lista de product items con domain de lista cumming
+		#cumming_list
+		#return self.env.ref('proandsys_rac_14.action_picking_in_team_2_ready').read()[0]
+		views = [(self.env.ref('product.product_pricelist_item_tree_view').id, 'tree'), (self.env.ref('product.product_pricelist_item_form_view').id, 'form')]
+		return{
+		   'name': 'Productos en lista',
+			'view_type': 'form',
+			'view_mode': 'tree,form',
+			'view_id': False,
+			'res_model': 'product.pricelist.item',
+			'views': views,
+			'domain': [('cumming_list', '=', self.cumming_list)],
+			'type': 'ir.actions.act_window',
+			#'context':{'contact_display': 'partner_address', 'search_default_available': 1}
+		}
 class ProductPricelistItemCummingInventario(models.Model):
 	_inherit = 'product.pricelist.item'
 	#este es de variante
@@ -35,6 +43,7 @@ class ProductPricelistItemCummingInventario(models.Model):
 
 	alternative_full = fields.Char(string='Productos full',related="product_tmpl_id.alternative_full",store=True)
 
+	#duda: hacer que combinacion de product template y lista de precios sea unica ?
 
 	applied_on = fields.Selection([
 		('3_global', 'All Products'),
@@ -45,6 +54,13 @@ class ProductPricelistItemCummingInventario(models.Model):
 		help='Pricelist Item applicable on selected option')
 
 
+	cumming_list = fields.Selection([
+		('a', 'A'),
+		('b', 'B'),
+		('c', 'C'),
+		('d', 'D'),
+	], string='Identificador de lista',related="pricelist_id.cumming_list",store=True)
+
 
 	@api.depends('fixed_price')
 	def _compute_margin_profit(self):
@@ -52,4 +68,7 @@ class ProductPricelistItemCummingInventario(models.Model):
 		for line in self:
 			_logger.info("line.product_cost_cumming_tmpl %s",line.product_cost_cumming_tmpl)
 			margin = line.fixed_price - line.product_cost_cumming_tmpl
-			line.percent_profit = line.fixed_price and margin/line.fixed_price
+			if line.product_cost_cumming_tmpl >0:
+				line.percent_profit = line.fixed_price and margin/line.product_cost_cumming_tmpl
+			else:
+				line.percent_profit = margin
