@@ -76,6 +76,7 @@ class ProductTemplate(models.Model):
                 _logger.info(tt_warehouses)
    
                 cont = 0
+                _logger.info("tt_warehouses %s",tt_warehouses)
                 for item in tt_warehouses:
                     if cont == 0:
                         if tt_warehouses[item]:

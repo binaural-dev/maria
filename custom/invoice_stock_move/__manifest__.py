@@ -35,6 +35,7 @@
         'views/invoice_stock_move_view.xml',
         'views/sale_views.xml',
         'views/res_config.xml',
+        'views/stock_warehouse.xml',
     ],
     'images': ['static/description/banner.png'],
     'license': 'AGPL-3',

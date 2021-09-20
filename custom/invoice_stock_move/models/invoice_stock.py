@@ -21,10 +21,24 @@
 #############################################################################
 from odoo.exceptions import UserError
 from odoo import models, fields, api, _
-
-
+import logging
+_logger = logging.getLogger(__name__)
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, float_compare, float_round
+#acount move
 class InvoiceStockMove(models.Model):
     _inherit = 'account.move'
+
+    @api.model
+    def _default_warehouse_id(self):
+        # !!! Any change to the default value may have to be repercuted
+        # on _init_column() below.
+        #return self.env.user._get_default_warehouse_id()
+        _logger.info("self.env['stock.warehouse'].sudo().search([('is_sale_storage','=',True)],limit=1).id %s",self.env['stock.warehouse'].sudo().search([('is_sale_storage','=',True)],limit=1).id)
+        return self.env['stock.warehouse'].sudo().search([('is_sale_storage','=',True)],limit=1).id
+    warehouse_id = fields.Many2one(
+        'stock.warehouse', string='Almacen',
+        default=_default_warehouse_id)
+
 
     def _get_stock_type_ids(self):
         data = self.env['stock.picking.type'].search([])
@@ -149,6 +163,47 @@ class InvoiceStockMove(models.Model):
 class SupplierInvoiceLine(models.Model):
     _inherit = 'account.move.line'
 
+    warehouse_id = fields.Many2one(
+        'stock.warehouse', string='Almacen',
+        related='move_id.warehouse_id')
+
+    @api.onchange('quantity', 'product_id', 'warehouse_id')
+    def _onchange_product_id_check_availability(self):
+        if not self.product_id or not self.quantity or not self.warehouse_id:
+            return {}
+        if self.product_id.type == 'product':
+            _logger.info("self.product_id.free_qty arriba %s",self.product_id.free_qty)
+            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+            product = self.product_id.with_context(
+                warehouse=self.warehouse_id.id,
+                lang=self.move_id.partner_id.lang or self.env.user.lang or 'en_US'
+            )
+            #buscar cantidad por almacen elegido
+            #product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
+            #if product.virtual_available < self.quantity:
+            for warehouse in self.env['stock.warehouse'].search([]):
+                quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
+                _logger.info("quantity %s",quantity)
+            if product.free_qty < self.quantity:
+                if 1 == 1:
+                    message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s.') % \
+                            (self.quantity, self.product_id.uom_id.name, self.product_id.name, product.free_qty, product.uom_id.name, self.warehouse_id.name)
+                    # We check if some products are available in other warehouses.
+                    _logger.info("self.product_id.free_qty %s",self.product_id.free_qty)
+                    if product.free_qty < self.product_id.free_qty:
+                        message += _('\nExisten %s %s disponible entre todos los almacenes.\n\n') % \
+                                (self.product_id.free_qty, product.uom_id.name)
+                        for warehouse in self.env['stock.warehouse'].search([]):
+                            quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
+                            if quantity > 0:
+                                message += "%s: %s %s\n" % (warehouse.name, quantity, self.product_id.uom_id.name)
+                    warning_mess = {
+                        'title': _('No hay suficiente inventario!'),
+                        'message' : message
+                    }
+                    self.quantity = 0
+                    return {'warning': warning_mess}
+        return {}
     def _create_stock_moves(self, picking):
         moves = self.env['stock.move']
         done = self.env['stock.move'].browse()
