@@ -299,17 +299,16 @@
                         Precio D: <field name="price_d" string="Precio "/>
                     </div>-->
                     <!--csa y repubus estan en el modulo de quantity by location-->
-                    <div>
+                    <!--<div>
                         <div t-if="record.type.raw_value == 'product'">Disp por Vender: <field name="available_qty"/> <field name="uom_id"/></div>
-                        <!--<field name="pattern_id" invisible="1"/>-->
-                       <!-- <field name="seller_ids" widget="many2many_tags" invisible="1"/>-->
-                    </div>
+                       
+                    </div>-->
                     <div>
                         <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse" invisible="1"/>
-                        CSA: <field name="quantity_csa" />
+                        <field name="quantity_csa" />
                     </div>
                     <div>
-                        REP: <field name="quantity_repubus" />
+                        <field name="quantity_repubus" />
                     </div>
             
                 </div>

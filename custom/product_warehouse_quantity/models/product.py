@@ -18,7 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #################################################################################
-
+from odoo.tools import pycompat,float_is_zero
+from odoo.tools.float_utils import float_round
 from odoo import api, fields, models, _
 import logging
 _logger = logging.getLogger(__name__)
@@ -45,11 +46,12 @@ class ProductTemplate(models.Model):
             if product_id:
                 quant_ids = self.env['stock.quant'].sudo().search([('product_id','=',product_id[0].id),('location_id.usage','=','internal')])
                 t_warehouses = {}
+                rounding = product_id.uom_id.rounding
                 for quant in quant_ids:
                     if quant.location_id:
                         if quant.location_id not in t_warehouses:
                             t_warehouses.update({quant.location_id:0})
-                        t_warehouses[quant.location_id] += quant.quantity
+                        t_warehouses[quant.location_id] += float_round(quant.quantity - quant.reserved_quantity,precision_rounding=rounding)
 
                 tt_warehouses = {}
                 for location in t_warehouses:
