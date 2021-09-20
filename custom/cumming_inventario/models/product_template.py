@@ -44,6 +44,29 @@ class ProductTemplateCummingInventario(models.Model):
 
 	provider_names = fields.Char(string='Proveedor',index=True, compute="_compute_provider_names")
 
+	price_a = fields.Float(string='Precio Lista A',compute="_compute_price_by_cumming_list")
+	price_b = fields.Float(string='Precio Lista B',compute="_compute_price_by_cumming_list")
+	price_c = fields.Float(string='Precio Lista C',compute="_compute_price_by_cumming_list")
+	price_d = fields.Float(string='Precio Lista D',compute="_compute_price_by_cumming_list")
+	#se puede hacer con campo binario y widget como pedido en caso de que se quieran dinamicas
+	def _compute_price_by_cumming_list(self):
+		#buscar items de lista de precios con identificador cumming y que el producto sea el actual en el for
+		for product in self:
+			items = self.env['product.pricelist.item'].sudo().search([('cumming_list','!=',False),('applied_on','=','1_product'),('product_tmpl_id','=',product.id)])
+			#si el identificador cumming coincide poner el precio
+			product.price_a = 0
+			product.price_b = 0
+			product.price_c = 0
+			product.price_d = 0
+			for i in items:
+				if i.cumming_list == 'a':
+					product.price_a = i.fixed_price #puede ser price en caso que no se use fixed sino alguna otra formula
+				elif i.cumming_list == 'b':
+					product.price_b = i.fixed_price
+				elif i.cumming_list == 'c':
+					product.price_c = i.fixed_price
+				elif i.cumming_list == 'd':
+					product.price_d = i.fixed_price
 	@api.depends("price_by_pricelist")
 	def _compute_price_names(self):
 		for product in self:
