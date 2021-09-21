@@ -42,7 +42,7 @@
             <field name="inherit_id" ref="product.product_template_tree_view" />
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <field name="name" position="after">
+                <field name="default_code" position="after">
                     <field name="alternative_ids" string="Equivalencias" widget="many2many_tags"/>
                     <field name="alternative_manual" string="Otras Equivalencias" />
                     <field name="used_for" invisible="1" />

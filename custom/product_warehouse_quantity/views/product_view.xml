@@ -27,8 +27,14 @@
             <field name="arch" type="xml">
                 <field name="qty_available" position="before">
                     <!--<field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>-->
-                    <field name="quantity_csa" string="Cantidad Almacen"/>
-                    <field name="quantity_repubus" string="Cantidad Almacen"/>
+                    <field name="quantity_csa" string="Cantidad"/>
+                    <field name="quantity_repubus" string="Cantidad"/>
+                </field>
+                <field name="qty_available" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <field name="virtual_available" position="attributes">
+                    <attribute name="invisible">1</attribute>
                 </field>
             </field>
         </record>
