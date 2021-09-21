@@ -14,18 +14,8 @@
             <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle" data-toggle="dropdown">
                 Moneda:
                 <t t-set="selected_currency" t-value="', '.join(currency.get('name') for currency in options['currency'] if currency.get('selected'))"/>
-                <!--<t t-set="selected_currency" t-value="options.get('currency')"/>-->
                 <t t-esc="selected_currency"/>
-<!--                <t t-if="selected_currency">-->
-<!--                    <t t-foreach="options.get('currency')" t-as="jj">-->
-<!--                        <t t-if="jj.get('selected')">-->
-<!--                            <t t-esc="jj.get('name')"/>-->
-<!--                        </t>-->
-<!--                    </t>-->
-<!--                </t>-->
-<!--                <t t-else="">-->
-<!--                    All-->
-<!--                </t>-->
+
             </button>
             <div class="o_dropdown_menu dropdown-menu o_filter_menu" role="menu">
                 <t t-foreach="options.get('currency')" t-as="j">
