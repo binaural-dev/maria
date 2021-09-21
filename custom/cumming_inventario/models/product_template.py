@@ -127,4 +127,4 @@ class ProductTemplateCummingInventario(models.Model):
 		#standard = cif
 		for line in self:
 			margin = line.standard_price - line.fob_cost
-			line.percent_dif_cost = line.standard_price and margin/line.standard_price
+			line.percent_dif_cost = line.standard_price and margin/line.fob_cost

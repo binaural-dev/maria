@@ -62,7 +62,7 @@ class ProductPricelistItemCummingInventario(models.Model):
 	], string='Identificador de lista',related="pricelist_id.cumming_list",store=True)
 
 
-	@api.depends('fixed_price')
+	@api.depends('fixed_price','product_cost_cumming_tmpl')
 	def _compute_margin_profit(self):
 		#standard = cif
 		for line in self:

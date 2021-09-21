@@ -82,6 +82,11 @@ class InvoiceStockMove(models.Model):
     ], string='Status', index=True, readonly=True, default='draft',
         track_visibility='onchange', copy=False)
 
+    def button_draft(self):
+        if any(m.invoice_picking_id and m.invoice_picking_id.state !='cancel' for m in self):
+            raise UserError("No puedes cambiar a borrador una factura con orden de entrega sin cancelar.")
+        return super(InvoiceStockMove, self).button_draft()
+
     def button_cancel(self):
         if any(m.invoice_picking_id and m.invoice_picking_id.state !='cancel' for m in self):
             raise UserError("No puedes cancelar una factura con orden de entrega sin cancelar.")
