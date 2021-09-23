@@ -26,7 +26,7 @@
                 </xpath>
                 <xpath expr="//page[@name='other_info']/group[@id='other_tab_group']/group[@name='sale_info_group']/field[@name='invoice_origin']" position="after">
 
-                    <field name="warehouse_id" widget="selection"/>
+                    <field name="warehouse_id" widget="selection" readonly="1" force_save="1"/>
                    
                 </xpath>
                 
