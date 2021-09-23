@@ -101,6 +101,8 @@ class InvoiceStockMove(models.Model):
         if self.amount_residual >0 and not self.env['ir.config_parameter'].sudo().get_param('picking_with_residual'):
             raise UserError("La factura no debe tener importe adeudado para emitir la orden de inventario")
         for order in self:
+            for l in order.invoice_line_ids:
+                l._confirm_check_availability_invoice()
             if not self.invoice_picking_id:
                 pick = {}
                 if self.picking_type_id.code == 'outgoing':
@@ -170,13 +172,15 @@ class SupplierInvoiceLine(models.Model):
 
     warehouse_id = fields.Many2one(
         'stock.warehouse', string='Almacen',
-        related='move_id.warehouse_id')
+        related='move_id.warehouse_id',store=True)
+
+    alert_qty = fields.Boolean(string='Alerta de Cantidad')
 
     @api.onchange('quantity', 'product_id', 'warehouse_id')
     def _onchange_product_id_check_availability(self):
         if not self.product_id or not self.quantity or not self.warehouse_id:
             return {}
-        if self.product_id.type == 'product':
+        if self.product_id.type == 'product' and self.warehouse_id:
             _logger.info("self.product_id.free_qty arriba %s",self.product_id.free_qty)
             precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             product = self.product_id.with_context(
@@ -186,29 +190,77 @@ class SupplierInvoiceLine(models.Model):
             #buscar cantidad por almacen elegido
             #product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
             #if product.virtual_available < self.quantity:
-            for warehouse in self.env['stock.warehouse'].search([]):
-                quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
-                _logger.info("quantity %s",quantity)
+            #for warehouse in self.env['stock.warehouse'].search([]):
+            #    quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
+            #    _logger.info("quantity %s",quantity)
             if product.free_qty < self.quantity:
-                if 1 == 1:
-                    message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s.') % \
-                            (self.quantity, self.product_id.uom_id.name, self.product_id.name, product.free_qty, product.uom_id.name, self.warehouse_id.name)
-                    # We check if some products are available in other warehouses.
-                    _logger.info("self.product_id.free_qty %s",self.product_id.free_qty)
-                    if product.free_qty < self.product_id.free_qty:
-                        message += _('\nExisten %s %s disponible entre todos los almacenes.\n\n') % \
-                                (self.product_id.free_qty, product.uom_id.name)
-                        for warehouse in self.env['stock.warehouse'].search([]):
-                            quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
-                            if quantity > 0:
-                                message += "%s: %s %s\n" % (warehouse.name, quantity, self.product_id.uom_id.name)
-                    warning_mess = {
-                        'title': _('No hay suficiente inventario!'),
-                        'message' : message
-                    }
+                another_have = False
+                self.alert_qty = True
+                message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s.') % \
+                        (self.quantity, self.product_id.uom_id.name, self.product_id.name, product.free_qty, product.uom_id.name, self.warehouse_id.name)
+                # We check if some products are available in other warehouses.
+                _logger.info("self.product_id.free_qty %s",self.product_id.free_qty)
+                if product.free_qty < self.product_id.free_qty:
+                    message += _('\nExisten %s %s disponible entre todos los almacenes.\n\n') % \
+                            (self.product_id.free_qty, product.uom_id.name)
+                    for warehouse in self.env['stock.warehouse'].search([]):
+                        quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
+                        if quantity > 0:
+                            message += "%s: %s %s\n" % (warehouse.name, quantity, self.product_id.uom_id.name)
+                #los demas almacenes si tienen
+                if self.quantity <= self.product_id.free_qty:
+                    another_have = True
+                warning_mess = {
+                    'title': _('No hay suficiente inventario!'),
+                    'message' : message
+                }
+                #si otro almacen no tiene mandar a 0
+                if not another_have:
                     self.quantity = 0
-                    return {'warning': warning_mess}
+                return {'warning': warning_mess}
+            else:
+                self.alert_qty = False
         return {}
+
+
+    #misma validacion pero en este caso se retorna un raise exepcion para detener la operacion
+    def _confirm_check_availability_invoice(self):
+        if not self.product_id or not self.quantity or not self.warehouse_id:
+            raise UserError("Producto, cantidad y ALmacen son obligatorios")
+        if self.product_id.type == 'product' and self.warehouse_id:
+            _logger.info("self.product_id.free_qty arriba %s",self.product_id.free_qty)
+            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+            product = self.product_id.with_context(
+                warehouse=self.warehouse_id.id,
+                lang=self.move_id.partner_id.lang or self.env.user.lang or 'en_US'
+            )
+            #buscar cantidad por almacen elegido
+            #product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
+            #if product.virtual_available < self.quantity:
+            #for warehouse in self.env['stock.warehouse'].search([]):
+            #    quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
+            #    _logger.info("quantity %s",quantity)
+            if product.free_qty < self.quantity:
+                another_have = False
+                message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s.') % \
+                        (self.quantity, self.product_id.uom_id.name, self.product_id.name, product.free_qty, product.uom_id.name, self.warehouse_id.name)
+                # We check if some products are available in other warehouses.
+                _logger.info("self.product_id.free_qty %s",self.product_id.free_qty)
+                if product.free_qty < self.product_id.free_qty:
+                    message += _('\nExisten %s %s disponible entre todos los almacenes.\n\n') % \
+                            (self.product_id.free_qty, product.uom_id.name)
+                    for warehouse in self.env['stock.warehouse'].search([]):
+                        quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
+                        if quantity > 0:
+                            message += "%s: %s %s\n" % (warehouse.name, quantity, self.product_id.uom_id.name)
+                    another_have = True
+                warning_mess = {
+                    'title': _('No hay suficiente inventario!'),
+                    'message' : message
+                }
+                raise UserError(message)
+        return True
+
     def _create_stock_moves(self, picking):
         moves = self.env['stock.move']
         done = self.env['stock.move'].browse()
