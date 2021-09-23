@@ -75,6 +75,6 @@ class ProductPricelistItemCummingInventario(models.Model):
 			_logger.info("line.product_cost_cumming_tmpl %s",line.product_cost_cumming_tmpl)
 			margin = line.fixed_price - line.product_cost_cumming_tmpl
 			if line.product_cost_cumming_tmpl >0:
-				line.percent_profit = line.fixed_price and margin/line.product_cost_cumming_tmpl
+				line.percent_profit = line.fixed_price and margin/line.product_cost_cumming_tmpl if line.product_cost_cumming_tmpl > 0 else line.fixed_price
 			else:
 				line.percent_profit = margin
