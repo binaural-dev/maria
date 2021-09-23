@@ -43,7 +43,8 @@ class ProductPricelistItemCummingInventario(models.Model):
 
 	alternative_full = fields.Char(string='Productos full',related="product_tmpl_id.alternative_full",store=True)
 
-	#duda: hacer que combinacion de product template y lista de precios sea unica ?
+	product_price_untaxed  = fields.Float(string='Precio sin iva',compute="_compute_prices_cumming",store=True)
+	product_price_tax = fields.Float(string='IVA',compute="_compute_prices_cumming",store=True)
 
 	applied_on = fields.Selection([
 		('3_global', 'All Products'),
@@ -61,6 +62,11 @@ class ProductPricelistItemCummingInventario(models.Model):
 		('d', 'D'),
 	], string='Identificador de lista',related="pricelist_id.cumming_list",store=True)
 
+	@api.depends('fixed_price')
+	def _compute_prices_cumming(self):
+		for line in self:
+			line.product_price_untaxed = line.fixed_price/1.16
+			line.product_price_tax = (line.fixed_price/1.16) * 0.16
 
 	@api.depends('fixed_price','product_cost_cumming_tmpl')
 	def _compute_margin_profit(self):

@@ -89,6 +89,8 @@
                 </field>
                 <field name="price" position="after">
                     <field name="fixed_price" />
+                    <field name="product_price_untaxed" />
+                    <field name="product_price_tax" />
                 </field>
                 <!--cambios para que se pueda editar en la lista, consultar, si se edita en formulario se podria dejar sin los cambios anteriores-->
                 <field name="min_quantity" position="attributes">
@@ -136,6 +138,8 @@
                 </field>
                 <xpath expr="//field[@name='product_tmpl_id']" position="after">
                     <xpath expr="//field[@name='fixed_price']" position="move"/>
+                    <field name="product_price_untaxed" />
+                    <field name="product_price_tax" />
                 </xpath>
                 <field name="product_tmpl_id" position="after">
                     <field name="product_cost_cumming_tmpl" attrs="{'invisible':[('applied_on', '!=', '1_product')]}"/>
