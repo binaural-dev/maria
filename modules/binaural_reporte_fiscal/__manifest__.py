@@ -34,6 +34,8 @@
         'views/mail_template.xml',
         'views/search_template_view.xml',
         'views/assets.xml',
+        'views/account_financial_config_report_line.xml',
+        'views/account_report_view.xml',
         'wizard/txt_wizard.xml',
         'wizard/arcv_wizard.xml',
     ],

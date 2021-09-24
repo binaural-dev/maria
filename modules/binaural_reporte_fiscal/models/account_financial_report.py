@@ -4,6 +4,8 @@ from odoo import models, fields, api, _
 class AccountFinancialReportLineBinaural(models.Model):
     _inherit = "account.financial.html.report.line"
 
+    account_prefix = fields.Integer(string='prefijo de cuenta contable')
+
     def _compute_amls_results(self, options_list, calling_financial_report=None, sign=1):
         ''' Compute the results for the unfolded lines by taking care about the line order and the group by filter.
 

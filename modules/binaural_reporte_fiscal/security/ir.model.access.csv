@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 acl_txt_wizard,binaural_reporte_fiscal.txt_wizard,model_txt_wizard,base.group_user,1,1,1,1
 acl_arcv_wizard,binaural_reporte_fiscal.arcv_wizard,model_arcv_wizard,base.group_user,1,1,1,1
+
+access_config_financial_report_line,binaural_reporte_fiscal.account_financial_config_rpeort_line,model_account_financial_config_report_line,base.group_user,1,1,1,1

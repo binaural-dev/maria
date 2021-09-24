@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_financial_report_line_tree_configbinaural" model="ir.ui.view">
+        <field name="name">Configuración para las lineas de reportes financieros</field>
+        <field name="model">account.financial.html.report.line</field>
+        <field name="inherit_id" ref="account_reports.view_account_financial_report_line_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='parent_id']" position="after">
+                <field name="account_prefix"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
