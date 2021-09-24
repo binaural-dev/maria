@@ -1,0 +1,266 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <template id="accounting_reports.shopping_book">
+	        <t t-call="web.html_container">
+		        <xpath expr="//t[@t-call='web.report_layout']" position="replace">
+			       <div class="article" style="">
+		                <t t-foreach="docs" t-as="o">
+		                    <div class="header">
+		                        <table class="table-condensed" style="width:100%;font-size:10px">
+		                            <tr>
+		                                <td style="text-align: left;font-size: 25px;font-weight: 600;"><t t-esc="o.company_id.name"/> <br/> <t t-esc="o.company_id.vat"/>
+		                                </td>
+		                            </tr>
+		                        </table>
+		                    </div>
+							<!--th,td{ white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align: center;}-->
+		                    <div class="page">
+		                        <style>
+		                            th,td{text-align: center;}
+		                            thead { display: table-header-group }
+		                            tfoot { display: table-row-group }
+		                            tr { page-break-inside: avoid }
+		                            .clth{
+		                                    border-top: 6px double black;
+		                                    border-bottom: 6px double black;
+		                            }
+		                            .cltt{
+		                                    border-top: 2px solid black;
+		                                    font-weight: 600;
+		                            }
+		                        </style>
+		                        <h1 style="font-size: 25px;text-align: center;font-weight: 600">LIBRO DE COMPRAS - I.V.A</h1>
+		                        <table class="table-condensed" style="width:100%;font-size:10px">
+		                            <tr>
+
+		                                <td style="text-align:right;font-size: 20px;">
+		                                    <b>Período de imposición: </b>
+		                                    <span t-field="o.date_start"/>
+		                                    <span> al </span>
+		                                    <span t-field="o.date_end"/>
+		                                </td>
+		                            </tr>
+		                        </table>
+		                        <t t-set="total_g" t-value="0.00"/>
+		                        <t t-set="total_e" t-value="0.00"/>
+		                        <t t-set="total_b" t-value="0.00"/>
+		                        <t t-set="total_i" t-value="0.00"/>
+		                        <t t-set="total_r" t-value="0.00"/>
+		                        <t t-set="facturas" t-value="o._shopping_book_invoice()"/>
+		                        <t t-if="not facturas.empty">
+		                            <br/>
+		                            <table class="table-condensed" style="width:100%;font-size:10px;table-layout: fixed">
+		                                <thead>
+		                                    <tr>
+		                                        <td style="width:30px !important" class="clth" rowspan="2">Nª <br/>Ope</td>
+		                                        <td class="clth" rowspan="2">Fecha</td>
+		                                        <td  style="width:30px !important" class="clth" rowspan="2">Tipo</td>
+		                                        <td class="clth" rowspan="2">Nª Factura o <br/>Nª Documento</td>
+		                                        <td class="clth" rowspan="2">Nª Control</td>
+		                                        <td width="12%" class="clth" rowspan="2">Proveedor</td>
+		                                        <td class="clth" rowspan="2">R.I.F.</td>
+		                                        <td style="width:35px !important" class="clth" rowspan="2">Tipo <br/>Transa</td>
+		                                        <td style="width:90px !important" class="clth" rowspan="2">Total Comp. <br/>mas IVA</td>
+		                                        <td class="clth" rowspan="2">Compras <br/>Exentas</td>
+		                                        <td class="clth" colspan="3" rowspan="2">
+		                                            <table style="width: 100%;table-layout: fixed">
+		                                                <tr>
+		                                                    <td rowspan="1" colspan="3">---------------Compras Nacionales---------------</td>
+		                                                </tr>
+		                                                <tr>
+		                                                    <td rowspan="1" width="45%">Base</td>
+		                                                    <td rowspan="1" width="10%">%</td>
+		                                                    <td rowspan="1" width="45%">IVA</td>
+		                                                </tr>
+		                                            </table>
+		                                        </td>
+			                                	<!--retenciones en misma linea-->
+												<td class="clth" rowspan="2">Monto<br/>retenido</td>
+                                                <td class="clth" rowspan="1">Fecha de <br/>comprobante de retención</td>
+                                                <td style="width:40px !important" class="clth" rowspan="1">Comprobante</td>
+		                                    </tr>
+		                                </thead>
+		                                <t t-set="subtabla" t-value="facturas"/>
+		                                <t t-foreach="subtabla.values.tolist()" t-as="q">
+		                                    <tr>
+		                                        <td style="width:30px !important"><span t-esc="q[0]"/></td>
+		                                        <td><span t-esc="q[1]"/></td>
+		                                        <td style="width:30px !important"><span t-esc="q[2]"/></td>
+		                                        <td><pre><span t-esc="q[3]"/></pre></td>
+		                                        <td><span t-esc="q[4]"/></td>
+		                                        <td width="12%"><span t-esc="q[5]"/></td>
+		                                        <td><span t-esc="q[6]"/></td>
+		                                        <td style="width:35px !important"><span t-esc="q[7]"/></td>
+		                                        <td style="text-align: right;width:90px !important"><span t-esc="'{0:,.2f}'.format(float(q[8])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                        <td style="text-align: right"><span t-esc="'{0:,.2f}'.format(float(q[9])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                        <td colspan="3">
+		                                            <table style="width: 100%;table-layout: fixed">
+		                                                <tr>
+		                                                    <td style="text-align: right" width="44%"><span t-esc="'{0:,.2f}'.format(float(q[10])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                                    <td style="text-align: right" width="12%"><span t-esc="'%.2f'% q[11]"/></td>
+		                                                    <td style="text-align: right" width="44%"><span t-esc="'{0:,.2f}'.format(float(q[12])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                                </tr>
+		                                            </table>
+		                                        </td>
+		                                        
+		                                    	<!--retention amount-->
+                                                <td style="text-align: right"><span t-esc="'{0:,.2f}'.format(float(q[13])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+                                                <!--retention date era 14-->
+                                                <td><span t-esc="q[15]"/></td>
+                                                <!--retention number era 15-->
+                                                <td style="width:40px !important"><span t-esc="q[16]"/></td>
+											</tr>
+		                                    <t t-set="total_g" t-value="total_g + q[8]"/>
+		                                    <t t-set="total_e" t-value="total_e + q[9]"/>
+		                                    <t t-set="total_b" t-value="total_b + q[10]"/>
+		                                    <t t-set="total_i" t-value="total_i + q[12]"/>
+		                                    <t t-set="total_r" t-value="total_r + q[13]"/>
+		                                </t>
+		                                <!--tr>
+		                                    <th colspan="5">
+		                                        Total
+		                                    </th>
+		                                    <t t-foreach="subtabla[subtabla.columns[5:]].sum().values.tolist()" t-as="p">
+		                                        <th style="text-align: right">
+		                                            <span t-esc="p" t-esc-options='{"widget": "monetary","display_currency":"o.company_id.currency_id"}'/>
+		                                        </th>
+		                                    </t>
+		                                </tr-->
+		                            </table>
+
+		                            <table class="table-condensed" style="width:100%;font-size:10px;table-layout: fixed;margin-top: 20px;">
+		                                <tr>
+		                                    <td class="" rowspan="1" colspan="3"></td>
+		                                    <td width="11%" class="" rowspan="1" colspan="1"></td>
+		                                    <td class="" rowspan="1" colspan="1"></td>
+		                                    <td class="cltt" style="width:60px !important" rowspan="1" colspan="1">TOTALES</td>
+		                                    <td style="text-align: right" class="cltt" rowspan="1" colspan="1"><t t-esc="'{0:,.2f}'.format(float(total_g)).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                    <td style="text-align: right" class="cltt" rowspan="1" colspan="1"><t t-esc="'{0:,.2f}'.format(float(total_e)).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                    <td class="cltt" colspan="2">
+		                                            <table style="width: 100%;table-layout: fixed">
+		                                                <tr>
+		                                                    <td width="45%" style="font-weight: 600;text-align: right" rowspan="1" colspan="1"><t t-esc="'{0:,.2f}'.format(float(total_b)).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                                    <td  width="10%" rowspan="1" colspan="1"></td>
+		                                                    <td width="45%" style="font-weight: 600;text-align: right" rowspan="1" colspan="1"><t t-esc="'{0:,.2f}'.format(float(total_i)).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                                </tr>
+		                                            </table>
+		                                        </td>
+		                                    <td style="font-weight: 600;text-align: right" class="cltt" rowspan="1" colspan="1"><t t-esc="'{0:,.2f}'.format(float(total_r)).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+		                                	<td class="cltt" rowspan="1" colspan="1"></td>
+											<td style="width:40px !important" class="cltt" rowspan="1" colspan="1"></td>
+										</tr>
+		                            </table>
+
+		                        </t>
+		                    </div>
+		                    <div class="footer">
+		                        <table class="table-condensed" style="width:100%;font-size:14px">
+		                            <tr>
+		                                <td style="text-align: left;font-weight: 600;">El resumen del Libro de compras es parte integral de este informe y continúa su
+		impresión luego de este enunciado (en la pagína 2)
+		                                </td>
+		                                <td style="text-align: right;font-weight: 600;">Página 1
+		                                </td>
+		                            </tr>
+		                        </table>
+		                    </div>
+		                </t>
+		            </div>
+                    <div class="article" style="">
+		                <t t-foreach="docs" t-as="o">
+		                    <div class="header">
+		                        <table class="table-condensed" style="width:100%;font-size:10px">
+		                            <tr>
+		                                <td style="text-align: left;font-size: 25px;font-weight: 600;"><t t-esc="o.company_id.name"/> <br/> <t t-esc="o.company_id.vat"/>
+		                                </td>
+		                            </tr>
+		                        </table>
+		                    </div>
+		                    <div class="page">
+		                        <style>
+		                            th,td{ white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align: center;}
+		                            thead { display: table-header-group }
+		                            tfoot { display: table-row-group }
+		                            tr { page-break-inside: avoid }
+		                            .clth{
+		                                    border-top: 6px double black;
+		                                    border-bottom: 6px double black;
+		                            }
+			                        .clthr1{
+		                                    border-top: 6px double black;
+		                                    border-bottom: 6px double black;
+		                            }
+			                        .clthr2{
+		                                    border-bottom: 6px double black;
+		                            }
+		                            .cltt{
+		                                    border-top: 2px solid black;
+		                                    font-weight: 600;
+		                            }
+		                        </style>
+		                        <h1 style="font-size: 25px;text-align: center;font-weight: 600">RESUMEN DE COMPRAS</h1>
+		                        <table class="table-condensed" style="width:100%;font-size:10px">
+		                            <tr>
+
+		                                <td style="text-align:right;font-size: 20px;">
+		                                    <b>Período de imposición: </b>
+		                                    <span t-field="o.date_start"/>
+		                                    <span> al </span>
+		                                    <span t-field="o.date_end"/>
+		                                </td>
+		                            </tr>
+		                        </table>
+			                    <t t-set="facturas" t-value="o._shopping_book_invoice_resumen_excel()"/>
+		                        <t t-if="not facturas.empty">
+		                            <table class="table-condensed" style="width:100%;font-size:10px;table-layout: fixed">
+		                                <thead>
+		                                    <tr>
+		                                        <td style="text-align: center" class="clthr1" colspan="6" rowspan="1">Resumen</td>
+		                                        <td style="text-align: center" class="clthr1" colspan="2" rowspan="1">Facturas / Notas de Débito</td>
+		                                        <td style="text-align: center" class="clthr1" colspan="2" rowspan="1">Notas de Crédito</td>
+		                                        <td style="text-align: center" class="clthr1" colspan="2" rowspan="1">Total Neto</td>
+		                                    </tr>
+			                                <tr>
+		                                        <td style="text-align: center" class="clthr2" colspan="1" rowspan="1"></td>
+		                                        <td style="text-align: center" class="clthr2" colspan="5" rowspan="1">Créditos Fiscales</td>
+		                                        <td style="text-align: center" class="clthr2" colspan="1" rowspan="1">Base Imponible</td>
+		                                        <td style="text-align: center" class="clthr2" colspan="1" rowspan="1">Crédito Fiscal</td>
+				                                <td style="text-align: center" class="clthr2" colspan="1" rowspan="1">Base Imponible</td>
+		                                        <td style="text-align: center" class="clthr2" colspan="1" rowspan="1">Crédito Fiscal</td>
+		                                        <td style="text-align: center" class="clthr2" colspan="1" rowspan="1">Base Imponible</td>
+		                                        <td style="text-align: center" class="clthr2" colspan="1" rowspan="1">Crédito Fiscal</td>
+		                                    </tr>
+		                                </thead>
+
+			                            <t t-foreach="facturas.values.tolist()" t-as="q">
+			                                <tr>
+			                                    <td style="text-align: center" class="" colspan="1" rowspan="1"><span t-esc="q[0]"/></td>
+			                                    <td style="text-align: left" class="" colspan="5" rowspan="1"><span t-esc="q[1]"/></td>
+			                                    <td style="text-align: right" class="" colspan="1" rowspan="1"><t t-esc="'{0:,.2f}'.format(float(q[2])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+			                                    <td style="text-align: right" class="" colspan="1" rowspan="1"><t t-esc="'{0:,.2f}'.format(float(q[3])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+			                                    <td style="text-align: right" class="" colspan="1" rowspan="1"><t t-esc="'{0:,.2f}'.format(float(q[4])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+			                                    <td style="text-align: right" class="" colspan="1" rowspan="1"><t t-esc="'{0:,.2f}'.format(float(q[5])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+			                                    <td style="text-align: right" class="" colspan="1" rowspan="1"><t t-esc="'{0:,.2f}'.format(float(q[6])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+			                                    <td style="text-align: right" class="" colspan="1" rowspan="1"><t t-esc="'{0:,.2f}'.format(float(q[7])).replace (',',' ').replace ('.',',').replace (' ','.')"/></td>
+			                                </tr>
+			                            </t>
+		                            </table>
+			                        <br/>
+		                        </t>
+		                    </div>
+		                    <div class="footer">
+		                        <table class="table-condensed" style="width:100%;font-size:14px">
+		                            <tr>
+		                                <td style="text-align: right;font-weight: 600;">Página 2
+		                                </td>
+		                            </tr>
+		                        </table>
+		                    </div>
+		                </t>
+		            </div>
+		        </xpath>
+	        </t>
+        </template>
+    </data>
+</odoo>

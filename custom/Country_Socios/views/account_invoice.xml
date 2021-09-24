@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+	    <record id="view_invoice_action_form_inherited" model="ir.ui.view">
+            <field name="name">Accion de socio</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="action_number" force_save="1"/>
+                </field>
+            </field>
+        </record>
+
+	    <record id="view_invoice_action_tree_inherited" model="ir.ui.view">
+            <field name="name">Accion de socio</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_invoice_tree"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="action_number"/>
+                </field>
+            </field>
+        </record>
+
+	    <record id="view_invoice_action_search_inherited" model="ir.ui.view">
+            <field name="name">Accion de socio</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="action_number" string="Número de Acción" filter_domain="[('action_number','=',self)]"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="assets_backend" name="custom_css_country" inherit_id="web.assets_backend">
+    <xpath expr="." position="inside">
+         <link rel="stylesheet" href="/Country_Socios/static/src/css/country_custom.css"/>
+    </xpath>
+</template>
+</odoo>
