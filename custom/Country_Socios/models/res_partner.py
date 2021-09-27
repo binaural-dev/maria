@@ -173,8 +173,9 @@ class ResPartnerAction(models.Model):
     date_remove_suspend  = fields.Date(string='Fecha en que se removio la suspensión')
     
     def _default_type_person(self):
-        return self.env['master.type_person'].search([('status', '=',True)], limit=1).id
-    type_person_ids = fields.Many2one('master.type_person', 'Tipo de Persona', track_visibility="onchange",default=_default_type_person)
+        return self.env['type.person'].search([('status', '=',True)], limit=1).id
+    
+    type_person_ids = fields.Many2one('type.person', 'Tipo de Persona', track_visibility="onchange",default=_default_type_person)
 
     def action_transfer(self):
         for p in self:

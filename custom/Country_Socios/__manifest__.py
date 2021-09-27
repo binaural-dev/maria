@@ -20,7 +20,7 @@
     "application": False,
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account'],
+    'depends': ['base', 'account', 'binaural_contactos_configuraciones'],
     ##gregar dependencia de cxc
     ###gregar dependencia de accounting_reports
     # always loaded
