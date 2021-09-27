@@ -27,8 +27,8 @@
             <field name="arch" type="xml">
                 <field name="qty_available" position="before">
                     <!--<field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>-->
-                    <field name="quantity_csa" string="Cantidad"/>
-                    <field name="quantity_repubus" string="Cantidad"/>
+                    <field name="quantity_csa" string="CSA"/>
+                    <field name="quantity_repubus" string="REP"/>
                 </field>
                 <field name="qty_available" position="attributes">
                     <attribute name="invisible">1</attribute>
@@ -69,7 +69,7 @@
                             icon="fa-cubes" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
                         <div class="o_field_widget o_stat_info" name="button_available_qty_1">
                             <span class="o_stat_value" widget="statinfo">
-                                <field name="quantity_csa" widget="statinfo" nolabel="1" class="mr4"/>
+                                CSA: <field name="quantity_csa" widget="statinfo" nolabel="1" class="mr4"/>
                                 <field name="uom_name"/>
                             </span>
                             <span class="o_stat_text"></span>
@@ -80,7 +80,7 @@
                             icon="fa-cubes" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
                         <div class="o_field_widget o_stat_info" name="button_available_qty_1">
                             <span class="o_stat_value" widget="statinfo">
-                                <field name="quantity_repubus" widget="statinfo" nolabel="1" class="mr4"/>
+                               REP: <field name="quantity_repubus" widget="statinfo" nolabel="1" class="mr4"/>
                                 <field name="uom_name"/>
                             </span>
                             <span class="o_stat_text"></span>
