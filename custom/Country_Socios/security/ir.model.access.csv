@@ -9,5 +9,3 @@ access_country_professions,Profesiones,model_country_professions,,1,1,1,1
 access_country_members_config,Configuraciones de socios country,model_country_config_members,,1,1,1,1
 access_wizard_suspend_partner,Suspender socios,model_wizard_suspend_partner,,1,1,1,1
 access_wizard_suspend_partner_remove,Remover suspension de socios,model_wizard_remove_suspend_partner,,1,1,1,1
-
-country.config.members
