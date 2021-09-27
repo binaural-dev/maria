@@ -29,7 +29,7 @@ class ProductTemplate(models.Model):
     warehouse_quantity = fields.Char(compute='_get_warehouse_quantity', string='Cantidad por almacén')
 
     quantity_csa = fields.Char(compute='_get_warehouse_quantity', string='Cantidad en CSA')
-    quantity_repubus = fields.Char(compute='_get_warehouse_quantity', string='Cantidad en CSA 2')
+    quantity_repubus = fields.Char(compute='_get_warehouse_quantity', string='Cantidad en REPUBUS')
 
     def button_dummy_ware(self):
         pass
@@ -37,6 +37,10 @@ class ProductTemplate(models.Model):
     def button_dummy_ware_2(self):
         pass
 
+    #por location es casi igual, buscar location por almacen principal ?
+    """  for location, product_ids in mtso_products_by_locations.items():
+            products = self.env['product.product'].browse(product_ids).with_context(location=location.id)
+            forecasted_qties_by_loc[location] = {product.id: product.free_qty for product in products}"""
     def _get_warehouse_quantity(self):
         for record in self:
             warehouse_quantity_text = ''
@@ -80,9 +84,11 @@ class ProductTemplate(models.Model):
                 for item in tt_warehouses:
                     if cont == 0:
                         if tt_warehouses[item]:
-                            record.quantity_csa = item + ': ' + str(tt_warehouses[item])
+                            #record.quantity_csa = item + ': ' + str(tt_warehouses[item])
+                            record.quantity_csa = str(tt_warehouses[item])
                     if cont == 1:
                         if tt_warehouses[item]:
-                            record.quantity_repubus = item + ': ' + str(tt_warehouses[item])
+                            #record.quantity_repubus = item + ': ' + str(tt_warehouses[item])
+                            record.quantity_repubus = str(tt_warehouses[item])
 
                     cont+=1
