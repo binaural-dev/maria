@@ -70,9 +70,9 @@
                         <div class="o_field_widget o_stat_info" name="button_available_qty_1">
                             <span class="o_stat_value" widget="statinfo">
                                 CSA: <field name="quantity_csa" widget="statinfo" nolabel="1" class="mr4"/>
-                                <field name="uom_name"/>
+                                
                             </span>
-                            <span class="o_stat_text"></span>
+                            <span class="o_stat_text"><field name="uom_name"/></span>
                         </div>
                     </button>
                     <button type="object" name="button_dummy_ware_2" attrs="{'invisible':[('type', '!=', 'product')]}"
@@ -81,9 +81,9 @@
                         <div class="o_field_widget o_stat_info" name="button_available_qty_1">
                             <span class="o_stat_value" widget="statinfo">
                                REP: <field name="quantity_repubus" widget="statinfo" nolabel="1" class="mr4"/>
-                                <field name="uom_name"/>
+                                
                             </span>
-                            <span class="o_stat_text"></span>
+                            <span class="o_stat_text"><field name="uom_name"/></span>
                         </div>
                     </button>
                 </xpath>
