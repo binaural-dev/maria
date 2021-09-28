@@ -23,7 +23,7 @@ class ProductTemplateCummingInventario(models.Model):
 	_inherit = 'product.template'
 
 	pattern_id = fields.Many2one('product.pattern',string='Modelo',tracking=True)
-	fob_cost = fields.Float(string='Costo FOB',required=True,tracking=True)
+	fob_cost = fields.Float(string='Costo FOB',required=False,tracking=True)
 	percent_dif_cost = fields.Float(string='% DIF',compute="_compute_margin_cost",store=True,tracking=True)
 	standard_price = fields.Float(
 		'Costo CIF', compute='_compute_standard_price',
