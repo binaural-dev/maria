@@ -28,6 +28,7 @@
         'views/product_template.xml',
         'views/product_pricelist.xml',
         'views/assets.xml',
+        'wizard/price_lot.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
