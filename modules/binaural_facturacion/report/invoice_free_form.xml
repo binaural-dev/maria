@@ -5,11 +5,11 @@
             <field name="name">Nota de Venta</field>
             <field name="model">account.move</field>
             <field name="report_type">qweb-pdf</field>
-            <field name="report_name">cumming_facturacion.cumming_invoice_free_form_template</field>
-            <field name="report_file">cumming_facturacion.cumming_invoice_free_form_template</field>
+            <field name="report_name">binaural_facturacion.cumming_invoice_free_form_template</field>
+            <field name="report_file">binaural_facturacion.cumming_invoice_free_form_template</field>
             <field name="attachment">(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')
             </field>
-            <field name="paperformat_id" ref="cumming_facturacion.paperformat_freeform_cumming"/>
+            <field name="paperformat_id" ref="binaural_facturacion.paperformat_freeform_cumming"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="binding_type">report</field>
         </record>
