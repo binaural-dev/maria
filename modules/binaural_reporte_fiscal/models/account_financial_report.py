@@ -41,9 +41,9 @@ class AccountFinancialHtmlReportBinaural(models.Model):
                                 'name': res[1],
                                 'code': res[1],
                                 'sequence': 0,
-                                'level': 0,
+                                'level': lvl.nro_nivel,
                                 # 'financial_report_id': financial_report_id,
-                                'formulas': '-sum',
+                                'formulas': line.formulas,
                                 'domain': domain,
                                 'green_on_positive': True,
                                 'figure_type': 'float',
@@ -56,10 +56,15 @@ class AccountFinancialHtmlReportBinaural(models.Model):
                                 account_line.setdefault('groupby', groupby)
                             self.env['account.financial.html.report.line'].create(account_line)
 
-        return {'warning': {
-            'title': _("Niveles de Cuenta"),
-            'message': _("Linea 2"),
-        }}
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'info',
+                'message': _("Niveles de cuentas actualizadas ."),
+                'next': {'type': 'ir.actions.act_window_close'},
+            }
+        }
 
 
 class AccountFinancialReportLineBinaural(models.Model):
