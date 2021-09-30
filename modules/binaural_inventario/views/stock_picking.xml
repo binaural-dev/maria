@@ -1,0 +1,53 @@
+<odoo>
+    <data>
+        <!--heredar formulario de pickigns-->
+        <record id="view_picking_form_inherited_binaural" model="ir.ui.view">
+            <field name="name">stock.picking.form.binaural</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='origin']" position="after">
+                    <field name="foreign_currency_id"/>
+                    <field name="foreign_currency_rate"/>
+                    <field name="update_cost_inventory" attrs="{'invisible': [('picking_type_code', '=', 'internal')]}"/>
+                </xpath>
+
+                <!--restringir boton cancelar reserva a solo los que tienen permiso adecuado-->
+                <xpath expr="//button[@name='do_unreserve']" position="replace">
+                    <button name="do_unreserve" string="Anular Reserva" groups="binaural_inventario.group_show_cancel_reserve" type="object" 
+                    attrs="{'invisible': ['|', '|', '|', ('picking_type_code', '=', 'incoming'), ('immediate_transfer', '=', True), '&amp;', ('state', 'not in', ('assigned', 'partially_available')), ('move_type', '!=', 'one'), '&amp;', ('state', 'not in', ('assigned', 'partially_available', 'confirmed')), ('move_type', '=', 'one')]}"/>
+                </xpath>
+               
+            </field>
+        </record>
+
+        <!--heredar vista listado de pickings-->
+        <record id="vpicktree_inh_binaural_inventario" model="ir.ui.view">
+            <field name="name">stock.picking.vpicktree.binaural.inventario</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.vpicktree"/>
+            <field name="arch" type="xml">
+
+                <!--restringir boton cancelar reserva a solo los que tienen permiso adecuado-->
+                <xpath expr="//header" position="replace">
+                    <header>
+                        <button name="do_unreserve" type="object" string="Anular Reserva" groups="binaural_inventario.group_show_cancel_reserve"/>
+                    </header>
+                </xpath>
+               
+            </field>
+        </record>
+
+
+        <!--mostrar opcion de menu ajuste de inventario solo a usuario con el permiso de ajustar cantidades de productos-->
+        <record model="ir.ui.menu" id="stock.menu_action_inventory_form">
+            <field name="groups_id" eval="[(6,0,[ref('binaural_inventario.group_can_update_qty_stock')])]"/>
+        </record>
+        <!--mostrar menu de Desecho solo al usuario con permiso de ajustar cantidades de productos-->
+        
+        <record model="ir.ui.menu" id="stock.menu_stock_scrap">
+            <field name="groups_id" eval="[(6,0,[ref('binaural_inventario.group_can_update_qty_stock')])]"/>
+        </record>
+
+    </data>
+</odoo>

@@ -2,5 +2,7 @@
   <data>
 	  <!--Menu Retenciones-->
 	  <menuitem name="Retenciones" id="retention_configuration" parent="account.menu_finance_configuration"/>
+	  <!--Menu Maestros-->
+	  <menuitem name="Maestros" id="master_configuration" parent="account.menu_finance_configuration"/>
   </data>
 </odoo>

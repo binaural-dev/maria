@@ -258,6 +258,66 @@ class TestAccountMoveOutInvoiceBinauralFacturacion(AccountTestInvoicingCommon):
             'correlative':next_correlative,
             'name':move.name,
         })
+
+
+        #convertir a borrador, al validar nuevamente no incrementar nro control
+        move.button_draft()
+        move.action_post()
+        self.assertInvoiceValues(move, [
+            {
+                **self.product_line_vals_1,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -1000.0,
+                'debit': 0.0,
+                'credit': 500.0,
+            },
+            {
+                **self.product_line_vals_2,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -200.0,
+                'debit': 0.0,
+                'credit': 100.0,
+            },
+            {
+                **self.tax_line_vals_1,
+                'currency_id': self.currency_data['currency'].id,
+                'price_unit': 200.0,
+                'price_subtotal': 200.0,
+                'price_total': 200.0,
+                'amount_currency': -200.0,
+                'debit': 0.0,
+                'credit': 100.0,
+            },
+            {
+                **self.tax_line_vals_2,
+                'currency_id': self.currency_data['currency'].id,
+                'amount_currency': -30.0,
+                'debit': 0.0,
+                'credit': 15.0,
+            },
+            {
+                **self.term_line_vals_1,
+                'name': move.name,
+                'currency_id': self.currency_data['currency'].id,
+                'price_unit': -1430.0,
+                'price_subtotal': -1430.0,
+                'price_total': -1430.0,
+                'amount_currency': 1430.0,
+                'debit': 715.0,
+                'credit': 0.0,
+                'date_maturity': fields.Date.from_string('2016-01-01'),
+            },
+        ], {
+            **self.move_vals,
+            'payment_reference': move.name,
+            'currency_id': self.currency_data['currency'].id,
+            'date': fields.Date.from_string('2017-01-01'),
+            'amount_untaxed': 1200.0,
+            'amount_tax': 230.0,
+            'amount_total': 1430.0,
+            'correlative':next_correlative,
+            'name':move.name,
+        })
         
     
 

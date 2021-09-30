@@ -1,27 +1,126 @@
+import logging
+from collections import defaultdict
+from datetime import timedelta
+
 from odoo import api, fields, models, _
-from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_compare, date_utils, email_split, email_re
+from odoo.exceptions import UserError, ValidationError, AccessError
+from odoo.tools import float_compare
 from odoo.tools.misc import formatLang, format_date, get_lang
 
-from datetime import date, timedelta
-from collections import defaultdict
-from itertools import zip_longest
-from hashlib import sha256
-from json import dumps
-
-import ast
-import json
-import re
-import warnings
-
-import logging
 _logger = logging.getLogger(__name__)
+from .. models import funtions_retention
 
 
 class AccountMoveBinauralFacturacion(models.Model):
     _inherit = 'account.move'
 
+    @api.onchange('filter_partner')
+    def get_domain_partner(self):
+        for record in self:
+            record.partner_id = False
+            if record.filter_partner == 'customer':
+                return {'domain': {
+                    'partner_id': [('customer_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'supplier':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '>=', 1)],
+                }}
+            elif record.filter_partner == 'contact':
+                return {'domain': {
+                    'partner_id': [('supplier_rank', '=', 0), ('customer_rank', '=', 0)],
+                }}
+            else:
+                return []
 
+    @api.onchange('foreign_currency_id', 'foreign_currency_date')
+    def _compute_foreign_currency_rate(self):
+        for record in self:
+            rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+                                                         ('name', '<=', record.foreign_currency_date)], limit=1,
+                                                        order='name desc')
+            if rate:
+                record.update({
+                    'foreign_currency_rate': rate.rate,
+                })
+            else:
+                rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+                                                             ('name', '>=', record.foreign_currency_date)], limit=1,
+                                                            order='name asc')
+                if rate:
+                    record.update({
+                        'foreign_currency_rate': rate.rate,
+                    })
+                else:
+                    record.update({
+                        'foreign_currency_rate': 0.00,
+                    })
+
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+
+        if alternate_currency:
+            return alternate_currency
+        else:
+            return False
+
+    @api.depends('invoice_line_ids.price_total', 'foreign_currency_rate')
+    def _amount_all_foreign(self):
+        """
+        Compute the foreign total amounts of the SO.
+        """
+        for order in self:
+            foreign_amount_untaxed = foreign_amount_tax = 0.0
+            for line in order.invoice_line_ids:
+                foreign_amount_untaxed += line.price_subtotal
+            foreign_amount_tax += order.amount_tax
+            foreign_amount_untaxed *= order.foreign_currency_rate
+            foreign_amount_tax *= order.foreign_currency_rate
+            order.update({
+                'foreign_amount_untaxed': foreign_amount_untaxed,
+                'foreign_amount_tax': foreign_amount_tax,
+                'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
+            })
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        obj_retention_islr = False
+        if 'retention_islr_line_ids' in vals_list:
+            obj_retention_islr = vals_list['retention_islr_line_ids']
+        res = super(AccountMoveBinauralFacturacion, self).create(vals_list)
+        _logger.info('resssssssssssssssssssssssssssssssssssssssss')
+        _logger.info(res)
+        if obj_retention_islr:
+            vals_list['retention_islr_line_ids'] = obj_retention_islr
+        _logger.info('vals_lisssssssssssssssssstttttttttttttttt')
+        _logger.info(vals_list)
+        _logger.info('retenciones linea islr')
+        _logger.info(res.retention_islr_line_ids)
+        if 'retention_islr_line_ids' in vals_list:
+            _logger.info('Paso aqui')
+            for line in vals_list['retention_islr_line_ids']:
+                _logger.info('Paso aqui2')
+                line[2]['invoice_id'] = res['id']
+            self.env['account.retention'].create({
+                'type': 'in_invoice',
+                'type_retention': 'islr',
+                'partner_id': vals_list['partner_id'],
+                'retention_line': vals_list['retention_islr_line_ids'],
+                'date_accounting': vals_list['date'],
+                'date': vals_list['date'],
+            })
+        _logger.info('resssssssssssssssssssssssssssssssssssssssss')
+        _logger.info(res)
+        return res
+    
+    def _check_origin_invoice(self):
+        sale = self.env['account.journal'].search([('name', '=', self.invoice_orgin)], limit=1)
+        if sale:
+            return {'readonly': {
+                'partner_id': True}}
+        else:
+            return
+        
     correlative = fields.Char(string='Número de control',copy=False)
     is_contingence = fields.Boolean(string='Es contingencia',default=False)
 
@@ -31,8 +130,191 @@ class AccountMoveBinauralFacturacion(models.Model):
     business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
 
     date_reception = fields.Date(string='Fecha de recepción',copy=False)
-    
+
     days_expired = fields.Integer('Dias vencidos en base a Fecha de recepción', compute='_compute_days_expired',copy=False)
+    filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
+                                      string='Filtro de Contacto')
+
+    amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+
+    apply_retention_iva = fields.Boolean(string="¿Se aplico retención de iva?", default=False, copy=False)
+    apply_retention_islr = fields.Boolean(string="¿Se aplico retención de islr?", default=False, copy=False)
+    iva_voucher_number = fields.Char(string="Comprobante de Retención de IVA", readonly=False, copy=False)
+    islr_voucher_number = fields.Char(string="Comprobante de Retención de ISLR", readonly=False, copy=False)
+    # Foreing cyrrency fields
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+                                          tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
+    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+
+    foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True,
+                                             compute='_amount_all_foreign',
+                                             tracking=5)
+    foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
+    foreign_amount_total = fields.Monetary(string='Total moneda alterna', store=True, readonly=True, compute='_amount_all_foreign',
+                                           tracking=4)
+    foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo",
+                                            compute='_compute_invoice_taxes_by_group')
+    foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo",
+                                                 compute='_compute_invoice_taxes_by_group')
+    
+    retention_iva_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'iva')])
+    generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False, copy=False)
+
+    retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'islr')])
+
+    @api.constrains('foreign_currency_rate')
+    def _check_foreign_currency_rate(self):
+        for record in self:
+            if record.foreign_currency_rate <= 0:
+                raise UserError("La tasa de la factura debe ser mayor que cero ")
+
+    @api.depends('company_id', 'invoice_filter_type_domain', 'is_contingence')
+    def _compute_suitable_journal_ids(self):
+        for m in self:
+            journal_type = m.invoice_filter_type_domain or 'general'
+            company_id = m.company_id.id or self.env.company.id
+            domain = [('company_id', '=', company_id), ('type', '=', journal_type),
+                      ('journal_contingence', '=', m.is_contingence)]
+            m.suitable_journal_ids = self.env['account.journal'].search(domain)
+
+    @api.model
+    def _search_default_journal(self, journal_types):
+        is_contingence = self._context.get('default_is_contingence')
+        company_id = self._context.get('default_company_id', self.env.company.id)
+        if is_contingence:
+            domain = [('company_id', '=', company_id), ('type', 'in', journal_types),
+                      ('journal_contingence', '=', is_contingence)]
+        else:
+            domain = [('company_id', '=', company_id), ('type', 'in', journal_types)]
+        
+        journal = None
+        if self._context.get('default_currency_id'):
+            currency_domain = domain + [('currency_id', '=', self._context['default_currency_id'])]
+            journal = self.env['account.journal'].search(currency_domain, limit=1)
+            _logger.info('Diario por moneda')
+        if not journal:
+            journal = self.env['account.journal'].search(domain, limit=1)
+        if not journal:
+            company = self.env['res.company'].browse(company_id)
+            
+            error_msg = _(
+                "No journal could be found in company %(company_name)s for any of those types: %(journal_types)s",
+                company_name=company.display_name,
+                journal_types=', '.join(journal_types),
+            )
+            raise UserError(error_msg)
+        
+        return journal
+
+    @api.model
+    def _get_default_journal(self):
+        ''' Get the default journal.
+        It could either be passed through the context using the 'default_journal_id' key containing its id,
+        either be determined by the default type.
+        '''
+        move_type = self._context.get('default_move_type', 'entry')
+        if move_type in self.get_sale_types(include_receipts=True):
+            journal_types = ['sale']
+        elif move_type in self.get_purchase_types(include_receipts=True):
+            journal_types = ['purchase']
+        else:
+            journal_types = self._context.get('default_move_journal_types', ['general'])
+        
+        if self._context.get('default_journal_id'):
+            journal = self.env['account.journal'].browse(self._context['default_journal_id'])
+            
+            if move_type != 'entry' and journal.type not in journal_types:
+                raise UserError(_(
+                    "Cannot create an invoice of type %(move_type)s with a journal having %(journal_type)s as type.",
+                    move_type=move_type,
+                    journal_type=journal.type,
+                ))
+        else:
+            journal = self._search_default_journal(journal_types)
+        if self.is_contingence and not journal.journal_contingence:
+            journal_new = self.env['account.journal'].browse([('journal_contingence', '=', True)], limit=1)
+            if journal_new:
+                journal = journal_new
+        return journal
+
+    @api.depends('line_ids.price_subtotal', 'line_ids.tax_base_amount', 'line_ids.tax_line_id', 'partner_id', 'currency_id')
+    def _compute_invoice_taxes_by_group(self):
+        ''' Helper to get the taxes grouped according their account.tax.group.
+        This method is only used when printing the invoice.
+        '''
+        for move in self:
+            lang_env = move.with_context(lang=move.partner_id.lang).env
+            tax_lines = move.line_ids.filtered(lambda line: line.tax_line_id)
+            tax_balance_multiplicator = -1 if move.is_inbound(True) else 1
+            res = {}
+            # There are as many tax line as there are repartition lines
+            done_taxes = set()
+            for line in tax_lines:
+                res.setdefault(line.tax_line_id.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                res[line.tax_line_id.tax_group_id]['amount'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
+                tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
+                if tax_key_add_base not in done_taxes:
+                    if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
+                        amount = line.company_currency_id._convert(line.tax_base_amount, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
+                    else:
+                        amount = line.tax_base_amount
+                    res[line.tax_line_id.tax_group_id]['base'] += amount
+                    # The base should be added ONCE
+                    done_taxes.add(tax_key_add_base)
+
+            # At this point we only want to keep the taxes with a zero amount since they do not
+            # generate a tax line.
+            zero_taxes = set()
+            for line in move.line_ids:
+                for tax in line.tax_ids.flatten_taxes_hierarchy():
+                    if tax.tax_group_id not in res or tax.tax_group_id in zero_taxes:
+                        res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
+                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.amount_currency if line.currency_id else line.balance)
+                        zero_taxes.add(tax.tax_group_id)
+
+            res = sorted(res.items(), key=lambda l: l[0].sequence)
+            move.amount_by_group = [(
+                group.name, amounts['amount'],
+                amounts['base'],
+                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
+            move.amount_by_group_base = [(
+                group.name.replace("IVA", "Total G").replace("TAX", "Total G"), amounts['base'],
+                amounts['amount'],
+                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
+            move.foreign_amount_by_group = [(
+                group.name, amounts['amount'] * move.foreign_currency_rate,
+                amounts['base'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
+
+            move.foreign_amount_by_group_base = [(
+                group.name.replace("IVA", "Total G").replace("TAX", "Total G"),
+                amounts['base'] * move.foreign_currency_rate,
+                amounts['amount'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                           currency_obj=move.foreign_currency_id),
+                len(res),
+                group.id
+            ) for group, amounts in res]
 
     @api.onchange("date_reception")
     def _onchange_date_reception(self):
@@ -43,6 +325,9 @@ class AccountMoveBinauralFacturacion(models.Model):
         res = super(AccountMoveBinauralFacturacion, self)._write(vals)
         if 'date_reception' in vals:
             self._compute_days_expired()
+        _logger.info('EDITAR FACTURAS')
+        _logger.info(vals)
+        _logger.info('EDITAR FACTURAS')
         return res
 
     @api.depends('date_reception', 'invoice_date_due', 'invoice_payment_term_id', 'state')
@@ -69,9 +354,9 @@ class AccountMoveBinauralFacturacion(models.Model):
                     _logger.info("Exepction en days expired")
                     _logger.info(e)
                     days_expired = 0
-                _logger.info("Days expired %s",days_expired)
+                _logger.info("Daysssss expired %s",days_expired)
             i.days_expired = days_expired if days_expired > 0 else 0
-        
+
     @api.depends('partner_id')
     def _get_vat(self):
         for p in self:
@@ -79,7 +364,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 vat = str(p.partner_id.prefix_vat) + str(p.partner_id.vat)
             else:
                 vat = str(p.partner_id.vat)
-            p.vat = vat
+            p.vat = vat.upper()
 
     def sequence(self):
         sequence = self.env['ir.sequence'].search([('code','=','invoice.correlative')])
@@ -90,6 +375,7 @@ class AccountMoveBinauralFacturacion(models.Model):
                 'padding': 5
             })
         return sequence
+
     def _post(self, soft=True):
         """Post/Validate the documents.
 
@@ -201,14 +487,33 @@ class AccountMoveBinauralFacturacion(models.Model):
 
         #Binaural facturacion init code
 
-        for move in to_post:  
+        for move in to_post:
             #cliente
-            if move.is_sale_document(include_receipts=True):
+            if move.is_sale_document(include_receipts=False) and not move.correlative:
                 #incrementar numero de control de factura y Nota de credito de manera automatica
-                sequence = move.sequence()
-                next_correlative = sequence.get_next_char(sequence.number_next_actual) 
-                correlative = sequence.next_by_id(sequence.id)
-                move.write({'correlative':correlative})
+                if move.journal_id and move.journal_id.fiscal:
+                    sequence = move.sequence()
+                    next_correlative = sequence.get_next_char(sequence.number_next_actual)
+                    correlative = sequence.next_by_id(sequence.id)
+                    move.write({'correlative':correlative})
+            if move.generate_retencion_iva and not move.iva_voucher_number:
+                retention = self.env['account.retention'].create({
+                    'type': 'in_invoice',
+                    'partner_id': move.partner_id.id,
+                    'type_retention': 'iva',
+                    'date_accounting': move.date,
+                    'date': move.date,
+                })
+                data = funtions_retention.load_line_retention(retention, [], move.id)
+                retention.write({'retention_line': data})
+                retention.action_emitted()
+                move.write({'iva_voucher_number': retention.number, 'apply_retention_iva': True})
+            if move.retention_islr_line_ids and not move.islr_voucher_number:
+                for rislr in move.retention_islr_line_ids:
+                    if rislr.retention_id.type_retention in ['islr']:
+                        rislr.retention_id.write({'date': move.date, 'date_accounting': move.date})
+                        rislr.retention_id.action_emitted()
+                        move.write({'islr_voucher_number': rislr.retention_id.number, 'apply_retention_islr': True})
         return to_post
 
     #heredar constrain para permitir name duplicado solo en proveedor
@@ -235,7 +540,7 @@ class AccountMoveBinauralFacturacion(models.Model):
         res = self._cr.fetchall()
         if res:
             for i in moves:
-                if not i.is_purchase_document(include_receipts=True):
+                if not i.is_invoice(include_receipts=True) or not i.is_purchase_document(include_receipts=True) :
                     raise ValidationError(_('Posted journal entry must have an unique sequence number per company.\n'
                     'Problematic numbers: %s\n') % ', '.join(r[1] for r in res))
                 else:
@@ -243,9 +548,8 @@ class AccountMoveBinauralFacturacion(models.Model):
                     for r in res:
                         _logger.info("id a buscar %s",r[0])
                         invoice = self.env['account.move'].sudo().browse(int(r[0]))
-                        if invoice.partner_id == i.partner_id:
-                            raise ValidationError(_('La entrada de diario registrada debe tener un número de secuencia único por empresa y Proveedor.\n'
-                            'Números problemáticos: %s\n') % ', '.join(r[1] for r in res))
+                        if invoice.partner_id == i.partner_id and i.is_purchase_document(include_receipts=True):
+                            raise ValidationError(_('La factura Nro %s esta repetida para el proveedor %s.\n') %(', '.join(r[1] for r in res),i.partner_id.name))
 
     @api.depends('journal_id', 'date')
     def _compute_highest_name(self):
@@ -255,81 +559,146 @@ class AccountMoveBinauralFacturacion(models.Model):
                 record.highest_name = record._get_last_sequence()
             else:
                 record.highest_name = '/'
-    
+
     @api.depends('posted_before', 'state', 'journal_id', 'date')
     def _compute_name(self):
         #No aplicar para documentos de compras
-        if not self.is_purchase_document(include_receipts=True):
+        for record in self:
+            if not record.is_purchase_document(include_receipts=True):
+                def journal_key(move):
+                    return (move.journal_id, move.journal_id.refund_sequence and move.move_type)
 
-            def journal_key(move):
-                return (move.journal_id, move.journal_id.refund_sequence and move.move_type)
+                def date_key(move):
+                    return (move.date.year, move.date.month)
 
-            def date_key(move):
-                return (move.date.year, move.date.month)
-
-            grouped = defaultdict(  # key: journal_id, move_type
-                lambda: defaultdict(  # key: first adjacent (date.year, date.month)
-                    lambda: {
-                        'records': self.env['account.move'],
-                        'format': False,
-                        'format_values': False,
-                        'reset': False
-                    }
+                grouped = defaultdict(  # key: journal_id, move_type
+                    lambda: defaultdict(  # key: first adjacent (date.year, date.month)
+                        lambda: {
+                            'records': self.env['account.move'],
+                            'format': False,
+                            'format_values': False,
+                            'reset': False
+                        }
+                    )
                 )
-            )
-            self = self.sorted(lambda m: (m.date, m.ref or '', m.id))
-            highest_name = self[0]._get_last_sequence() if self else False
+                self = self.sorted(lambda m: (m.date, m.ref or '', m.id))
+                highest_name = self[0]._get_last_sequence() if self else False
 
-            # Group the moves by journal and month
-            for move in self:
-                if not highest_name and move == self[0] and not move.posted_before:
-                    # In the form view, we need to compute a default sequence so that the user can edit
-                    # it. We only check the first move as an approximation (enough for new in form view)
-                    pass
-                elif (move.name and move.name != '/') or move.state != 'posted':
-                    try:
-                        if not move.posted_before:
-                            move._constrains_date_sequence()
-                        # Has already a name or is not posted, we don't add to a batch
-                        continue
-                    except ValidationError:
-                        # Has never been posted and the name doesn't match the date: recompute it
+                # Group the moves by journal and month
+                for move in self:
+                    if not highest_name and move == self[0] and not move.posted_before:
+                        # In the form view, we need to compute a default sequence so that the user can edit
+                        # it. We only check the first move as an approximation (enough for new in form view)
                         pass
-                group = grouped[journal_key(move)][date_key(move)]
-                if not group['records']:
-                    # Compute all the values needed to sequence this whole group
-                    move._set_next_sequence()
-                    group['format'], group['format_values'] = move._get_sequence_format_param(move.name)
-                    group['reset'] = move._deduce_sequence_number_reset(move.name)
-                group['records'] += move
+                    elif (move.name and move.name != '/') or move.state != 'posted':
+                        try:
+                            if not move.posted_before:
+                                move._constrains_date_sequence()
+                            # Has already a name or is not posted, we don't add to a batch
+                            continue
+                        except ValidationError:
+                            # Has never been posted and the name doesn't match the date: recompute it
+                            pass
+                    group = grouped[journal_key(move)][date_key(move)]
+                    if not group['records']:
+                        # Compute all the values needed to sequence this whole group
+                        move._set_next_sequence()
+                        group['format'], group['format_values'] = move._get_sequence_format_param(move.name)
+                        group['reset'] = move._deduce_sequence_number_reset(move.name)
+                    group['records'] += move
 
-            # Fusion the groups depending on the sequence reset and the format used because `seq` is
-            # the same counter for multiple groups that might be spread in multiple months.
-            final_batches = []
-            for journal_group in grouped.values():
-                for date_group in journal_group.values():
-                    if (
-                        not final_batches
-                        or final_batches[-1]['format'] != date_group['format']
-                        or final_batches[-1]['format_values'] != date_group['format_values']
-                    ):
-                        final_batches += [date_group]
-                    elif date_group['reset'] == 'never':
-                        final_batches[-1]['records'] += date_group['records']
-                    elif (
-                        date_group['reset'] == 'year'
-                        and final_batches[-1]['records'][0].date.year == date_group['records'][0].date.year
-                    ):
-                        final_batches[-1]['records'] += date_group['records']
-                    else:
-                        final_batches += [date_group]
+                # Fusion the groups depending on the sequence reset and the format used because `seq` is
+                # the same counter for multiple groups that might be spread in multiple months.
+                final_batches = []
+                for journal_group in grouped.values():
+                    for date_group in journal_group.values():
+                        if (
+                            not final_batches
+                            or final_batches[-1]['format'] != date_group['format']
+                            or final_batches[-1]['format_values'] != date_group['format_values']
+                        ):
+                            final_batches += [date_group]
+                        elif date_group['reset'] == 'never':
+                            final_batches[-1]['records'] += date_group['records']
+                        elif (
+                            date_group['reset'] == 'year'
+                            and final_batches[-1]['records'][0].date.year == date_group['records'][0].date.year
+                        ):
+                            final_batches[-1]['records'] += date_group['records']
+                        else:
+                            final_batches += [date_group]
 
-            # Give the name based on previously computed values
-            for batch in final_batches:
-                for move in batch['records']:
-                    move.name = batch['format'].format(**batch['format_values'])
-                    batch['format_values']['seq'] += 1
-                batch['records']._compute_split_sequence()
-            self.filtered(lambda m: not m.name).name = '/'
+                # Give the name based on previously computed values
+                for batch in final_batches:
+                    for move in batch['records']:
+                        move.name = batch['format'].format(**batch['format_values'])
+                        batch['format_values']['seq'] += 1
+                    batch['records']._compute_split_sequence()
+                self.filtered(lambda m: not m.name).name = '/'
+            else:
+                self.filtered(lambda m: not m.name).name = '/'
+
+    @api.constrains('move_type', 'invoice_date', 'invoice_line_ids')
+    def _check_qty_lines(self):
+        for record in self:
+            _logger.info('RECORD')
+            _logger.info(record)
+            #if not record.invoice_date:
+            #    raise ValidationError("Debe ingresar fecha")
+            if record.move_type in ['out_invoice', 'out_refund']:
+                qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
+                if qty_max and qty_max < len(record.invoice_line_ids):
+                    #pass
+                    raise UserError("La cantidad de lineas de la factura "+str(len(record.invoice_line_ids))+" es mayor a la cantidad configurada "+str(qty_max))
+
+    def action_register_payment(self):
+        ''' Open the account.payment.register wizard to pay the selected journal entries.
+        :return: An action opening the account.payment.register wizard.
+        '''
+        res = super(AccountMoveBinauralFacturacion, self).action_register_payment()
+        context = res.get('context')
+        res['context'].setdefault('default_foreign_currency_rate', self.foreign_currency_rate)
+        if self.foreign_currency_id:
+            res['context'].setdefault('default_foreign_currency_id', self.foreign_currency_id.id)
+        return res
+
+
+class AcoountMoveLineBinauralFact(models.Model):
+    _inherit = 'account.move.line'
+
+
+    #validar que el precio unitario no sea mayor al costo del producto, basado en la configuracion
+    @api.onchange('price_unit','product_id')
+    def onchange_price_unit_check_cost(self):
+        for l in self:
+            if self.env['ir.config_parameter'].sudo().get_param('not_cost_higher_price_invoice') and l.price_unit and l.product_id:
+                _logger.info("costo del producto %s",l.product_id.standard_price)
+                _logger.info("precio unitario %s",l.price_unit)
+                if l.price_unit <= l.product_id.standard_price and l.product_id.type == 'product' and l.move_id.is_sale_document(include_receipts=True):#solo aplica a almacenables
+                    raise ValidationError("Precio unitario no puede ser menor o igual al costo del producto")
+
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+
+        if alternate_currency:
+            return alternate_currency
         else:
-            self.filtered(lambda m: not m.name).name = '/'
+            return False
+
+    @api.depends('move_id.foreign_currency_rate')
+    def _amount_all_foreign(self):
+        """
+        Compute the foreign total amounts of the SO.
+        """
+        for order in self:
+            order.update({
+                'foreign_price_unit': order.price_unit * order.move_id.foreign_currency_rate,
+                'foreign_subtotal': order.price_subtotal * order.move_id.foreign_currency_rate,
+            })
+
+    foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True,
+                                         compute='_amount_all_foreign', tracking=4)
+    foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True,
+                                       compute='_amount_all_foreign', tracking=4)
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", related='move_id.foreign_currency_rate', tracking=True)

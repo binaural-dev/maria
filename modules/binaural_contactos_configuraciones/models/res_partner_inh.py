@@ -33,9 +33,16 @@ class ResPartnerBinauralContactos(models.Model):
     business_name = fields.Char(string='Razón Social')
 
     prefix_vat = fields.Selection([
-        ('v', 'V'),
-        ('e', 'E'),
-        ('j', 'J'),
-        ('g', 'G'),
-        ('c', 'C'),
-    ], 'Prefijo Rif', required=False, default='v')
+        ('V', 'V'),
+        ('E', 'E'),
+        ('J', 'J'),
+        ('G', 'G'),
+        ('C', 'C'),
+    ], 'Prefijo Rif', required=False, default='V')
+    city_id = fields.Many2one('res.country.city', 'Ciudad', track_visibility='onchange')
+
+    @api.constrains('city_id')
+    def _update_city(self):
+        for record in self:
+            if record.city_id:
+                record.city = record.city_id.name
