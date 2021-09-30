@@ -8,97 +8,183 @@
 	        <field name="arch" type="xml">
 		        <xpath expr="//div[@id='invoicing_settings']" position="after">
 			        <h2>Retenciones</h2>
-			        <div class="col-xs-12 col-md-6 o_setting_box" id="retention_iva">
+			        <div class="col-12 o_setting_box" id="use_retention">
 	                    <div class="o_setting_left_pane">
-		                    <span class="o_form_label">Cuenta de Retenciones de IVA</span>
-	                        <div class="text-muted">
-	                            Ingrese la cuenta contable para las retenciones de IVA de proveedor
-	                        </div>
 	                    </div>
 				        <div class="o_setting_right_pane">
                             <div class="row mt16">
-                                <label for="account_retention_iva" class="col-lg-3 o_light_label"/>
-                                <field name="account_retention_iva" required="1" options="{'no_create_edit': True, 'no_open': True}"/>
+                                <label for="use_retention" class="col-lg-3 o_light_label"/>
+                                <field name="use_retention" options="{'no_create_edit': True, 'no_open': True}"/>
                             </div>
 	                    </div>
 	                </div>
+			        <div attrs="{'invisible':[('use_retention','=', False)]}" class="row mt16 o_settings_container">
+				        <div class="col-12 col-lg-6 o_setting_box" id="retention_iva">
+		                    <div class="o_setting_left_pane">
+		                    </div>
+					        <div class="o_setting_right_pane">
+	                            <div>
+		                            <span class="o_form_label">Cuenta de Retenciones de IVA</span>
+			                        <div class="text-muted">
+			                            Ingrese la cuenta contable para las retenciones de IVA de proveedor
+			                        </div>
+	                                <field name="account_retention_iva" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+	                            </div>
+		                    </div>
+		                </div>
 
-			        <div class="col-xs-12 col-md-6 o_setting_box" id="retention_islr">
-				        <div class="o_setting_left_pane">
-	                        <span class="o_form_label">Cuenta de Retenciones de ISLR</span>
-	                        <div class="text-muted">
-	                            Ingrese la cuenta contable para las retenciones de ISLR de proveedor
-	                        </div>
-	                    </div>
+				        <div class="col-12 col-lg-6 o_setting_box" id="retention_islr">
+					        <div class="o_setting_left_pane">
+		                    </div>
+		                    <div class="o_setting_right_pane">
+	                            <div>
+		                            <span class="o_form_label">Cuenta de Retenciones de ISLR</span>
+			                        <div class="text-muted">
+			                            Ingrese la cuenta contable para las retenciones de ISLR de proveedor
+			                        </div>
+	                                <field name="account_retention_islr" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+	                            </div>
+		                    </div>
+		                    </div>
+
+				        <div class="col-12 col-lg-6 o_setting_box" id="jorrnal_retention_customer">
+		                    <div class="o_setting_left_pane">
+		                    </div>
+					        <div class="o_setting_right_pane">
+						        <span class="o_form_label">Diario de Retenciones de Clientes</span>
+		                        <div class="text-muted">
+		                            Ingrese el diario para las retenciones de cliente
+		                        </div>
+                                <field name="journal_retention_client" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+		                    </div>
+		                </div>
+
+				        <div class="col-12 col-lg-6 o_setting_box" id="jorrnal_retention_supplier">
+		                    <div class="o_setting_left_pane">
+		                    </div>
+					        <div class="o_setting_right_pane">
+	                            <div>
+		                            <span class="o_form_label">Diario de Retenciones de Proveedor</span>
+			                        <div class="text-muted">
+			                            Ingrese el diario para las retenciones de proveedor
+			                        </div>
+	                                <field name="journal_retention_supplier" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+	                            </div>
+		                    </div>
+		                </div>
+
+				        <!--div class="col-12 col-lg-6 o_setting_box" id="cxc_customer">
+		                    <div class="o_setting_left_pane">
+		                    </div>
+					        <div class="o_setting_right_pane">
+						        <span class="o_form_label">Cuenta P/cobrar clientes</span>
+		                        <div class="text-muted">
+		                            Ingrese cuenta por cobrar de retenciones de clientes
+		                        </div>
+	                            <field name="account_retention_receivable_client" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+		                    </div>
+		                </div-->
+
+				        <!--div class="col-12 col-lg-6 o_setting_box" id="cxp_supplier">
+		                    <div class="o_setting_left_pane">
+		                    </div>
+					        <div class="o_setting_right_pane">
+						        <span class="o_form_label">Cuenta P/pagar proveedor</span>
+		                        <div class="text-muted">
+		                            Ingrese cuenta por pagar de retenciones de proveedores
+		                        </div>
+	                            <div>
+	                                <field name="account_retention_to_pay_supplier" attrs="{'required':[('use_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+	                            </div>
+		                    </div>
+		                </div-->
+		            </div>
+				</xpath>
+		        <xpath expr="//div[@id='invoicing_settings']" position="inside">
+				    <div class="col-12 col-lg-6 o_setting_box">
 	                    <div class="o_setting_right_pane">
-                            <div class="row mt16">
-                                <label for="account_retention_islr" class="col-lg-3 o_light_label"/>
-                                <field name="account_retention_islr" required="1" options="{'no_create_edit': True, 'no_open': True}"/>
-                            </div>
-	                    </div>
+		                     <span class="o_form_label">Máxima de productos facturables</span>
+		                     <div class="text-muted">
+	                            Ingresa la cantidad máxima de productos facturables
+		                     </div>
+		                     <div class="content-group">
+		                         <div class="mt16 row">
+		                             <label for="qty_max" string="Cantidad de Líneas" class="col-3 col-lg-3 o_light_label"/>
+		                             <field name="qty_max" class="oe_inline" required="1"/>
+		                         </div>
+		                    </div>
+		                </div>
 	                </div>
-
-			        <div class="col-xs-12 col-md-6 o_setting_box" id="retention_iva">
-	                    <div class="o_setting_left_pane">
-		                    <span class="o_form_label">Diario de Retenciones de Clientes</span>
-	                        <div class="text-muted">
-	                            Ingrese el diario para las retenciones de cliente
-	                        </div>
-	                    </div>
-				        <div class="o_setting_right_pane">
-                            <div class="row mt16">
-                                <label for="journal_retention_client" class="col-lg-3 o_light_label"/>
-                                <field name="journal_retention_client" required="1" options="{'no_create_edit': True, 'no_open': True}"/>
+				</xpath>
+		        <xpath expr="//div[@name='main_currency_setting_container']" position="inside">
+				    <div class="col-12 col-lg-6 o_setting_box" id="alternate_currency">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">Moneda Alterna</span>
+                            <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
+                            <div class="text-muted">
+                                Moneda Alterna de la compañia
                             </div>
-	                    </div>
-	                </div>
-
-			        <div class="col-xs-12 col-md-6 o_setting_box" id="retention_iva">
-	                    <div class="o_setting_left_pane">
-		                    <span class="o_form_label">Diario de Retenciones de Proveedor</span>
-	                        <div class="text-muted">
-	                            Ingrese el diario para las retenciones de proveedor
-	                        </div>
-	                    </div>
-				        <div class="o_setting_right_pane">
-                            <div class="row mt16">
-                                <label for="journal_retention_supplier" class="col-lg-3 o_light_label"/>
-                                <field name="journal_retention_supplier" required="1" options="{'no_create_edit': True, 'no_open': True}"/>
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="curreny_foreign_id" class="col-lg-3 o_light_label"/>
+                                    <field name="curreny_foreign_id" options="{'no_create_edit': True, 'no_open': True}" context="{'active_test': False}"/>
+                                </div>
                             </div>
-	                    </div>
-	                </div>
-
-			        <div class="col-xs-12 col-md-6 o_setting_box" id="retention_iva">
-	                    <div class="o_setting_left_pane">
-		                    <span class="o_form_label">Cuenta P/cobrar clientes</span>
-	                        <div class="text-muted">
-	                            Ingrese cuenta por cobrar de retenciones de clientes
-	                        </div>
-	                    </div>
-				        <div class="o_setting_right_pane">
-                            <div class="row mt16">
-                                <label for="account_retention_receivable_client" class="col-lg-3 o_light_label"/>
-                                <field name="account_retention_receivable_client" required="1" options="{'no_create_edit': True, 'no_open': True}"/>
-                            </div>
-	                    </div>
-	                </div>
-
-			        <div class="col-xs-12 col-md-6 o_setting_box" id="retention_iva">
-	                    <div class="o_setting_left_pane">
-		                    <span class="o_form_label">Cuenta P/pagar proveedor</span>
-	                        <div class="text-muted">
-	                            Ingrese cuenta por pagar de retenciones de proveedores
-	                        </div>
-	                    </div>
-				        <div class="o_setting_right_pane">
-                            <div class="row mt16">
-                                <label for="account_retention_to_pay_supplier" class="col-lg-3 o_light_label"/>
-                                <field name="account_retention_to_pay_supplier" required="1" options="{'no_create_edit': True, 'no_open': True}"/>
-                            </div>
-	                    </div>
-	                </div>
+                        </div>
+                    </div>
 				</xpath>
 	        </field>
 	  </record>
+
+	  <record id="view_move_line_tree_grouped_sales_purchases" model="ir.ui.view">
+            <field name="name">account.move.line.tree.grouped.sales.purchase</field>
+            <field name="model">account.move.line</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
+            <field name="arch" type="xml">
+                <field name="date" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="move_id" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="partner_id" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="matching_number" position="attributes"><attribute name="optional">hide</attribute></field>
+                <field name="tax_ids" position="attributes"><attribute name="optional">show</attribute></field>
+                <field name="tax_tag_ids" position="attributes"><attribute name="optional">show</attribute></field>
+            </field>
+        </record>
+
+	  <record id="view_account_journal_contingence_tree" model="ir.ui.view">
+	        <field name="name">account.journal.tree</field>
+	        <field name="model">account.journal</field>
+	        <field name="priority">1</field>
+	        <field name="arch" type="xml">
+	            <tree string="Account Journal">
+	                <field name='sequence' widget='handle'/>
+	                <field name="name"/>
+	                <field name="type"/>
+	                <field name="journal_group_ids" widget="many2many_tags" readonly="1"/>
+	                <field name="company_id" groups="base.group_multi_company"/>
+		            <field name="journal_contingence" widget="boolean_toggle"/>
+	            </tree>
+	        </field>
+	  </record>
+
+	  <record id="action_account_moves_journal_contingence_sales" model="ir.actions.act_window">
+            <field name="name">Journals</field>
+            <field name="res_model">account.journal</field>
+            <field name="view_mode">tree</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_account_journal_contingence_tree')})]"/>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Add a journal
+              </p><p>
+                A journal is used to record transactions of all accounting data
+                related to the day-to-day business.
+              </p>
+            </field>
+	  </record>
+
+	  <menuitem name="Diarios de contingencia" id="journal_contingence_configuration" parent="account.account_account_menu"
+	  sequence="2" action="action_account_moves_journal_contingence_sales"/>
   </data>
 </odoo>

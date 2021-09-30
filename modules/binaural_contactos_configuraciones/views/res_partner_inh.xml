@@ -16,6 +16,10 @@
 	                    <field name="vat" required="1"/>
 	                </div>
 	            </field>
+		        <field name="city" position="replace">
+			        <field name="city_id" placeholder="Ciudad"/>
+			        <field name="city" invisible="1"/>
+		        </field>
 
 	            <div id="vat" position="after">
                     <field name="withholding_type" attrs="{'required':[('supplier_rank','&gt;', 0)]}"/>
@@ -26,21 +30,24 @@
 	                <field name="business_name" required="1"/>
 	            </label>
 
+		        <xpath expr="//sheet/notebook/page[@name='contact_addresses']/field[@name='child_ids']/form//field[@name='city']" position="replace">
+					<field name="city_id" placeholder="Ciudad"/>
+			        <field name="city" invisible="1"/>
+				</xpath>
+
 		        <page name="sales_purchases" position="after">
 	                <page name='retention' string="Retenciones">
 	                    <group>
 	                        <group>
 		                        <field name="exempt_iva" />
 	                            <field name="iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)],
-	                            'required': ['&amp;', ('exempt_iva', '=', False), '|', ('customer_rank', '&gt;', 0),
-	                            '&amp;', ('customer_rank', '=', 0), ('customer_rank', '=', 0)]}"/>
+	                            'required': [('exempt_iva', '=', False), ('customer_rank', '&gt;', 0)]}"/>
 	                            <field name="supplier_iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)]}"/>
 	                        </group>
 	                        <group>
 		                        <field name="exempt_islr"/>
 	                            <field name="islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)],
-	                            'required': ['&amp;', ('islr_retention', '=', False), '|', ('customer_rank', '&gt;', 0),
-	                            '&amp;', ('customer_rank', '=', 0), ('customer_rank', '=', 0)]}"/>
+	                            'required': [('exempt_islr', '=', False), ('customer_rank', '&gt;', 0)]}"/>
 	                            <field name="supplier_islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)]}"/>
 	                        </group>
 	                   </group>

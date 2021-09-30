@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assets_frontend_binaural_sitio_web" inherit_id="web_editor.assets_frontend" name="Portal Assets" priority="15">
+        <xpath expr="//script[last()]" position="after">
+            <script type="text/javascript" src="/binaural_sitio_web/static/src/js/portal.js"></script>
+            <script type="text/javascript" src="/binaural_sitio_web/static/src/js/website_sale.js"></script>
+        </xpath>
+    </template>
+</odoo>

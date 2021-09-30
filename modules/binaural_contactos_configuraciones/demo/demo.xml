@@ -25,7 +25,7 @@
 	      </record>
 
 	      <!--TAX UNIT-->
-	      <record id="demo_tax_unit_0" model="tax.unit">
+	      <record id="demo_tax_unit_1" model="tax.unit">
 		      <field name="name">1500,00 UT</field>
 		      <field name="value">1500</field>
 		      <field name="status" eval="True"/>
@@ -39,17 +39,9 @@
 		      <field name="apply_subtracting" eval="False"/>
 		      <field name="acumulative_rate" eval="True"/>
 		      <field name="status" eval="True"/>
-		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_1"/>
+		      <field name="acumulative_rate_ids" eval="[(5, 0), (0, 0, {'name': '0-3000 UT', 'since': 0, 'until': 3000, 'percentage': 15, 'sustract_ut': 0})]"/>
 	      </record>
-
-	     <record id="demo_acumulative_tarif_retention_0" model="acumulative.tarif">
-		      <field name="name">0-3000 UT</field>
-		      <field name="since">0</field>
-		      <field name="until">3000</field>
-		      <field name="percentage">15</field>
-		      <field name="sustract_ut">0</field>
-		      <field name="tariffs_id" eval="demo_tarif_retention_0"/>
-	     </record>
 
 	     <record id="demo_tarif_retention_1" model="tarif.retention">
 		      <field name="name">3%</field>
@@ -58,7 +50,7 @@
 		      <field name="apply_subtracting" eval="False"/>
 		      <field name="acumulative_rate" eval="False"/>
 		      <field name="status" eval="True"/>
-		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_1"/>
 	      </record>
 
 	    <record id="demo_tarif_retention_2" model="tarif.retention">
@@ -68,7 +60,7 @@
 		      <field name="apply_subtracting" eval="True"/>
 		      <field name="acumulative_rate" eval="False"/>
 		      <field name="status" eval="True"/>
-		      <field name="tax_unit_ids" eval="demo_tax_unit_0"/>
+		      <field name="tax_unit_ids" eval="demo_tax_unit_1"/>
 	      </record>
 
 	    <!--PAYMENT CONCEPT-->
@@ -103,5 +95,22 @@
 		      <field name="email">demo@odoo.com</field>
 		      <field name="active" eval="True"/>
 	    </record>
+
+	    <!--RES COUNTRY STATE-->
+
+	    <record id="demo_res_country_state_0" model="res.country.state">
+		      <field name="name">Portuguesa</field>
+		      <field name="code">VEPO</field>
+		      <field name="country_id" ref="base.ve"/>
+	    </record>
+
+	    <!--RES COUNTRY CITY-->
+
+	    <record id="demo_res_country_city_0" model="res.country.city">
+		      <field name="name">Guanare</field>
+		      <field name="country_id" ref="base.ve"/>
+		      <field name="state_id" ref="demo_res_country_state_0"/>
+	    </record>
+
     </data>
 </odoo>

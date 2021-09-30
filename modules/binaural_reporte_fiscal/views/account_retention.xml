@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_retention_islr_client_form_report" model="ir.ui.view">
+            <field name="name">Formulario de retenciones de islr clientes reportes</field>
+            <field name="model">account.retention</field>
+            <field name="inherit_id" ref="binaural_facturacion.view_retention_islr_client_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@name='action_draft']" position="after">
+                    <button name="action_retention_send" string="Enviar por correo" type="object" class="btn-primary"/>
+                    <button name="islr_report" string="Imprimir" type="object"
+                            attrs="{'invisible':[('number','=',False)]}"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="view_retention_iva_client_form_report" model="ir.ui.view">
+            <field name="name">Formulario de retenciones de iva clientes reportes</field>
+            <field name="model">account.retention</field>
+            <field name="inherit_id" ref="binaural_facturacion.view_retention_iva_client_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@name='action_draft']" position="after">
+                    <button name="action_retention_send" string="Enviar por correo" type="object" class="btn-primary"/>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

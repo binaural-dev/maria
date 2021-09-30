@@ -8,13 +8,52 @@
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
 
-                <!--add fields: vat,phone,address,business_name-->
+                <field name="user_id" position="before">
+	                <field name="filter_partner"/>
+                </field>
                 <field name="partner_id" position="after">
                     <field name="business_name" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>
                     <field name="vat" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>
                     <field name="phone" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>
                     <field name="address" force_save="1" readonly="1" attrs="{'invisible':[('partner_id','=',False)]}"/>            
                 </field>
+
+                <field name="amount_tax" position="after">
+                    <field name="amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                    <field name="amount_by_group" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>          
+                </field>
+
+	            <xpath expr="//sheet/notebook/page" position="after">
+			         <page string="Moneda alterna" name="alternate_coin">
+                        <group>
+                            <group colspan="4" col="6" name="goreing_grup">
+                                <field name="foreign_currency_id"/>
+                                <field name="foreign_currency_date" widget="date"/>
+                                <field name="foreign_currency_rate"/>
+                            </group>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="coin_total">
+                                <field name="foreign_amount_untaxed" widget="monetary"
+                                       options="{'currency_field': 'foreign_currency_id'}"/>
+                                <field name="foreign_amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                                <field name="foreign_amount_by_group" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                                <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                    <label for="foreign_amount_total"/>
+                                </div>
+                                <field name="foreign_amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                       widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
+                            </group>
+                            <div class="oe_clear"/>
+                        </group>
+                    </page>
+		         </xpath>
+
+	            <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                    <field name="foreign_currency_id" invisible="1"/>
+                    <field name="foreign_price_unit" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
+                </xpath>
+	            <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
+                    <field name="foreign_subtotal" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
+                </xpath>
 
             </field>
         </record>

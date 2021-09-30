@@ -1,0 +1,70 @@
+<odoo>
+    <data>
+        <!--agregar boton con cantidad disp por vender en los botones del header-->
+        <record id="product_template_only_form_view_product_adD_header_buttom" model="ir.ui.view">
+            <field name="name">product.template.form.inherit.button.header</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.product_template_form_view_procurement_button"/>
+            <field name="arch" type="xml">
+                <!--agregar campo disp por vender en el header-->
+                <xpath expr="//button[@name='action_open_quants']" position="before">
+                    <button type="object" name="button_dummy" attrs="{'invisible':[('type', '!=', 'product')]}"
+                            class="oe_stat_button"
+                            icon="fa-cube"
+                            groups="base.group_system">
+                        <div class="o_field_widget o_stat_info" name="available_qty">
+                            <span class="o_stat_value" widget="statinfo">
+                                <field name="available_qty" widget="statinfo" nolabel="1" class="mr4"/>
+                                <field name="uom_name"/>
+                                
+                                
+                            </span>
+                            <span class="o_stat_text">Disp por Vender</span>
+                        </div>
+                    </button>
+                </xpath>
+                <!--mostrar boton de actualizar cantidad solo a usuarios con el permiso de actualizar cantidades en inventario-->
+                <xpath expr="//button[@name='action_update_quantity_on_hand']" position="replace">
+                    <button string="Actualizar la Cantidad" type="object"
+                            groups="binaural_inventario.group_can_update_qty_stock"
+                            name="action_update_quantity_on_hand"
+                            attrs="{'invisible': [('type', '!=', 'product')]}"/>
+                </xpath>
+                <!--mostrar boton de Reabastecer cantidad solo a usuarios con el permiso de actualizar cantidades en inventario-->
+                <xpath expr="//button[@name='%(stock.action_product_replenish)d']" position="replace">
+                    <button string="Reabastecer" type="action"
+                            name="%(stock.action_product_replenish)d"
+                            context="{'default_product_tmpl_id': id}"
+                            groups="binaural_inventario.group_can_update_qty_stock"
+                            attrs="{'invisible': [('type', '!=', 'product')]}"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <!--Agregar campos en formulario de product template-->
+        <record id="binaural_inventario_product_template_inh_tree" model="ir.ui.view">
+            <field name="name">Binaural inventario product template tree inh</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="qty_available" position="before">  
+                    <field name="available_qty" />
+                </field>
+            </field>
+        </record>
+
+        <!--heredar kanban y agregar mas informacion-->
+        <record id="product_template_kanban_view_inherit_binaural_inventario" model="ir.ui.view">
+            <field name="name">product.template.kanban.binaural.inventario</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="arch" type="xml">
+                
+                <div name="product_lst_price" position="after">
+                    <div t-if="record.type.raw_value == 'product'">Disp por Vender: <field name="available_qty"/> <field name="uom_id"/></div>                   
+                </div>
+            </field>
+        </record>
+        
+    </data>
+</odoo>

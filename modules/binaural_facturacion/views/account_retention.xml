@@ -1,0 +1,192 @@
+<odoo>
+    <data>
+
+
+        <!--
+        =====================================================
+        Retention
+        =====================================================
+        -->
+
+        <!-- View: Form: Retenciones client-->
+        <record id="view_retention_iva_client_form" model="ir.ui.view">
+            <field name="name">Formulario de retenciones de iva clientes</field>
+            <field name="model">account.retention</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Retention">
+                    <header>
+	                    <button name="action_draft" type="object" states="cancel" string="Convertir a Borrador" />
+                        <button name="action_emitted" type="object" states="draft" string="Validar" class="oe_highlight"/>
+                        <button name="action_cancel" type="object" states="emitted" string="Anular" confirm="¿Esta seguro que quiere anular este comprabante? Se revertiran los asientos contables asociados" />
+                        <field name="state" widget="statusbar" nolabel="1"/>
+                    </header>
+                    <group colspan="4" col="4">
+                        <field name="type" force_save="1" select="2"/>
+                        <field name="partner_id" on_change="onchange_partner_id(type,partner_id)" select="1"  attrs="{'invisible':[('type','=', False)],'readonly':[('state','in',['emitted','cancel'])]}"/>
+                        <field name="date_accounting" select="1" attrs="{'readonly':[('state','in',['emitted','cancel'])]}"/>
+                        <field name="number" force_save="1" attrs="{'readonly':['|',('type','=', 'in_invoice'),('state','in', ['emitted','cancel'])],
+                        'required':[('type','=', 'out_invoice')]}" />
+                        <field name="correlative" force_save="1" invisible="1" attrs="{'readonly':[('type','=', 'in_invoice')] }"/>
+                        <field name="date" attrs="{'readonly':[('state','in',['emitted','cancel'])]}"/>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Linea de Retención">
+                            <field colspan="4" name="retention_line" nolabel="1" attrs="{'invisible':[('partner_id','=',False)],'readonly':[('state','in',['emitted','cancel'])]}">
+                                <tree editable='bottom'>
+                                    <field name="name"/>
+                                    <field name="invoice_id" force_save="1" />
+                                    <field name="invoice_type" force_save="1" readonly="1"/>
+	                                <field name="tax_line"/>
+                                    <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                    <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                    <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+                                    <field name="retention_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="company_currency_id" invisible="1" />
+                                    <field name="company_id" invisible="1" />
+                                    <field name="is_retention_client" invisible="1"/>
+                                </tree>
+                            </field>
+
+                            <group col="2" colspan="2">
+                                <!--field name="amount_base_ret" attrs="{'invisible':[('type','in',[False,'out_invoice','out_refund','out_debit']) ]}" />
+                                <field name="amount_total_facture" attrs="{'invisible':[('type','in',[False,'in_invoice','in_refund','in_debit']) ]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" /-->
+                                <field name="amount_total_facture" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+                                <field name="amount_imp_ret" attrs="{'invisible':[('type','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"  />
+                                <field name="total_tax_ret" attrs="{'invisible':[('type','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                            </group>
+                        </page>
+                        <page string="Otra Información">
+                            <group>
+                                <field name="company_id"/>
+                                <field name="company_currency_id" readonly="0" />
+                            </group>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+
+	    <!-- View: Tree: Retenciones client-->
+        <record id="view_retention_iva_client_tree" model="ir.ui.view">
+            <field name="name">Listado de retenciones de iva clientes</field>
+            <field name="model">account.retention</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Retention">
+	                <field name="number"/>
+	                <field name="type"/>
+	                <field name="partner_id"/>
+	                <field name="date"/>
+	                <field name="date_accounting"/>
+	                <field name="total_tax_ret" string="Monto Retenido" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+	    <!--View: Search: Retenciones client-->
+        <record id="view_retention_iva_client_search" model="ir.ui.view">
+            <field name="name">Retenciones IVA</field>
+            <field name="model">account.retention</field>
+            <field name="arch" type="xml">
+                <search string="Retenciones IVA">
+                    <field name="number" string="Número" filter_domain="[('number','ilike',self)]"/>
+                    <field name="partner_id" string="Razón Social" filter_domain="[('partner_id','ilike',self)]"/>
+                    <field name="date" string="Fecha de Comprobante" filter_domain="[('date','ilike',self)]"/>
+                    <field name="date_accounting" string="Fecha Contable" filter_domain="[('date_accounting','ilike',self)]"/>
+                    <field name="retention_line" string="Factura" filter_domain="[('retention_line.invoice_id.name','ilike',self)]"/>
+
+                    <group expand="0" string="Group By">
+                        <filter name="group_state" string="Estatus" domain="[]" context="{'group_by':'state'}"/>
+                        <filter name="group_partner" string="Razón social" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter name="group_date_accounting" string="Fecha Contable" domain="[]" context="{'group_by':'date_accounting'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!--
+
+        =====================================================
+        Linea de Retencion
+        =====================================================
+        -->
+
+        <!-- View Tree: Retenciones -->
+        <record id="view_account_retention_line_tree" model="ir.ui.view">
+            <field name="name">view.account.retention.line.tree</field>
+            <field name="model">account.retention.line</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Lineas de Retencion">
+                    <field name="name"/>
+                    <field name="invoice_id" on_change="invoice_id_change(invoice_id)" domain="[('state', '=', 'open'), ('partner_id','=', parent.partner_id)]"/>
+                    <field name="retention_rate" />
+                    <field name="base_ret" />
+                    <field name="tax_line"/>
+                    <field name="imp_ret"/>
+                    <field name="amount_tax_ret"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- View: Form: Retenciones -->
+        <record id="view_account_retention_line_form" model="ir.ui.view">
+            <field name="name">view.account.retention.line.form</field>
+            <field name="model">account.retention.line</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Lineas de Retencion">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="invoice_id"/>
+                            <field name="retention_rate"/>
+                            <field name="base_ret"/>
+                            <field name="imp_ret"/>
+                            <field name="tax_line"/>
+                            <field name="amount_tax_ret"/>
+                            <field name="facture_amount" />
+                            <field name="iva_amount" />
+                            <field name="retention_amount" />
+                            <field name="is_retention_client" invisible="1"/>
+
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--Configuracion de Vista: Retenciones IVA Cliente-->
+        <record id="action_retention_iva_client"  model="ir.actions.act_window">
+            <field name="name">Retenciones IVA Clientes</field>
+            <field name="res_model">account.retention</field>
+            <field name="binding_view_types">list</field>
+	        <field name="view_mode">tree,form</field>
+            <field name="context">{"default_type":'out_invoice', "default_type_retention":'iva'}</field>
+	        <field name="domain">[('type_retention', '=', 'iva'), ('type', '=', 'out_invoice')]</field>
+        </record>
+
+	    <!--Configuracion de Vista: Retenciones IVA Cliente-->
+        <record id="action_retention_iva_supplier"  model="ir.actions.act_window">
+            <field name="name">Retenciones IVA Proveedores</field>
+            <field name="res_model">account.retention</field>
+            <field name="binding_view_types">list</field>
+	        <field name="view_mode">tree,form</field>
+            <field name="context">{"default_type":'in_invoice', "default_type_retention":'iva'}</field>
+	        <field name="domain">[('type_retention', '=', 'iva'), ('type', '=', 'in_invoice')]</field>
+        </record>
+
+        <!--Menu Lateral: Retenciones-->
+        <menuitem name="Retenciones IVA" id="menu_retention_iva" sequence="4" parent="account_accountant.menu_accounting"/>
+
+        <menuitem name="Cliente" id="menu_retention_iva_client" sequence="0" parent="menu_retention_iva" action="action_retention_iva_client"/>
+
+	    <menuitem name="Proveedor" id="menu_retention_iva_supplier" sequence="0" parent="menu_retention_iva" action="action_retention_iva_supplier"/>
+
+
+    </data>
+</odoo>

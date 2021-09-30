@@ -7,41 +7,217 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
-                <!--add is_contingence field after other invisibles field-->
                 <field name="country_code" position="after">
-                    <field name="is_contingence" force_save="1" invisible="1"/><!--desde el menu contingencia setear por defecto-->                    
+                    <field name="is_contingence" force_save="1" invisible="1" />
                 </field>
 
-                <!--add nro control-->
-                <xpath expr="//h1[@class='mt0']" position="after">
-                    <!--visible y requerido para contingencia ya que es editable--> 
-                    <label for="correlative" string="Nro Control" style="font-weight:bold;" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-                    <field name="correlative" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))],'readonly':[('is_contingence','=',False),('move_type','in',('out_invoice','out_refund'))],'required':[('is_contingence','=',True)]}"/>
+	            <xpath expr="//div[@name='journal_div']" position="after">
+		            <label for="generate_retencion_iva" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund'))]}"/>
+		            <field name="generate_retencion_iva" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund'))]}"/>
+                    <label for="iva_voucher_number" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+                    <field name="iva_voucher_number" readonly="1" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+		            <label for="islr_voucher_number" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+                    <field name="islr_voucher_number" readonly="1" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
                 </xpath>
 
-                <!--make name field editable in supplier-->
+                <xpath expr="//h1[@class='mt0']" position="after">
+                    <label for="correlative" string="Nro Control" style="font-weight:bold;" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+                    <field name="correlative" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))],'readonly':[('is_contingence','=',False),('move_type','in',('out_invoice','out_refund'))],'required':['|',('is_contingence','=',True), ('move_type','in',('in_invoice','in_refund'))]}"/>
+                </xpath>
+
                 <xpath expr="//h1[@class='mt0']" position="replace">
-                    <h1 class="mt0" attrs="{'invisible':[('move_type', 'not in',('in_invoice','in_refund')), ('posted_before', '=', False)]}"><!--('name', '=', '/')-->
-                        <field name="name" attrs="{'readonly': [('state', '!=', 'draft')],'required':[('move_type', 'in',('in_invoice','in_refund'))]}" placeholder="JRNL/2016/00001"/>
+                    <h1 class="mt0" attrs="{'invisible':[('move_type', 'not in',('in_invoice','in_refund','in_receipt')), ('posted_before', '=', False)]}">
+                        <field name="name" force_save="1" attrs="{'readonly': [('move_type', 'in', ('out_invoice', 'out_refund'))], 'required':[('move_type', 'in',('in_invoice','in_refund','in_receipt'))]}" placeholder="JRNL/2016/00001"/>
                     </h1>
                 </xpath>
 
-                <!--add fields: vat,phone,address,business_name-->
                 <field name="partner_id" position="after">
+                    <field name="filter_partner" attrs="{'invisible': [('move_type', '=', 'entry')]}"/>
                     <field name="business_name" force_save="1" readonly="1" attrs="{'invisible':['|',('partner_id','=',False),('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
                     <field name="vat" force_save="1" readonly="1" attrs="{'invisible':['|',('partner_id','=',False),('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
                     <field name="phone" force_save="1" readonly="1" attrs="{'invisible':['|',('partner_id','=',False),('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
                     <field name="address" force_save="1" readonly="1" attrs="{'invisible':['|',('partner_id','=',False),('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>            
                 </field>
+				<field name="partner_id" position="attributes">
+					<attribute name="attrs">{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))], 'readonly': ['|', ('state', 'not in', ('draft')), ('invoice_origin', '!=', False)]}</attribute>
+				</field>
 
-
-                <!--add field: date_reception-->
                 <field name="invoice_date" position="after">
                     <field name="date_reception" options="{'datepicker': {'warn_future': true}}"
                         attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))],'readonly':[('state','=','draft')]}"/>
                     <field name="days_expired" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
                 </field>
+
+
+                <field name="amount_by_group" position="before">
+                    <field name="amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>          
+                </field>
+
+	            <!-- Fields Foreing Currency -->
+                <xpath expr="//notebook" position="inside">
+	                <page string="Retenciones de IVA" name="alternate_riva">
+                        <field name="retention_iva_line_ids" nolabel="1" readonly="1">
+	                        <tree editable='bottom'>
+                                    <field name="name"/>
+                                    <field name="facture_total" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                    <field name="facture_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+		                            <field name="tax_line" force_save="1" />
+                                    <field name="iva_amount" force_save="1" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+	                                <field name="porcentage_retention" force_save="1"/>
+	                                <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="company_currency_id" invisible="1" />
+                                    <field name="company_id" invisible="1" />
+                                    <field name="is_retention_client" invisible="1"/>
+		                            <field name="foreign_currency_rate" optional="show" />
+	                                <field name="foreign_facture_amount" optional="show"/>
+	                                <field name="foreign_facture_total" optional="show"/>
+	                                <field name="foreign_iva_amount" optional="show"/>
+	                                <field name="foreign_retention_amount" optional="show"/>
+                                </tree>
+                        </field>
+                    </page>
+		            <page string="Retenciones de ISLR" name="alternate_rislr">
+                        <field name="retention_islr_line_ids" nolabel="1" attrs="{'readonly':[('move_type','not in', ['in_invoice', 'in_debit', 'in_refund'])]}">
+		                        <tree editable='bottom'>
+	                                    <field name="name"/>
+	                                    <field name="payment_concept_id"/>
+	                                    <field name="facture_total" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                                    <field name="facture_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+	                                    <field name="iva_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+		                                <field name="related_pay_from" />
+		                                <field name="related_percentage_tax_base"/>
+		                                <field name="related_percentage_tariffs"/>
+		                                <field name="related_amount_sustract_tariffs"/>
+				                        <field name="retention_amount" attrs="{'invisible':[('is_retention_client','=', False)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+
+	                                    <field name="currency_id" invisible="1"/>
+	                                    <field name="company_currency_id" invisible="1" />
+	                                    <field name="company_id" invisible="1" />
+	                                    <field name="is_retention_client" invisible="1"/>
+				                        <field name="foreign_currency_rate" optional="show" />
+		                                <field name="foreign_facture_amount" optional="show"/>
+		                                <field name="foreign_facture_total" optional="show"/>
+		                                <field name="foreign_iva_amount" optional="show"/>
+		                                <field name="foreign_retention_amount" optional="show"/>
+	                                </tree>
+	                        </field>
+                    </page>
+                    <page string="Moneda alterna" name="alternate_coin">
+                        <group>
+                            <group colspan="4" col="6" name="goreing_grup">
+                                <field name="foreign_currency_id" attrs="{'readonly': [('invoice_origin', '!=', False)]}"/>
+                                <field name="foreign_currency_date" widget="date" attrs="{'readonly': [('invoice_origin', '!=', False)]}"/>
+                                <field name="foreign_currency_rate" required="1" attrs="{'readonly': [('invoice_origin', '!=', False)]}"/>
+                            </group>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="coin_total">
+                                <field name="foreign_amount_untaxed" widget="monetary"
+                                       options="{'currency_field': 'foreign_currency_id'}"/>
+                                <field name="foreign_amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                                <field name="foreign_amount_by_group" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                                <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                    <label for="foreign_amount_total"/>
+                                </div>
+                                <field name="foreign_amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                       widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
+                            </group>
+                            <div class="oe_clear"/>
+                        </group>
+                    </page>
+                </xpath>
+
+	            <xpath expr="//page/field[@name='invoice_line_ids']/tree/field[@name='price_unit']" position="after">
+                    <field name="foreign_currency_id" invisible="1"/>
+                    <field name="foreign_price_unit" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
+                </xpath>
+	            <xpath expr="//page/field[@name='invoice_line_ids']/tree/field[@name='price_subtotal']" position="after">
+                    <field name="foreign_subtotal" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
+                </xpath>
+
+                <!-- Fields Foreing by payment -->
+                <xpath expr="//page/field[@name='line_ids']/tree/field[@name='currency_id']" position="after">
+                    <field name="foreign_currency_rate" />
+                </xpath>
             </field>
         </record>
+
+	    <!-- ACTION OUT_INVOICE -->
+
+	    <record id="account.action_move_out_invoice_type" model="ir.actions.act_window">
+            <field name="name">Invoices</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="account.view_out_invoice_tree"/>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="domain">[('move_type', '=', 'out_invoice'), ('is_contingence', '=', False)]</field>
+            <field name="context">{'default_move_type': 'out_invoice', 'default_filter_partner': 'customer'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a customer invoice
+              </p><p>
+                Create invoices, register payments and keep track of the discussions with your customers.
+              </p>
+            </field>
+        </record>
+
+	    <!-- ACTION OUT_REFUND -->
+
+	    <record id="account.action_move_out_refund_type" model="ir.actions.act_window">
+            <field name="name">Credit Notes</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="account.view_invoice_tree"/>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="domain">[('move_type', '=', 'out_refund')]</field>
+            <field name="context">{'default_move_type': 'out_refund', 'default_filter_partner': 'customer'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a credit note
+              </p><p>
+                Note that the easiest way to create a credit note is to do it directly
+                from the customer invoice.
+              </p>
+            </field>
+        </record>
+
+	    <!-- ACTION IN_INVOICE -->
+
+	    <record id="account.action_move_in_invoice_type" model="ir.actions.act_window">
+            <field name="name">Bills</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="account.view_in_invoice_tree"/>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="domain">[('move_type', '=', 'in_invoice')]</field>
+            <field name="context">{'default_move_type': 'in_invoice', 'default_filter_partner': 'supplier'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a vendor bill
+              </p><p>
+                Create invoices, register payments and keep track of the discussions with your vendors.
+              </p>
+            </field>
+        </record>
+
+	    <!-- ACTION IN_REFUND -->
+
+	    <record id="account.action_move_in_refund_type" model="ir.actions.act_window">
+            <field name="name">Refunds</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="account.view_in_invoice_tree"/>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="domain">[('move_type', '=', 'in_refund')]</field>
+            <field name="context">{'default_move_type': 'in_refund', 'default_filter_partner': 'supplier'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a vendor credit note
+              </p><p>
+                Note that the easiest way to create a vendor credit note it to do it directly from the vendor bill.
+              </p>
+            </field>
+        </record>
+
+
     </data>
 </odoo>
