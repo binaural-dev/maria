@@ -39,6 +39,8 @@ class InvoiceStockMove(models.Model):
         'stock.warehouse', string='Almacen',
         default=_default_warehouse_id)
 
+    
+
 
     def _get_stock_type_ids(self):
         data = self.env['stock.picking.type'].search([])
@@ -70,6 +72,15 @@ class InvoiceStockMove(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', 'Picking Type',
                                       default=_get_stock_type_ids,
                                       help="This will determine picking type of incoming shipment",copy=False)
+    @api.depends('invoice_origin')
+    def check_pick_order(self):
+        for i in self.filtered(lambda r: r.is_sale_document()):
+            have_pick_order = False
+            if i.invoice_origin:
+                order = self.env['sale.order'].sudo().search([('name','=',i.invoice_origin)])
+                if any(order.filtered(lambda s: s.picking_ids and len(s.picking_ids)>0)):
+                    have_pick_order = True
+            i.have_pick_order = have_pick_order
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -82,6 +93,7 @@ class InvoiceStockMove(models.Model):
     ], string='Status', index=True, readonly=True, default='draft',
         track_visibility='onchange', copy=False)
 
+    have_pick_order = fields.Boolean(string='Tiene pick de orden',compute="check_pick_order",store=True)
     def button_draft(self):
         if any(m.invoice_picking_id and m.invoice_picking_id.state !='cancel' for m in self):
             raise UserError("No puedes cambiar a borrador una factura con orden de entrega sin cancelar.")
@@ -124,13 +136,13 @@ class InvoiceStockMove(models.Model):
                         'move_type': 'direct'
                     }
 
-                picking = self.env['stock.picking'].create(pick)
+                picking = self.env['stock.picking'].sudo().create(pick)
                 self.invoice_picking_id = picking.id
                 self.picking_count = len(picking)
                 moves = order.invoice_line_ids.filtered(
-                    lambda r: r.product_id.type in ['product', 'consu'])._create_stock_moves(picking)
-                move_ids = moves._action_confirm()
-                move_ids._action_assign()
+                    lambda r: r.product_id.type in ['product', 'consu']).sudo()._create_stock_moves(picking)
+                move_ids = moves.sudo()._action_confirm()
+                move_ids.sudo()._action_assign()
 
     def action_view_picking(self):
         action = self.env.ref('stock.action_picking_tree_ready')

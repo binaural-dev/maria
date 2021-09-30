@@ -7,8 +7,11 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//header" position="inside">
-                    <button name="action_stock_move" string="Entrega" type="object" class="oe_highlight"
-                            attrs="{'invisible':['|','|',('state', 'in', ['draft','cancel']),('picking_count', '=', 1),('move_type', 'not in', ['out_refund','in_refund','in_invoice','out_invoice'])]}"/>
+                    <field name="have_pick_order" invisible="1"/>
+                    <!--<div attrs="{'invisible':[('have_pick_order','=',True)]}">-->
+                        <button name="action_stock_move" string="Entrega" type="object" class="oe_highlight"
+                            attrs="{'invisible':['|','|','|',('state', 'in', ['draft','cancel']),('picking_count', '=', 1),('move_type', 'not in', ['out_refund','in_refund','in_invoice','out_invoice']),('have_pick_order','=',True)]}"/>
+                    <!--</div>-->
                 </xpath>
                 <xpath expr="//field[@name='invoice_date']" position="after">
 
