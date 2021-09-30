@@ -61,7 +61,7 @@ class AccountFinancialHtmlReportBinaural(models.Model):
             'tag': 'display_notification',
             'params': {
                 'type': 'info',
-                'message': _("Niveles de cuentas actualizadas ."),
+                'message': _("Niveles de cuentas actualizadas."),
                 'next': {'type': 'ir.actions.act_window_close'},
             }
         }
