@@ -1,10 +1,72 @@
 from odoo import models, fields, api, _
 
 
-class AccountFinancialReportLineBinaural(models.Model):
-    _inherit = "account.financial.html.report.line"
+class AccountFinancialHtmlReportBinaural(models.Model):
+    _inherit = 'account.financial.html.report'
 
-    account_prefix = fields.Integer(string='prefijo de cuenta contable')
+    def succession_report_lines(self):
+        lvl_account = self.env['account.financial.config.report.line'].search([], order="nro_nivel ASC")
+        for line in self.line_ids:
+            for lvl in lvl_account:
+                if line.account_prefi != 0:
+                    query = ("""SELECT id, code, length(code) 
+                    FROM account_account WHERE code LIKE '{prefix}%' AND length(code)={len};""").format(
+                        len=lvl.code_length, prefix=line.account_prefi)
+                    self._cr.execute(query)
+                    query_res = self._cr.fetchall()
+                    for res in query_res:
+                        if lvl.nro_nivel != 1:
+                            code = str(res[1])[0:lvl.code_length - 1]
+                            account_id = self.env['account.financial.html.report.line'].search([('code', '=', code)])
+                            parent_id = account_id.id
+                        else:
+                            parent_id = line.id
+                        account_line = self.env['account.financial.html.report.line'].search([('code', '=', res[1])])
+                        if account_line.exists():
+                            # se actualiza el padre
+                            if account_line.parent_id.id != parent_id:
+                                account_line.write({'parent_id': parent_id})
+
+                            # se comprueba si tiene grupo y es el ultimo nivel
+                            if account_line.groupby:
+                                if lvl.nro_nivel == len(lvl_account):
+                                    account_line.groupby = 'account_id'
+                                else:
+                                    account_line.groupby = False
+                        else:
+                            domain = (
+                                """[('account_id.user_type_id', 'in', {user_type}), ('account_id.code', 'like', '%{code}')]""").format(user_type=line.type_control_ids.ids, code=res[1])
+
+                            account_line = {
+                                'name': res[1],
+                                'code': res[1],
+                                'sequence': 0,
+                                'level': 0,
+                                # 'financial_report_id': financial_report_id,
+                                'formulas': '-sum',
+                                'domain': domain,
+                                'green_on_positive': True,
+                                'figure_type': 'float',
+                                'show_domain': 'foldable',
+                                'parent_id': parent_id,
+                            }
+
+                            if lvl.nro_nivel == len(lvl_account):
+                                groupby = 'account_id'
+                                account_line.setdefault('groupby', groupby)
+                            self.env['account.financial.html.report.line'].create(account_line)
+
+        return {'warning': {
+            'title': _("Niveles de Cuenta"),
+            'message': _("Linea 2"),
+        }}
+
+
+class AccountFinancialReportLineBinaural(models.Model):
+    _inherit = 'account.financial.html.report.line'
+
+    account_prefi = fields.Integer(string="Prefijo")
+    type_control_ids = fields.Many2many('account.account.type', string='Tipo cuenta')
 
     def _compute_amls_results(self, options_list, calling_financial_report=None, sign=1):
         ''' Compute the results for the unfolded lines by taking care about the line order and the group by filter.
