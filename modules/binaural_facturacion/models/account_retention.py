@@ -81,10 +81,16 @@ class AccountRetentionBinauralFacturacion(models.Model):
                     record.amount_base_ret += line.base_ret
                     record.amount_imp_ret += line.imp_ret
                     record.total_tax_ret += line.amount_tax_ret
+
+                    record.foreign_amount_base_ret += line.foreign_base_ret
+                    record.foreign_amount_imp_ret += line.foreign_imp_ret
+                    record.foreign_total_tax_ret += line.foreign_amount_tax_ret
                 else:
                     total_sum = 0
+                    foreign_total_sum = 0
                     if line.invoice_id.id not in invoices:
                         total_sum = line.invoice_id.amount_total
+                        foreign_total_sum = line.invoice_id.foreign_amount_total
                         invoices.append(line.invoice_id.id)
                     if line.invoice_type in ['out_invoice', 'out_debit', 'in_invoice', 'in_debit']:
                         _logger.info('tipo de factura')
@@ -92,12 +98,20 @@ class AccountRetentionBinauralFacturacion(models.Model):
                         record.amount_total_facture += total_sum
                         record.amount_imp_ret += line.iva_amount
                         record.total_tax_ret += line.retention_amount
+
+                        record.foreign_amount_total_facture += foreign_total_sum
+                        record.foreign_amount_imp_ret += line.foreign_iva_amount
+                        record.foreign_total_tax_ret += line.foreign_retention_amount
                     elif line.invoice_type in ['out_refund', 'in_refund']:
                         _logger.info('tipo de factura1')
                         _logger.info(line.invoice_type)
                         record.amount_total_facture -= total_sum
                         record.amount_imp_ret -= line.iva_amount
                         record.total_tax_ret -= line.retention_amount
+
+                        record.foreign_amount_total_facture -= foreign_total_sum
+                        record.foreign_amount_imp_ret -= line.foreign_iva_amount
+                        record.foreign_total_tax_ret -= line.foreign_retention_amount
                     else:
                         _logger.info('tipo de factura3')
                         _logger.info(line.invoice_type)
@@ -147,6 +161,14 @@ class AccountRetentionBinauralFacturacion(models.Model):
                 record.multi_currency_retention = True
             else:
                 record.multi_currency_retention = False
+                
+    def default_alternate_currency(self):
+        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+
+        if alternate_currency:
+            return alternate_currency
+        else:
+            return False
 
     name = fields.Char('Descripción', size=64, select=True, states={'draft': [('readonly', False)]},
                        help="Descripción del Comprobante")
@@ -190,6 +212,13 @@ class AccountRetentionBinauralFacturacion(models.Model):
     total_tax_ret = fields.Float(compute=amount_ret_all, store=True, string='IVA retenido',
                                  help="Total del impuesto Retenido")
 
+    foreign_amount_base_ret = fields.Float(compute=amount_ret_all, string='Base Imponible', help="Total de la base retenida",
+                                   store=True)
+    foreign_amount_imp_ret = fields.Float(compute=amount_ret_all, store=True, string='Total IVA')
+    foreign_total_tax_ret = fields.Float(compute=amount_ret_all, store=True, string='IVA retenido',
+                                 help="Total del impuesto Retenido")
+    foreign_amount_total_facture = fields.Float(compute=amount_ret_all, store=True, string="Total Facturado")
+
     amount_total_facture = fields.Float(compute=amount_ret_all, store=True, string="Total Facturado")
     company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string="Company Currency")
     type_retention = fields.Selection([
@@ -198,6 +227,9 @@ class AccountRetentionBinauralFacturacion(models.Model):
     ], 'Tipo de retención')
     multi_currency_retention = fields.Boolean(string='Retenciones multimoneda', compute='_check_group_multi_currency')
     actual_currency_retention = fields.Boolean(string='Retenciones en moneda alterna', default=False)
+
+    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+                                          tracking=True)
     
     def round_half_up(self, n, decimals=0):
         multiplier = 10 ** decimals

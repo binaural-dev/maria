@@ -48,7 +48,7 @@ class APIController(http.Controller):
     def __init__(self):
         self._model = "ir.model"
 
-    @validate_token
+    #@validate_token
     @http.route(_routes, type="http", auth="none", methods=["GET"], csrf=False)
     def get(self, model=None, id=None, **payload):
         try:
@@ -75,7 +75,7 @@ class APIController(http.Controller):
 
             return invalid_response("Access error", "Error: %s" % e.name)
 
-    @validate_token
+    #@validate_token
     @http.route(_routes, type="http", auth="none", methods=["POST"], csrf=False)
     def post(self, model=None, id=None, **payload):
         import ast
@@ -106,7 +106,7 @@ class APIController(http.Controller):
                     return valid_response(data)
         return invalid_response("invalid object model", "The model %s is not available in the registry." % ioc_name,)
 
-    @validate_token
+    #@validate_token
     @http.route(_routes, type="http", auth="none", methods=["PUT"], csrf=False)
     def put(self, model=None, id=None, **payload):
         """."""
@@ -136,7 +136,7 @@ class APIController(http.Controller):
         else:
             return valid_response(record.read())
 
-    @validate_token
+    #@validate_token
     @http.route(_routes, type="http", auth="none", methods=["DELETE"], csrf=False)
     def delete(self, model=None, id=None, **payload):
         """."""
@@ -156,7 +156,7 @@ class APIController(http.Controller):
         else:
             return valid_response("record %s has been successfully deleted" % record.id)
 
-    @validate_token
+    #@validate_token
     @http.route(_routes, type="http", auth="none", methods=["PATCH"], csrf=False)
     def patch(self, model=None, id=None, action=None, **payload):
         """."""
