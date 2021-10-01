@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="invoice_free_form_1_id" model="ir.actions.report">
+        <!--<record id="invoice_free_form_1_id" model="ir.actions.report">
             <field name="name">Nota de Venta</field>
             <field name="model">account.move</field>
             <field name="report_type">qweb-pdf</field>
@@ -12,9 +12,9 @@
             <field name="paperformat_id" ref="cumming_facturacion.paperformat_freeform_cumming"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="binding_type">report</field>
-        </record>
+        </record>-->
 
-        <template id="cumming_invoice_free_form_template">
+        <template id="binaural_facturacion.cumming_invoice_free_form_template">
             <t t-call="web.html_container">
                 <xpath expr="//t[@t-call='web.report_layout']" position="replace">
                     <t t-foreach="docs" t-as="invoice">
