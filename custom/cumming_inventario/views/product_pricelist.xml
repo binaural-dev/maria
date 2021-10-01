@@ -66,12 +66,6 @@
             <field name="model">product.pricelist.item</field>
             <field name="inherit_id" ref="product.product_pricelist_item_tree_view"/>
             <field name="arch" type="xml">
-                
-                <field name="min_quantity" position="before">
-                    <field name="percent_profit" widget="percentage"/>
-                    <field name="product_cost_cumming_tmpl" />
-                    <field name="product_fob_cumming_tmpl" />
-                </field>
                 <!--cambos para que se pueda editar en la lista-->
                 <field name="pricelist_id" position="attributes">
                     <attribute name="readonly">0</attribute><!--debe elegirse-->
@@ -87,10 +81,18 @@
                 <field name="name" position="after">
                     <field name="product_tmpl_id" />
                 </field>
+                <field name="name" position="after">
+                    <field name="cumming_list" invisible="0" />
+                </field>
                 <field name="price" position="after">
-                    <field name="fixed_price" />
+                    <field name="product_cost_cumming_tmpl" />
+                    <field name="product_fob_cumming_tmpl" />
                     <field name="product_price_untaxed" />
                     <field name="product_price_tax" />
+                    <field name="fixed_price" />
+                    <field name="percent_profit" widget="percentage"/>                    
+                    <field name="price_list_a" attrs="{'invisible':[('cumming_list','=','a')]}"/>
+                    <field name="price_list_b" attrs="{'invisible':[('cumming_list','=','b')]}"/>
                 </field>
                 <!--cambios para que se pueda editar en la lista, consultar, si se edita en formulario se podria dejar sin los cambios anteriores-->
                 <field name="min_quantity" position="attributes">

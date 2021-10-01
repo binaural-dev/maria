@@ -46,6 +46,9 @@ class ProductPricelistItemCummingInventario(models.Model):
 	product_price_untaxed  = fields.Float(string='Precio sin iva',compute="_compute_prices_cumming",store=True)
 	product_price_tax = fields.Float(string='IVA',compute="_compute_prices_cumming",store=True)
 
+	price_list_a = fields.Float(string='Precio Mayor',compute="_compute_prices_cumming_another",store=True)
+	price_list_b = fields.Float(string='Precio Detal',compute="_compute_prices_cumming_another",store=True)
+
 	applied_on = fields.Selection([
 		('3_global', 'All Products'),
 		('2_product_category', 'Product Category'),
@@ -61,6 +64,11 @@ class ProductPricelistItemCummingInventario(models.Model):
 		('c', 'C'),
 		('d', 'D'),
 	], string='Identificador de lista',related="pricelist_id.cumming_list",store=True)
+
+	def _compute_prices_cumming_another(self):
+		for i in self:
+			i.price_list_a = self.env['product.pricelist.item'].sudo().search([('pricelist_id.cumming_list','=','a'),('product_tmpl_id','=',i.product_tmpl_id.id)]).fixed_price
+			i.price_list_b = self.env['product.pricelist.item'].sudo().search([('pricelist_id.cumming_list','=','b'),('product_tmpl_id','=',i.product_tmpl_id.id)]).fixed_price
 
 	@api.depends('fixed_price')
 	def _compute_prices_cumming(self):
