@@ -160,7 +160,7 @@
                                             
                                         </tr>
                                         <!--fila n+1-->
-                                        <tr t-if="invoice.partner_shipping_id != invoice.partner_id">
+                                        <!--<tr t-if="invoice.partner_shipping_id != invoice.partner_id">
                                             <td colspan="8" style="font-size:10px" class="font-weight-bold">
                                                 Dirección de entrega:
                                                 <span t-field="invoice.partner_shipping_id.street"/>
@@ -173,16 +173,13 @@
 
                                                 Ciudad:
                                                 <span t-field="invoice.partner_shipping_id.city"/>
-                                                <!--												-
-                                                                                                Município:
-                                                                                                <span>MUNICIPIO</span>-->
-                                                <!--<span t-field="invoice.partner_id.municipality"/>-->
+                                              
                                                 -
                                                 Telf:
-                                                <span t-field="invoice.partner_shipping_id.phone"/><!--o mobile-->
+                                                <span t-field="invoice.partner_shipping_id.phone"/>
 
                                             </td>
-                                        </tr>
+                                        </tr>-->
                                         <!--fila 4-->
                                         <tr>
                                             <td colspan="2">
