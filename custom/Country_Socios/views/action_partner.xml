@@ -74,10 +74,26 @@
             <field name="search_view_id" ref="view_search_action"/>
         </record>
 
+	    <record id="country_action_partner_form" model="ir.actions.act_window">
+            <field name="name">Customers</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="context">{'res_partner_search_mode': 'customer', 'default_customer_rank': 1}</field>
+            <field name="search_view_id" ref="base.view_res_partner_filter"/>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a new customer in your address book
+              </p><p>
+                Odoo helps you easily track all activities related to a customer.
+              </p>
+            </field>
+        </record>
+
 	    <menuitem name="Socios" id="Country_Socios.menu_root" />
 
 	    <menuitem name="Socios" id="Country_Socios.partners" parent="Country_Socios.menu_root" />
-        <menuitem name="Listado de Socios" id="Country_Socios.partners_list" parent="Country_Socios.partners" action="base.action_partner_form"/>
+        <menuitem name="Listado de Socios" id="Country_Socios.partners_list" parent="Country_Socios.partners" action="country_action_partner_form"/>
 
 	    <menuitem name="Acciones" id="Country_Socios.actions" parent="Country_Socios.menu_root" />
         <menuitem name="Listado de Acciones" id="Country_Socios.actions_list" parent="Country_Socios.actions" action="action_action"/>
