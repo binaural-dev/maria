@@ -9,8 +9,8 @@
 
                 <!--campos relacionados a la accion-->
                 <field name="type" position="before">
-	                <field name="supplier_rank"/>
-	                <field name="customer_rank"/>
+	                <field name="supplier_rank" invisible="1"/>
+	                <field name="customer_rank" invisible="1"/>
 
                     <field name="action_number" attrs="{'invisible':['|',('supplier_rank','>', 0),('customer_rank','=',0)]}"/>
 	                <field name="type_relation" required="1"/>
