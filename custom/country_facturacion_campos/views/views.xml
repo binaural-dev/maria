@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_form_invoice_add_fields_coutnry" model="ir.ui.view">
+            <field name="name">numero de factura editable</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+                <field name="arch" type="xml">
+                    <xpath expr="//field[@name='correlative']" position="after">
+                        <field name="fee_period" attrs="{'required':True}" /> <!--attrs="{'invisible': [('state','in',('draft',))]}"/>-->
+                        <field name="pay_soon" />
+                    </xpath>
+                </field>
+        </record>
+    </data>
+</odoo>
+
