@@ -65,7 +65,7 @@
                                     }
                                 </style>
 
-                                <section id="segmento_2"><!--style="height: 170px"-->
+                                <section id="segmento_2"  style="margin-top:6em;"><!--style="height: 170px"-->
                                     <table name="table_invoice_number" class="class_number"><!--style="width:925px"-->
                                         <!-- membrete -->
                                         <tr>
@@ -213,7 +213,7 @@
                                     </table>
                                 </section>
                                 <!--<br/>-->
-                                <section id="segmento_3" style="font-size:10px !important;"><!--height: 590px;-->
+                                <section id="segmento_3" style="font-size:12px !important;"><!--height: 590px;-->
                                     <table name="table_product"><!--style="width:925px"-->
                                         <thead>
                                             <th style="width:120px;text-align:center;border: 1px solid black;">Código
