@@ -12,12 +12,12 @@
                 </field>
 
 	            <xpath expr="//div[@name='journal_div']" position="after">
-		            <label for="generate_retencion_iva" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-		            <field name="generate_retencion_iva" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+		            <label for="generate_retencion_iva" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund'))]}"/>
+		            <field name="generate_retencion_iva" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund'))]}"/>
                     <label for="iva_voucher_number" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-                    <field name="iva_voucher_number" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+                    <field name="iva_voucher_number" readonly="1" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
 		            <label for="islr_voucher_number" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
-                    <field name="islr_voucher_number" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
+                    <field name="islr_voucher_number" readonly="1" nolabel="1" force_save="1" attrs="{'invisible': [('move_type', 'not in', ('in_invoice','in_refund','out_invoice', 'out_refund'))]}"/>
                 </xpath>
 
                 <xpath expr="//h1[@class='mt0']" position="after">
@@ -46,6 +46,7 @@
                     <field name="date_reception" options="{'datepicker': {'warn_future': true}}"
                         attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))],'readonly':[('state','=','draft')]}"/>
                     <field name="days_expired" attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))]}"/>
+                    
                 </field>
 
 
@@ -53,6 +54,17 @@
                     <field name="amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>          
                 </field>
 
+               <!---->
+                <xpath expr="//page[@name='other_info']" position="inside">
+                    <group>
+                        <group>
+                            
+                            <field name="reversal_move_id"  attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'in_invoice'))]}"/>
+                             <field name="reversed_entry_id"  attrs="{'invisible': [('move_type', 'not in', ('out_refund', 'in_refund'))]}"/>
+                        </group>
+                    </group>
+                    
+                </xpath>
 	            <!-- Fields Foreing Currency -->
                 <xpath expr="//notebook" position="inside">
 	                <page string="Retenciones de IVA" name="alternate_riva">
