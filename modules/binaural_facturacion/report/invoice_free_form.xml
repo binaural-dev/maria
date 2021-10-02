@@ -124,7 +124,7 @@
                                             <td colspan="2" name="td_vat">
                                                 <span>RIF/Cédula:
                                                    <!-- <span t-field="invoice.partner_id.prefix_vat"/>-->
-                                                    <span t-field="invoice.partner_id.vat"/>
+                                                    <span t-field="invoice.vat"/>
                                                 </span>
                                             </td>
                                             <td colspan="5"/>
