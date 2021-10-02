@@ -105,6 +105,7 @@
                 <field name="list_price" position="attributes">
                     <attribute name="required">0</attribute>
                     <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                    <attribute name="invisible">1</attribute>
                 </field>
 
                 <field name="company_id" position="attributes">
