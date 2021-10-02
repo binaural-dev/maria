@@ -82,14 +82,14 @@
                     <field name="product_tmpl_id" />
                 </field>
                 <field name="name" position="after">
-                    <field name="cumming_list" invisible="0" />
+                    <field name="cumming_list" invisible="1" />
                 </field>
                 <field name="price" position="after">
                     <field name="product_cost_cumming_tmpl" />
                     <field name="product_fob_cumming_tmpl" />
                     <field name="product_price_untaxed" />
                     <field name="product_price_tax" />
-                    <field name="fixed_price" />
+                    <field name="fixed_price" string="Precio de Venta"/>
                     <field name="percent_profit" widget="percentage"/>                    
                     <field name="price_list_a" attrs="{'invisible':[('cumming_list','=','a')]}"/>
                     <field name="price_list_b" attrs="{'invisible':[('cumming_list','=','b')]}"/>
