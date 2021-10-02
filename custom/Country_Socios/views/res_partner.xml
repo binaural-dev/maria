@@ -118,8 +118,9 @@
                 <!--Carga familiar-->
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='name']" position="before">
                     <field name="image_1920" widget="image" class="oe_avatar" options='{"preview_image": "image_medium","size": [90, 90]}'/>
-                    <field name="supplier_rank"/>
-	                <field name="customer_rank"/>
+                    <field name="supplier_rank" invisible="1"/>
+	                <field name="customer_rank" invisible="1"/>
+	                <field name="vat"/>
                 </xpath>
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='name']" position="after">
 

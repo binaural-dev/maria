@@ -1,0 +1,28 @@
+<odoo>
+  <data>
+    <record id="view_form_account_payment_form_inh_bin_expense" model="ir.ui.view">
+        <field name="name">Extension de formulario de registro de pago agregando campo Gasto</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='is_internal_transfer']" position="after">
+                    <field name="is_expense" string="Es Gasto" invisible="1"></field>      
+            </xpath>
+        </field>
+    </record>
+
+
+        <!--Add column is advance in list-->
+    <record id="view_list_account_payment_list_inh_bin_expense" model="ir.ui.view">
+        <field name="name">Extension de listado de pagos registrados, agregar columna es gasto</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_supplier_payment_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="is_expense" string="Gasto"></field>
+            </xpath>
+
+        </field>
+    </record>
+  </data>
+</odoo>
