@@ -307,6 +307,11 @@ class ResPartnerAction(models.Model):
         
     @api.model
     def create(self,vals):
+        if vals.get('type_relation') == 'children' and vals.get('age') >= 25:
+            raise exceptions.UserError(
+                "No pueden registrarse hijos con edad superior o igual a 25 años")
+
+        p_vat = False
         if 'vat' in vals:
             p_vat = vals.get('vat',False)
         if 'action_number' in vals:
