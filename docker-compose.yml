@@ -14,6 +14,7 @@ services:
       - ./config:/etc/odoo
       - ./enterprise:/mnt/extra-addons
       - ./modules:/mnt/custom-addons
+      - ./custom:/mnt/another-addons
     environment:
       - PYTHONUNBUFFERED=0
   db-integra14:

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="form_invoice_batch_wizard" model="ir.ui.view">
+        <field name="name">Facturas por Conceptos fijos</field>
+        <field name="model">wizard.invoice.batch</field>
+        <field name="arch" type="xml">
+            <form string="Facturas por Conceptos fijos">
+                    <group>
+                        <group>
+                            
+                            <field name="currency_id" invisible="1"/>
+                            <field name="pricelist_id" invisible="1"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="comment" />
+                            <field name="fee_period" attrs="{'required':True}"/>
+                            
+                        </group>
+                    </group>
+                <notebook>
+                    <page name="socios" string="Socios">
+                        <field name="partners_ids" options="{'no_create': True}"/>
+                    </page>
+
+                    <page string="Lineas de factura" id="subscription_product">
+                            <field name="subscription_product_line_ids" context="{'default_currency_id': currency_id}" >
+                                <form string="Lineas">
+                                    <group>
+                                        <group>
+
+                                            <field name="product_id" />
+                                            <field name="price_subtotal" invisible="1"/>
+                                            <div>
+                                                <field name="product_uom"/>
+                                            </div>
+                                            <field name="price_unit"/>
+
+                                        </group>
+                                        <group>
+                                            <field name="tax_ids" widget="many2many_tags" />
+
+                                        </group>
+                                    </group>
+
+                                    <field name="name"/>
+                                </form>
+                                <tree string="Lineas" editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="currency_id" invisible="1"/>
+
+                                    <field name="name" readonly="0"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom" />
+                                    <field name="price_unit"  widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="tax_ids" widget="many2many_tags" />
+                                    <field name="price_subtotal" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                <field name="sub_amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                <field name="sub_amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+
+                                <field name="sub_amount_total" class="oe_subtotal_footer_separator" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                        </page>
+                </notebook>
+                                      
+                <footer>
+                    <button name="generate_invoice_batch" string="Generar Facturas" type="object" class="oe_highlight" />
+                    <button string="Cancelar" class="btn-default" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_invoice_batch_wizard" model="ir.actions.act_window" >
+        <field name="name">Facturas por Conceptos fijos</field>
+        <field name="res_model">wizard.invoice.batch</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field><!--inline new-->
+    </record>
+
+	   
+    	<menuitem name="Conceptos fijos" id="country_facturas_lote.menu_invoice_batch" parent="account.menu_finance_receivables"
+              action="country_facturas_lote.action_invoice_batch_wizard"/> 
+    </data>
+</odoo>
