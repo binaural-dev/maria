@@ -416,7 +416,7 @@
                                         <t t-if="invoice.move_type == 'out_refund'">
                                             <tr>
                                                 <td colspan="6">
-                                                    <span>Observación: Nro de Factura: <span t-field="invoice.reversed_entry_id.name"/></span>
+                                                    <span>Doc afectado: <span t-field="invoice.reversed_entry_id.name"/></span>
                                                 </td>
                                             </tr>
                                             <tr>
