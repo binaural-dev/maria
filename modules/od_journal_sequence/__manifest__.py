@@ -10,7 +10,7 @@
     'author': 'Odoo Developers',
     'support': 'developersodoo@gmail.com',
     'live_test_url': 'https://www.youtube.com/watch?v=z-xZwCah7wM',
-    'depends': ['account'],
+    'depends': ['account','binaural_facturacion'],
     'demo': [],
     'data': [
         'data/account_data.xml',
