@@ -65,7 +65,7 @@
                                     }
                                 </style>
 
-                                <section id="segmento_2"  style="margin-top:6em;"><!--style="height: 170px"-->
+                                <section id="segmento_2"  style="padding-top:60px!important;"><!--style="height: 170px"-->
                                     <table name="table_invoice_number" class="class_number"><!--style="width:925px"-->
                                         <!-- membrete -->
                                         <tr>
@@ -413,6 +413,33 @@
                                                 </table>
                                             </td>
                                         </tr>
+                                        <t t-if="invoice.move_type == 'out_refund'">
+                                            <tr>
+                                                <td colspan="6">
+                                                    <span>Doc Afectado: <span t-field="invoice.reversed_entry_id.name"/></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="6">
+                                                    <span>Nro de control: <span t-field="invoice.reversed_entry_id.correlative"/></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="6">
+                                                    <span>Fecha de Factura: <span t-field="invoice.reversed_entry_id.invoice_date"/></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="7">
+                                                    <span>Total Facturado: <span t-field="invoice.reversed_entry_id.amount_total"/></span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="7">
+                                                    <span>Motivo: <span t-field="invoice.ref"/></span>
+                                                </td>
+                                            </tr>
+                                        </t>
                                     </table>
                                 </section>
                             </div>
