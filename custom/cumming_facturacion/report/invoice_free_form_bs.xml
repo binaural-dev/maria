@@ -65,7 +65,7 @@
                                     }
                                 </style>
 
-                                <section id="segmento_2" style="margin-top:6em!important;"><!--style="height: 170px"-->
+                                <section id="segmento_2" style="padding-top:60px!important;"><!--style="height: 170px"-->
                                     <table name="table_invoice_number" class="class_number"><!--style="width:925px"-->
                                         <!-- membrete -->
                                         <tr>
