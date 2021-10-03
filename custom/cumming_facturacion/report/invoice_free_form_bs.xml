@@ -312,7 +312,7 @@
                                         </tbody>
                                     </table>
                                 </section>
-                                <div style="width:100%;margin-top:3px"></div>
+                                <div style="width:100%;margin-top:20px"></div>
                         <div class="clearfix">
                          <t t-set="o" t-value="invoice"/>
                         <div id="total" class="row">
@@ -401,6 +401,47 @@
                                 </table>
                             </div>
                         </div>
+                                                        <section id="segmento_4"><!--style="height: 170px"-->
+                                    <table name="table_total"><!--style="width:925px"-->
+                                        <t t-if="invoice.move_type == 'out_refund'">
+                                                    <tr>
+                                                        <td colspan="6">
+                                                            <span>Observación: Nro de Factura:
+                                                                <span t-field="invoice.reversed_entry_id.name"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="6">
+                                                            <span>Nro de control:
+                                                                <span t-field="invoice.reversed_entry_id.correlative"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="6">
+                                                            <span>Fecha de Factura:
+                                                                <span t-field="invoice.reversed_entry_id.invoice_date"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="7">
+                                                            <span>Total Facturado:
+                                                                <span t-esc="invoice.reversed_entry_id.foreign_amount_total" t-options='{"widget": "monetary", "display_currency": invoice.foreign_currency_id}'/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="7">
+                                                            <span>Motivo:
+                                                                <span t-field="invoice.ref"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                    </table>
+                                </section>
                     </div>
                              
                             </div>
