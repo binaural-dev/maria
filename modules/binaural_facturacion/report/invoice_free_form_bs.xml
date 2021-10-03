@@ -437,7 +437,7 @@
                                                     <tr>
                                                         <td colspan="7">
                                                             <span>Total Facturado:
-                                                                <span t-field="invoice.reversed_entry_id.foreign_amount_total"/>
+                                                                <span t-esc="invoice.reversed_entry_id.foreign_amount_total" t-options='{"widget": "monetary", "display_currency": invoice.foreign_currency_id}'/>
                                                             </span>
                                                         </td>
                                                     </tr>
