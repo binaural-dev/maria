@@ -12,6 +12,7 @@
             <field name="paperformat_id" ref="binaural_facturacion.paperformat_freeform_cumming"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="binding_type">report</field>
+            <field name="print_report_name" >(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')</field>
         </record>
 
         <template id="cumming_invoice_free_form_template">
@@ -207,33 +208,7 @@
                                                 t-if="len(invoice.picking_ids) > 0"<span t-field="invoice.picking_ids[0].name"/>
                                             </td>-->
                                         </tr>
-                                        <t t-if="invoice.move_type == 'out_refund'">
-                                            <tr>
-                                                <td colspan="6">
-                                                    <span>Observación: Nro de Factura: <span t-field="invoice.reversed_entry_id.name"/></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="6">
-                                                    <span>Nro de control: <span t-field="invoice.reversed_entry_id.correlative"/></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="6">
-                                                    <span>Fecha de Factura: <span t-field="invoice.reversed_entry_id.invoice_date"/></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="7">
-                                                    <span>Total Facturado: <span t-field="invoice.reversed_entry_id.amount_total"/></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="7">
-                                                    <span>Motivo: <span t-field="invoice.ref"/></span>
-                                                </td>
-                                            </tr>
-                                        </t>
+                                     
                                     </table>
                                 </section>
                                 <!--<br/>-->

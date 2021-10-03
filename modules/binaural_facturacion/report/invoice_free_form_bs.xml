@@ -12,6 +12,7 @@
             <field name="paperformat_id" ref="binaural_facturacion.paperformat_freeform_cumming_bs"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="binding_type">report</field>
+            <field name="print_report_name" >(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')</field>
         </record>
 
         <template id="cumming_invoice_free_form_template_bs">
@@ -437,7 +438,7 @@
                                                     <tr>
                                                         <td colspan="7">
                                                             <span>Total Facturado:
-                                                                <span t-field="invoice.reversed_entry_id.foreign_amount_total"/>
+                                                                <span t-esc="invoice.reversed_entry_id.foreign_amount_total" t-options='{"widget": "monetary", "display_currency": invoice.foreign_currency_id}'/>
                                                             </span>
                                                         </td>
                                                     </tr>
