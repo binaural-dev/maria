@@ -12,6 +12,7 @@
             <field name="paperformat_id" ref="binaural_facturacion.paperformat_freeform_cumming"/>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="binding_type">report</field>
+            <field name="print_report_name" >(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')</field>
         </record>
 
         <template id="cumming_invoice_free_form_template">
