@@ -401,12 +401,12 @@
                                 </table>
                             </div>
                         </div>
-                                                        <section id="segmento_4"><!--style="height: 170px"-->
+                                <section id="segmento_4"><!--style="height: 170px"-->
                                     <table name="table_total"><!--style="width:925px"-->
                                         <t t-if="invoice.move_type == 'out_refund'">
                                                     <tr>
                                                         <td colspan="6">
-                                                            <span>Observación: Nro de Factura:
+                                                            <span>Doc afectado: Nro Factura:
                                                                 <span t-field="invoice.reversed_entry_id.name"/>
                                                             </span>
                                                         </td>
