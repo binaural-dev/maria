@@ -46,8 +46,8 @@ class ProductPricelistItemCummingInventario(models.Model):
 	product_price_untaxed  = fields.Float(string='Precio sin iva',compute="_compute_prices_cumming",store=True)
 	product_price_tax = fields.Float(string='IVA',compute="_compute_prices_cumming",store=True)
 
-	price_list_a = fields.Float(string='Precio Mayor',compute="_compute_prices_cumming_another",store=True)
-	price_list_b = fields.Float(string='Precio Detal',compute="_compute_prices_cumming_another",store=True)
+	price_list_a = fields.Float(string='Precio Mayor',compute="_compute_prices_cumming_another",store=False)
+	price_list_b = fields.Float(string='Precio Detal',compute="_compute_prices_cumming_another",store=False)
 
 	applied_on = fields.Selection([
 		('3_global', 'All Products'),

@@ -55,7 +55,7 @@
 	
 
 
-	    <menuitem name="Actualizar precios en Lote" groups="base.group_system" id="cumming_inventario.updatE_price_lot_cumming" sequence="0" parent="stock.menu_stock_inventory_control" action="action_update_price_percentage_form"/>
+	    <menuitem name="Actualizar precios en Lote" groups="base.group_system" id="cumming_inventario.group_show_cost_on_product" sequence="0" parent="stock.menu_stock_inventory_control" action="action_update_price_percentage_form"/>
 
 	    
 
