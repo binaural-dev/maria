@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data>
+    	    <record id="account_jorunal_inh_fiscal_machine" model="ir.ui.view">
+            <field name="name">Medios de pago en máquina fiscal</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+             <field name="type">form</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='active']" position="after">
+                    <button name="get_payment_info"  groups="base.group_system" type="object">Programación</button>
+                    <!--<button name="get_payment_info_data" type="object">Consultar</button>-->
+                </xpath>
+
+                <field name="default_account_type" position="before">
+                    <field name="id_machine_payment"/>
+                    <field name="description_machine_payment"/>
+                </field>
+
+
+            </field>
+        </record>
+    
+    </data>
+
+</odoo>
