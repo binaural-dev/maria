@@ -20,7 +20,7 @@ class AccountMove(models.Model):
 
     def _post(self, soft=True):
         for move in self:
-            if move.name == '/':
+            if move.name == '/' and (move.move_type not in ['in_invoice', 'in_refund'] or move.is_contingence):
                 sequence = move._get_sequence()
                 if not sequence:
                     raise UserError(_('Please define a sequence on your journal.'))
