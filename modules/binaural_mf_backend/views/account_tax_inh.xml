@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data>
+    	    <record id="account_tax_form_inh_bin" model="ir.ui.view">
+            <field name="name">Impuestos con maquina fiscal</field>
+            <field name="model">account.tax</field>
+            <field name="inherit_id" ref="account.view_tax_form"/>
+             <field name="type">form</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='active']" position="after">
+                    <button name="get_tax_info" groups="base.group_system" type="object">Consultar</button>
+                </xpath>
+
+                <field name="name" position="after">
+                    <field name="caracter_tax_machine" readonly="1" force_save="1"/>
+                </field>
+
+
+            </field>
+        </record>
+    
+    </data>
+
+</odoo>

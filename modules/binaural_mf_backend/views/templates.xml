@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--agregar Serial de la maquina fiscal al libro de ventas-->
+       <!-- <template id="inh_sale_book_add_fiscal_machine_serial" inherit_id="accounting_reports.sale_book">
+            <xpath expr="//table/tbody/t/tr/th[@id='amount_tax_signed_th']" position="after">
+                
+                <th id="th_amount_exempt" class="text-right">Exento</th>
+            </xpath>
+
+            <xpath expr="//table/tbody/t/tr/td[@id='amount_tax_signed_td']" position="after">
+                    <td class="text-right" id="amount_exempt_signed_td" style="white-space: text-nowrap;">
+                        <span  t-esc="i.amount_exempt_signed" t-options="{'widget': 'monetary', 'display_currency': i.currency_id}"/>
+                    </td>
+            </xpath>
+        </template>-->
+    </data>
+</odoo>

@@ -1,0 +1,43 @@
+<odoo>
+  <data>
+      <record id="wizard_various_report_fiscal_machine_form_wizard" model="ir.ui.view">
+        <field name="name">wizard.various.reports.fiscal.machine.new.form</field>
+        <field name="model">wizard.various.reports.fiscal.machine</field>
+        <field name="arch" type="xml">
+            <form string="Reportes Varios">
+                <sheet string="Reportes Varios">
+                    <group>
+                        <group>
+                            <field name="type_report" />
+
+                            <!--<field name="date_start" />
+                            <field name="date_end" />-->
+                            
+                        </group>
+                        <group>
+
+                        </group>
+                    </group>
+
+                </sheet>
+                <footer>
+                    <button name="print_various_report" string="Imprimir" type="object" class="oe_highlight" />
+                    <button string="Cancelar" class="btn-default" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="binaural_mf_backend.action_various_reports_fiscal_machine" model="ir.actions.act_window" >
+            <field name="name">Reportes Varios</field>
+            <field name="res_model">wizard.various.reports.fiscal.machine</field>
+            <field name="type">ir.actions.act_window</field>
+            
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+    </record>
+
+    <menuitem name="Reportes Varios" action="binaural_mf_backend.action_various_reports_fiscal_machine"
+              id="id_various_reports_fiscal_machine"
+              parent="binaural_mf_backend.fiscal_operations"/>
+  </data>
+</odoo>
