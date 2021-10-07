@@ -192,7 +192,7 @@ class SupplierInvoiceLine(models.Model):
     def _onchange_product_id_check_availability(self):
         if not self.product_id or not self.quantity or not self.warehouse_id:
             return {}
-        if self.product_id.type == 'product' and self.warehouse_id:
+        if self.product_id.type == 'product' and self.warehouse_id and self.move_id.is_inbound():
             _logger.info("self.product_id.free_qty arriba %s",self.product_id.free_qty)
             precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             product = self.product_id.with_context(
@@ -239,7 +239,7 @@ class SupplierInvoiceLine(models.Model):
     def _confirm_check_availability_invoice(self):
         if not self.product_id or not self.quantity or not self.warehouse_id:
             raise UserError("Producto, cantidad y ALmacen son obligatorios")
-        if self.product_id.type == 'product' and self.warehouse_id:
+        if self.product_id.type == 'product' and self.warehouse_id and self.move_id.is_inbound():
             _logger.info("self.product_id.free_qty arriba %s",self.product_id.free_qty)
             precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             product = self.product_id.with_context(
