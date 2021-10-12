@@ -120,7 +120,7 @@
                     <field name="image_1920" widget="image" class="oe_avatar" options='{"preview_image": "image_medium","size": [90, 90]}'/>
                     <field name="supplier_rank" invisible="1"/>
 	                <field name="customer_rank" invisible="1"/>
-	                <field name="vat"/>
+	                <field name="vat" string="Rif"/>
                 </xpath>
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='name']" position="after">
 
@@ -148,9 +148,7 @@
                     <field name="state_partner" attrs="{'invisible' : [('type', '!=', 'contact')]}"/>
 
                     <field name="start_date"  attrs="{'invisible' : [('type', '!=', 'contact')]}"/>
-	                <div id="end_date_family_l" class="" attrs="{'invisible' : ['|',('type', '!=', 'contact'),('type_relation','!=','children')]}" readonly="1" force_save="1">
-                        <field name="end_date_family" />
-                    </div>
+                    <field name="end_date_family" attrs="{'invisible' : ['|',('type', '!=', 'contact'),('type_relation','!=','children')]}" readonly="1" force_save="1"/>
 
 
                     <field name="end_date_partner" attrs="{'invisible':[('supplier_rank','>', 0)]}" />
@@ -176,6 +174,9 @@
 
                 <!--Ocultar campos no usados en el contacto-->
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='title']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+	            <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='business_name']" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='function']" position="attributes">

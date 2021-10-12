@@ -37,6 +37,7 @@
                     <field name="image_medium" string="Foto" widget="image" class="oe_avatar"/>
                     <field name="action_number"/>
                     <field name="name"/>
+	                <field name="prefix_vat" string="Tipo de doc"/>
                     <field name="vat" string="Cédula"/>
                     <field name="type_relation" string="Parentesco"/>
                     <field name="can_access_club" string="Acceso al club"/>
