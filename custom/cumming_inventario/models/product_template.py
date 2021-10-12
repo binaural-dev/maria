@@ -42,7 +42,7 @@ class ProductTemplateCummingInventario(models.Model):
 	price_by_pricelist = fields.One2many('price.by.pricelist', 'product_template_id', string='Listas de precios')
 	price_pricelist_names = fields.Char(string='Precios',index=True, compute="_compute_price_names")
 
-	provider_names = fields.Char(string='Proveedor',index=True, compute="_compute_provider_names")
+	provider_names = fields.Char(string='Proveedor',index=True, compute="_compute_provider_names",store=True)
 
 	price_a = fields.Float(string='Precio Lista A',compute="_compute_price_by_cumming_list")
 	price_b = fields.Float(string='Precio Lista B',compute="_compute_price_by_cumming_list")

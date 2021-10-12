@@ -284,10 +284,12 @@
                 <field name="name" position="after">
                     <field string="Modelo" name="pattern_id" invisible="1"/>
                     <field string="Proveedor" name="seller_ids" invisible="1"/>
+                    <field string="Nombre proveedor" name="provider_names" invisible="1"/>
                 </field>
 
                 <xpath expr="//search" position="inside">
                     <filter string="Modelo" name="Pattern" context="{'group_by':'pattern_id'}" invisible="1"/>
+                    <filter string="Proveedor" name="provider_names" context="{'group_by':'provider_names'}" invisible="0"/>
                 </xpath>
 
             </field>
