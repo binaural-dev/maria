@@ -24,6 +24,7 @@
 									<field name="brand_id" attrs="{'invisible':[('filter_products','!=', 'brand')]}"/>
 									<field name="pattern_id" attrs="{'invisible':[('filter_products','!=', 'pattern')]}"/>
 									<field name="categ_id" attrs="{'invisible':[('filter_products','!=', 'category')]}"/>
+									<field name="supplier_id" attrs="{'invisible':[('filter_products','!=', 'supplier')]}"/>
 								
 									<field name="products_list" attrs="{'invisible':[('pricelist_id','=',False)]}"/>
 									
