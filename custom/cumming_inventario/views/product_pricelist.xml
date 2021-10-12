@@ -69,6 +69,7 @@
                 <!--cambos para que se pueda editar en la lista-->
                 <field name="pricelist_id" position="attributes">
                     <attribute name="readonly">0</attribute><!--debe elegirse-->
+                    <attribute name="invisible">0</attribute>
                 </field>
                 <field name="name" position="attributes">
                     <attribute name="readonly">1</attribute><!--toma el nombre del producto al guardarlo ya que por defecto esta que sea product template-->
@@ -85,12 +86,13 @@
                     <field name="cumming_list" invisible="1" />
                 </field>
                 <field name="price" position="after">
-                    <field name="product_cost_cumming_tmpl" />
                     <field name="product_fob_cumming_tmpl" />
-                    <field name="product_price_untaxed" />
-                    <field name="product_price_tax" />
+                    <field name="product_cost_cumming_tmpl" />
+                    <field name="product_price_untaxed" invisible="1"/>
+                    <field name="product_price_tax" invisible="1"/>
+                    <field name="percent_profit" widget="percentage"/>
                     <field name="fixed_price" string="Precio de Venta"/>
-                    <field name="percent_profit" widget="percentage"/>                    
+                                        
                     <field name="price_list_a" attrs="{'invisible':[('cumming_list','=','a')]}"/>
                     <field name="price_list_b" attrs="{'invisible':[('cumming_list','=','b')]}"/>
                 </field>

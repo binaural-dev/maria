@@ -43,8 +43,8 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <field name="default_code" position="after">
-                    <field name="alternative_ids" string="Equivalencias" widget="many2many_tags"/>
-                    <field name="alternative_manual" string="Otras Equivalencias" />
+                    <field name="alternative_ids" string="Equivalencias" widget="many2many_tags" invisible="1"/>
+                    <field name="alternative_manual" string="Equivalencias" />
                     <field name="used_for" invisible="1" />
                 </field>
             </field>

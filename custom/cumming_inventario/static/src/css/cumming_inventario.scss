@@ -10,3 +10,27 @@
     }
     text-transform: uppercase !important;
 }
+
+.cumming_product_tree{
+    table{
+        thead{
+            //position: fixed;
+            /*tr{
+                position: fixed;
+                z-index: 999;
+                background-color: white;
+            }*/
+        }
+        tbody{
+            tr{
+                td{
+                    border-right: 1px solid gray !important;
+
+                }
+                td.o_list_record_selector{
+                    border-right:none !important ;
+                }
+            }
+        }
+    }
+}
