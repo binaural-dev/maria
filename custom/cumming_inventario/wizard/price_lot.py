@@ -17,11 +17,13 @@ class PriceLotCummingInventario(models.TransientModel):
 		('all', 'TODOS'),
 		('category', 'LÍNEA (Categoria)'),
 		('brand','MARCA'),
-		('pattern','MODELO')
+		('pattern','MODELO'),
+		('supplier','PROVEEDOR')
 	], string='Filtrar productos por',default="all")
 	brand_id = fields.Many2one('product.brand',string='Marca')
 	pattern_id = fields.Many2one('product.pattern',string='Modelo')
 	categ_id = fields.Many2one('product.category', 'LÍNEA')
+	supplier_id = fields.Many2one('res.partner', string='PROVEEDOR')
 	products_list = fields.Many2many('product.pricelist.item', string='Productos')#productos,filtrar por la lista de precios elegida y el filtro
 
 
@@ -42,7 +44,7 @@ class PriceLotCummingInventario(models.TransientModel):
 					new_price = (i.fixed_price - amount) if amount <= i.fixed_price else 0
 				i.write({'fixed_price':new_price})
 
-	@api.onchange('brand_id','pattern_id','categ_id','pricelist_id')
+	@api.onchange('brand_id','pattern_id','categ_id','pricelist_id','supplier_id')
 	def onchange_filters_product(self):
 		products = []
 		if self.pricelist_id:
@@ -55,6 +57,16 @@ class PriceLotCummingInventario(models.TransientModel):
 
 			if self.categ_id and self.filter_products == 'category':
 				domain = expression.AND([domain, [('product_tmpl_id.categ_id', '=',self.pattern_id.id)]])
+			
+			if self.supplier_id and self.filter_products == 'supplier':
+				products_by_supplier = []
+				sup_inf = self.env['product.supplierinfo'].sudo().search([('name.id','=',self.supplier_id.id)])
+				_logger.info(sup_inf)
+				_logger.info(len(sup_inf))
+				for l in sup_inf:
+					if l.product_tmpl_id.id not in products_by_supplier:
+						products_by_supplier.append(l.product_tmpl_id.id)
+				domain = expression.AND([domain, [('product_tmpl_id.id','in',products_by_supplier)]])
 			#domain = {'domain': {'products_list': [('id', 'in',products)]}}
 			domain = {'domain': {'products_list': domain}}
 			_logger.info("DOMAIN %s",domain)
