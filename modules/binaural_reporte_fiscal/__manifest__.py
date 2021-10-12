@@ -26,6 +26,7 @@
         'data/paperformat.xml',
         'data/sequence_arcv.xml',
         'data/account_financial_html_report_data.xml',
+        'data/account_financial_report_data.xml',
         'security/ir.model.access.csv',
         'report/template_retention_iva_voucher.xml',
         'report/retention_iva_voucher.xml',
