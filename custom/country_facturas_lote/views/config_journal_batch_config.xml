@@ -2,7 +2,7 @@
   <data>
     <!-- explicit list view definition -->
     
-    <record model="ir.ui.view" id="country_facturas_lote.config_invoice_batch_journal">
+    <record model="ir.ui.view" id="country_facturas_lote.config_invoice_batch_journal_tree">
       <field name="name">Configuración facturas en lote</field>
       <field name="model">country.batch.invoice.config</field>
       <field name="arch" type="xml">

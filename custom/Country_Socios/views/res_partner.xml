@@ -120,7 +120,11 @@
                     <field name="image_1920" widget="image" class="oe_avatar" options='{"preview_image": "image_medium","size": [90, 90]}'/>
                     <field name="supplier_rank" invisible="1"/>
 	                <field name="customer_rank" invisible="1"/>
-	                <field name="vat" string="Rif"/>
+	                <label id="vat" for="vat" string="Rif"/>
+	                <div id="vat" class="">
+	                    <field name="prefix_vat"/>
+	                    <field name="vat"/>
+	                </div>
                 </xpath>
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='name']" position="after">
 
@@ -137,7 +141,12 @@
                 <xpath expr="//notebook/page/field[@name='child_ids']/kanban//div[@class='oe_kanban_details']" position="inside">
                     <field name="type_relation" />
                 </xpath>
-
+	            <xpath expr="//notebook/page/field[@name='child_ids']/kanban//div[@class='oe_kanban_details']" position="before">
+                    <div id="vat" class="">
+	                    <field name="prefix_vat"/>
+	                    <field name="vat"/>
+	                </div>
+                </xpath>
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='mobile']" position="after">
 
                     <field name="mobile_phone_two" attrs="{'invisible' : ['|',('type', '!=', 'contact'),('type_relation','!=','wife')]}" /><!--estos 2 si es esposa verificar que salgan los normales primero-->
