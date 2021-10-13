@@ -5,6 +5,7 @@ from odoo import api, fields, models
 _logger = logging.getLogger(__name__)
 from odoo.osv import expression
 from odoo.exceptions import UserError
+import math
 class PriceLotCummingInventario(models.TransientModel):
 	_name = 'update.price.lot'
 
@@ -42,7 +43,8 @@ class PriceLotCummingInventario(models.TransientModel):
 					new_price = i.fixed_price + amount
 				else:
 					new_price = (i.fixed_price - amount) if amount <= i.fixed_price else 0
-				i.write({'fixed_price':round(new_price)})
+				#round(new_price)
+				i.write({'fixed_price':int(math.ceil(new_price))})
 
 	@api.onchange('brand_id','pattern_id','categ_id','pricelist_id','supplier_id')
 	def onchange_filters_product(self):
