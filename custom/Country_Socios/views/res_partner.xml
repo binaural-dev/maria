@@ -147,6 +147,31 @@
 	                    <field name="vat"/>
 	                </div>
                 </xpath>
+
+	            <xpath expr="//notebook/page/field[@name='child_ids']/kanban//div[@class='oe_kanban_details']" position="replace">
+                    <div class="oe_kanban_details" style="padding-left: 72px;">
+                        <field name="name"/>
+		                    <div id="vat" class="">
+		                    <field name="prefix_vat"/>
+		                    <field name="vat"/>
+		                </div>
+                        <div t-if="record.function.raw_value"><field name="function"/></div>
+                        <div t-if="record.email.raw_value"><field name="email" widget="email"/></div>
+                        <div t-if="record.type.raw_value != 'contact'">
+                            <div>
+                                <field name="zip"/>
+                                <field name="city"/>
+                            </div>
+                            <field t-if="record.state_id.raw_value" name="state_id"/>
+                            <field name="country_id"/>
+                        </div>
+                        <div t-if="record.phone.raw_value">Phone: <t t-esc="record.phone.value"/></div>
+                        <div t-if="record.mobile.raw_value">Mobile: <t t-esc="record.mobile.value"/></div>
+	                    <field name="type_relation" />
+                    </div>
+                </xpath>
+
+
                 <xpath expr="//notebook/page/field[@name='child_ids']/form//field[@name='mobile']" position="after">
 
                     <field name="mobile_phone_two" attrs="{'invisible' : ['|',('type', '!=', 'contact'),('type_relation','!=','wife')]}" /><!--estos 2 si es esposa verificar que salgan los normales primero-->
