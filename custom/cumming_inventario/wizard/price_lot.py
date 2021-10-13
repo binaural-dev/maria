@@ -42,7 +42,7 @@ class PriceLotCummingInventario(models.TransientModel):
 					new_price = i.fixed_price + amount
 				else:
 					new_price = (i.fixed_price - amount) if amount <= i.fixed_price else 0
-				i.write({'fixed_price':new_price})
+				i.write({'fixed_price':round(new_price)})
 
 	@api.onchange('brand_id','pattern_id','categ_id','pricelist_id','supplier_id')
 	def onchange_filters_product(self):
