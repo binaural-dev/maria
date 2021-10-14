@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, api, exceptions, fields
-
+from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
 
 class HrExpenseExtendBc(models.Model):
 	_inherit = 'hr.expense'
@@ -73,7 +73,7 @@ class HrExpenseExtendBc(models.Model):
 
 			# create one more move line, a counterline for the total on payable account
 			if expense.payment_mode == 'company_account':
-				if not expense.sheet_id.bank_journal_id.default_credit_account_id:
+				if not expense.sheet_id.bank_journal_id.default_account_id:
 					raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
 				journal = expense.sheet_id.bank_journal_id
 				# create payment
