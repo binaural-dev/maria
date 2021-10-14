@@ -511,6 +511,44 @@ class SaleOrderLineBinauralVentas(models.Model):
                 if l.price_unit <= l.product_id.standard_price and l.product_id.type == 'product':#solo aplica a almacenables
                     raise ValidationError("Precio unitario no puede ser menor o igual al costo del producto")
 
+    @api.onchange('product_uom_qty', 'product_uom', 'order_id.warehouse_id')
+    def _onchange_product_id_check_availability(self):
+        _logger.info("_onchange_product_id_check_availability %s")
+        _logger.info(self.product_id)
+        _logger.info(self.product_uom_qty)
+        _logger.info(self.product_uom)
+        _logger.info(self.order_id.warehouse_id)
+        _logger.info(self.warehouse_id)
+
+        if not self.product_id or not self.product_uom_qty or not self.product_uom:
+            #self.product_packaging = False
+            return {}
+        if self.product_id.type == 'product':
+            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+            product = self.product_id.with_context(
+                warehouse=self.order_id.warehouse_id.id,
+                lang=self.order_id.partner_id.lang or self.env.user.lang or 'en_US'
+            )
+            product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
+            _logger.info("float_compare(product.free_qty, product_qty, precision_digits=precision) %s",float_compare(product.free_qty, product_qty, precision_digits=precision))
+            if float_compare(product.free_qty, product_qty, precision_digits=precision) == -1:
+                message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s.') % \
+                        (self.product_uom_qty, self.product_uom.name, self.product_id.name, product.free_qty, product.uom_id.name, self.order_id.warehouse_id.name)
+                # We check if some products are available in other warehouses.
+                if float_compare(product.free_qty, self.product_id.free_qty, precision_digits=precision) == -1:
+                    message += _('\nExisten %s %s disponible entre todos los almacenes.\n\n') % \
+                            (self.product_id.free_qty, product.uom_id.name)
+                    for warehouse in self.env['stock.warehouse'].search([]):
+                        quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
+                        if quantity > 0:
+                            message += "%s: %s %s\n" % (warehouse.name, quantity, self.product_id.uom_id.name)
+                warning_mess = {
+                    'title': _('No hay suficiente inventario!'),
+                    'message' : message
+                }
+                self.product_uom_qty = 0
+                return {'warning': warning_mess}
+        return {}
     
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
         readonly=True, store=True,

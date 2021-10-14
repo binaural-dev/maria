@@ -491,10 +491,11 @@ class AccountMoveBinauralFacturacion(models.Model):
             #cliente
             if move.is_sale_document(include_receipts=False) and not move.correlative:
                 #incrementar numero de control de factura y Nota de credito de manera automatica
-                sequence = move.sequence()
-                next_correlative = sequence.get_next_char(sequence.number_next_actual)
-                correlative = sequence.next_by_id(sequence.id)
-                move.write({'correlative':correlative})
+                if move.journal_id and move.journal_id.fiscal:
+                    sequence = move.sequence()
+                    next_correlative = sequence.get_next_char(sequence.number_next_actual)
+                    correlative = sequence.next_by_id(sequence.id)
+                    move.write({'correlative':correlative})
             if move.generate_retencion_iva and not move.iva_voucher_number:
                 retention = self.env['account.retention'].create({
                     'type': 'in_invoice',

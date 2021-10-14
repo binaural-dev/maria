@@ -26,11 +26,12 @@ class ProductTemplateBinauralInventario(models.Model):
 								domain=[('type_tax_use', '=', 'sale')],
 								default=lambda self: self.env.company.account_sale_tax_id)
 
-	#Campo cantidad disponible
 	@api.depends('qty_available', 'outgoing_qty')
 	def _compute_available_qty(self):
 		for record in self:
-			record.available_qty = record.qty_available - record.outgoing_qty
+			#record.available_qty = record.qty_available - record.outgoing_qty
+			#test: disponible para vender es el sin reserva de la variante asociada
+			record.available_qty = record.product_variant_id.free_qty
 
 	def button_dummy(self):
 		# TDE FIXME: this button is very interesting
