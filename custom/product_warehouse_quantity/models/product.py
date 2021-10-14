@@ -82,13 +82,14 @@ class ProductTemplate(models.Model):
                 cont = 0
                 _logger.info("tt_warehouses %s",tt_warehouses)
                 for item in tt_warehouses:
-                    if cont == 0:
-                        if tt_warehouses[item]:
+                    _logger.info("ITEM %s",item)
+                   
+                    if tt_warehouses[item]:
+                        if item == 'CSA':
                             #record.quantity_csa = item + ': ' + str(tt_warehouses[item])
                             record.quantity_csa = str(tt_warehouses[item])
-                    if cont == 1:
-                        if tt_warehouses[item]:
-                            #record.quantity_repubus = item + ': ' + str(tt_warehouses[item])
+                        if item == 'REP':
                             record.quantity_repubus = str(tt_warehouses[item])
+                    
 
                     cont+=1
