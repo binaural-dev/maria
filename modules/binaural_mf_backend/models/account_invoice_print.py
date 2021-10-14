@@ -22,7 +22,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 			return False
 		if not self.is_sale_document(include_receipts=False):
 			return False
-		print_pending = self.env['account.invoice'].search(
+		print_pending = self.env['account.move'].search(
 			[('state', 'not in', ['draft', 'cancel']), ('serial_machine', '=', False), ('move_type', '=', self.move_type)], limit=1)
 		print(self.id)
 		print(print_pending.id)
@@ -61,7 +61,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 		if self.amount_residual != 0 and not self.is_credit:
 			raise UserError("No se puede imprimir una factura sin pagar")
 		
-		if i.is_credit and i.amount_residual != i.amount_total:
+		if self.is_credit and self.amount_residual != self.amount_total:
 			raise UserError(
 				"No puedes imprimir una factura a crédito con pagos asociados")
 
@@ -71,10 +71,10 @@ class AccountMoveBinauralMFBackend(models.Model):
 			utils_print2 = utils_print(
 				machine_info.local, machine_info.host, machine_info.port)
 			
-			success_last_invoice, number = utils_print2.get_last_invoice_number("FAC")
-			if not success_last_invoice:
-				print("number",number)
-				raise UserError("Error consultando ultima factura")
+			# success_last_invoice, number = utils_print2.get_last_invoice_number("FAC")
+			# if not success_last_invoice:
+			# 	print("number",number)
+			# 	raise UserError("Error consultando ultima factura " + str(number))
 			#chequear que el ultmo + 1 coincida con el numero de la factura que vendra
 	
 			success,msg = utils_print2.print_customer_invoice(self)
@@ -91,7 +91,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 			else:
 				raise UserError(msg)
 		else:
-			raise UserError("No hay máquina fiscal configurada")
+			raise UserError("No hay máquina fiscal configurada " + str(machine_info))
 
 
 	#Imprimir Nota de Credito

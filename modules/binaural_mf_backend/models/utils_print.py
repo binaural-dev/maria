@@ -275,9 +275,9 @@ class utils_print():
 				machine_number_f = invoice.machine_invoice_number
 				#en este caso el inicio y fin es el mismo
 				#print("[1:]", machine_number_i[1:])#se toman los 7 ultimos
-				if invoice.type == "out_invoice":
+				if invoice.move_type == "out_invoice":
 					mode = "RF"
-				if invoice.type == "out_refund":
+				if invoice.move_type == "out_refund":
 					mode = "RC"
 				if not mode:
 					return False, "Tipo de documento no valido"
