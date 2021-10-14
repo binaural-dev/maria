@@ -33,7 +33,7 @@ class WizardInvoiceBatch(models.TransientModel):
 				string="Lineas de factura",required=True
 				)
 	partners_ids = fields.Many2many(
-		'res.partner', string='Socios', required=True, domain=[('customer', '=', True),('active', '=', True)])
+		'res.partner', string='Socios', required=True, domain=[('active', '=', True)])#('customer', '=', True),
 
 	sub_amount_untaxed = fields.Monetary(
 		string='Exento',
@@ -98,9 +98,9 @@ class WizardInvoiceBatch(models.TransientModel):
 		else:
 			raise UserError("Algo no salio bien, error generando Facturas")
 		#raise RedirectWarning(msg, action.id, _('Continuar'))
-	@api.returns('account.invoice')
+	@api.returns('account.move')
 	def _recurring_create_invoice(self, automatic=False):
-		AccountInvoice = self.env['account.invoice']
+		AccountInvoice = self.env['account.move']
 		invoices = []
 		#automatic
 		automatic = True
@@ -108,8 +108,8 @@ class WizardInvoiceBatch(models.TransientModel):
 			#Solo country
 			if not sub.action_number.number:
 				raise UserError("Socio no posee numero de accion")
-			if not sub.business_name:
-				raise UserError("Socio no posee razon social")
+			#if not sub.business_name:
+			#	raise UserError("Socio no posee razon social")
 			if not sub.vat:
 				raise UserError("Socio no posee rif o cedula")
 			try:
@@ -117,7 +117,7 @@ class WizardInvoiceBatch(models.TransientModel):
 				invoices[-1].message_post_with_view('mail.message_origin_link',
 					 values={'self': invoices[-1], 'origin': self},
 					 subtype_id=self.env.ref('mail.mt_note').id)
-				invoices[-1].compute_taxes()
+				invoices[-1]._onchange_recompute_dynamic_lines()
 				if automatic:
 					self.env.cr.commit()
 			except Exception as error:
@@ -133,18 +133,19 @@ class WizardInvoiceBatch(models.TransientModel):
 		
 
 	def _prepare_invoice(self,partner):
+		_logger.info("PARTNER A PASAR %s",partner)
 		invoice = self._prepare_invoice_data_recurring(partner)
 		invoice['invoice_line_ids'] = self._prepare_invoice_lines_recurring(invoice['fiscal_position_id'])
 		return invoice
 	
-	def _prepare_invoice_data_recurring(self,partner):
+	def _prepare_invoice_data_recurring(self,p):
 		self.ensure_one()
-		self.partner_id = partner
-		if not self.partner_id:
+		
+		if not p:
 			raise UserError(_("Please select customer on contract subscription in order to create invoice.!"))
 		company = self.company_id
 
-		fpos_id = self.env['account.fiscal.position'].get_fiscal_position(self.partner_id.id)
+		fpos_id = self.env['account.fiscal.position'].get_fiscal_position(p.id)
 		#asignarlo por defecto arriba
 		journal_config = self.env['country.batch.invoice.config'].search([('active','=',True)],limit=1)
 		if journal_config and journal_config.journal_id:
@@ -156,25 +157,26 @@ class WizardInvoiceBatch(models.TransientModel):
 		#comment = self.terms_and_conditions and  tools.html2plaintext(self.terms_and_conditions).strip() or ''
 		comment = self.comment
 		return {
-			#'name': self.partner_id.business_name + ' name',
-			#'origin': self.partner_id.business_name + ' origin',
-			'action_number': self.partner_id.action_number.number,
-			'business_name': self.partner_id.business_name,
-			'vat': self.partner_id.prefix_vat + self.partner_id.vat,
-			'address': self.partner_id.street,
+			#'name': p.business_name + ' name',
+			#'origin': p.business_name + ' origin',
+			'action_number': p.action_number.number,
+			#'business_name': p.business_name,
+			'vat': p.prefix_vat + p.vat,
+			'address': p.street,
 			#'related_project_id':self.id,
-			'account_id': self.partner_id.property_account_receivable_id.id,
-			'type': 'out_invoice',
-			'partner_id': self.partner_id.id,
+			#'account_id': p.property_account_receivable_id.id, 
+			
+			'partner_id': p.id,
 			'currency_id': self.currency_id.id,
 			'journal_id': journal.id,
-			'date_invoice': fields.Date.today(),
+			'invoice_date': fields.Date.today(),
 			#'origin': self.code,
 			'fiscal_position_id': fpos_id,
-			'payment_term_id': self.partner_id.property_payment_term_id.id,
+			'invoice_payment_term_id': p.property_payment_term_id.id,
 			'company_id': company.id,
 			# 'comment': _("This invoice covers the following period: %s - %s") % (next_date, end_date),
-			'comment': comment,
+			'narration': comment,
+			'move_type':'out_invoice',
 			'fee_period':self.fee_period,
 		}
 	def _prepare_invoice_lines_recurring(self, fiscal_position):
@@ -192,7 +194,7 @@ class WizardInvoiceBatch(models.TransientModel):
 			journal_config = self.env['country.batch.invoice.config'].search(
 				[('active', '=', True)], limit=1)
 			if journal_config and journal_config.journal_id:
-				account = journal_config.journal_id.default_credit_account_id
+				account = journal_config.journal_id.default_account_id
 			else:
 				raise UserError(
 					'No hay configuración registrada en el sistema por favor contacte al administrador')
@@ -207,9 +209,9 @@ class WizardInvoiceBatch(models.TransientModel):
 			'price_unit': line.price_unit or 0.0,
 			'discount': line.discount,
 			'quantity': line.product_uom_qty,
-			'uom_id': line.product_uom.id,
+			#'uom_id': line.product_uom.id,
 			'product_id': line.product_id.id,
-			'invoice_line_tax_ids': [(6, 0, tax.ids)],
+			'tax_ids': [(6, 0, tax.ids)],
 		}
 
 	def action_subscription_invoice(self, invoice):
