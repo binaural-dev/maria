@@ -31,7 +31,7 @@
         'views/sale_form_inh.xml',
         'views/sale_search_inh.xml',
         'views/sale_trees_inh.xml',
-        
+    
     ],
     # only loaded in demonstration mode
     'demo': [

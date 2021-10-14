@@ -1,5 +1,5 @@
+# coding: utf-8
 import odoo.tests
-
 
 @odoo.tests.common.at_install(False)
 @odoo.tests.common.post_install(True)
@@ -13,6 +13,6 @@ class TestUi(odoo.tests.HttpCase):
         #     }, 1000);
         # """
         link = '/web'
-            self.phantom_js(link, "odoo.__DEBUG__.services['web_tour.tour'].run('account_retenciones')",
+        self.phantom_js(link, "odoo.__DEBUG__.services['web_tour.tour'].run('account_retenciones')",
             "odoo.__DEBUG__.services['web_tour.tour'].tours.account_retenciones.ready",  login="admin")
 

@@ -50,10 +50,33 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/
     && rm -f /etc/apt/sources.list.d/pgdg.list \
     && rm -rf /var/lib/apt/lists/*
 
+
+# Install deps + add Chrome Stable + purge all the things
+RUN apt-get update && apt-get install -y \
+	apt-transport-https \
+	--no-install-recommends \
+	&& curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+	&& echo "deb https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+	&& apt-get update && apt-get install -y \
+	google-chrome-stable \
+	fontconfig \
+	fonts-ipafont-gothic \
+	fonts-wqy-zenhei \
+	fonts-thai-tlwg \
+	fonts-kacst \
+	fonts-symbola \
+	fonts-noto \
+	fonts-freefont-ttf \
+	--no-install-recommends \
+	&& rm -rf /var/lib/apt/lists/*
+
 # Install rtlcss (on Debian buster)
-RUN npm install -g rtlcss
+RUN npm install -g rtlcss chrome-launcher chrome 
 #add pandas and another
-RUN pip3 install num2words xlwt xlrd openpyxl xlwt pytest-odoo pandas wheel
+RUN pip3 install num2words xlwt xlrd openpyxl xlwt pytest-odoo wheel websocket-client websockets
+
+
+
 # Install Odoo
 ENV ODOO_VERSION 14.0
 #ARG ODOO_RELEASE=20210407
