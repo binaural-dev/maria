@@ -439,14 +439,14 @@ class AnalyticSaleOrderLine(models.TransientModel):
 		title = False
 		message = False
 		warning = {}
-		if product.sale_line_warn != 'no-message':
-			title = _("Warning for %s") % product.name
+		"""if product.sale_line_warn != 'no-message':
+			title = _("Warning for %s") % product.namesale_line_warn
 			message = product.sale_line_warn_msg
 			warning['title'] = title
 			warning['message'] = message
 			result = {'warning': warning}
 			if product.sale_line_warn == 'block':
-				self.product_id = False
+				self.product_id = False"""
 
 		return result
 	
