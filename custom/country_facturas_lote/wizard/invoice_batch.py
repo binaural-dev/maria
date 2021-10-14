@@ -23,6 +23,14 @@ _logger = logging.getLogger(__name__)
 class WizardInvoiceBatch(models.TransientModel):
 	_name = "wizard.invoice.batch"
 	_rec_name = "comment"
+	
+	def default_alternate_currency(self):
+		alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+
+		if alternate_currency:
+			return alternate_currency
+		else:
+			return False
 
 	company_id = fields.Many2one(
 		'res.company', string='Compañía', default=lambda self: self.env.user.company_id)
@@ -59,11 +67,40 @@ class WizardInvoiceBatch(models.TransientModel):
 	comment = fields.Text(string='Comentario')
 	fee_period = fields.Date(string="Periodo de la cuota")
 
+	foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
+	foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+
+	foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
+										  tracking=True)
 	currency_id = fields.Many2one(
 		'res.currency',
 		string="Moneda",
 		default=lambda self: self.env.user.company_id.currency_id,
 	)
+
+	@api.onchange('foreign_currency_id', 'foreign_currency_date')
+	def _compute_foreign_currency_rate(self):
+		_logger.info("buscara tasa por defceto")
+		for record in self:
+			rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+														 ('name', '<=', record.foreign_currency_date)], limit=1,
+														order='name desc')
+			if rate:
+				record.update({
+					'foreign_currency_rate': rate.rate,
+				})
+			else:
+				rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
+															 ('name', '>=', record.foreign_currency_date)], limit=1,
+															order='name asc')
+				if rate:
+					record.update({
+						'foreign_currency_rate': rate.rate,
+					})
+				else:
+					record.update({
+						'foreign_currency_rate': 0.00,
+					})
 
 	def set_default_pricelist(self):
 		p = self.env['product.pricelist'].search([('active','=',True)],limit=1).id
@@ -118,6 +155,8 @@ class WizardInvoiceBatch(models.TransientModel):
 					 values={'self': invoices[-1], 'origin': self},
 					 subtype_id=self.env.ref('mail.mt_note').id)
 				invoices[-1]._onchange_recompute_dynamic_lines()
+				invoices[-1]._compute_foreign_currency_rate()
+				
 				if automatic:
 					self.env.cr.commit()
 			except Exception as error:
@@ -155,7 +194,7 @@ class WizardInvoiceBatch(models.TransientModel):
 				'No hay configuración registrada en el sistema por favor contacte al administrador')
 			
 		#comment = self.terms_and_conditions and  tools.html2plaintext(self.terms_and_conditions).strip() or ''
-		comment = self.comment
+		
 		return {
 			#'name': p.business_name + ' name',
 			#'origin': p.business_name + ' origin',
@@ -175,7 +214,8 @@ class WizardInvoiceBatch(models.TransientModel):
 			'invoice_payment_term_id': p.property_payment_term_id.id,
 			'company_id': company.id,
 			# 'comment': _("This invoice covers the following period: %s - %s") % (next_date, end_date),
-			'narration': comment,
+			'narration': self.comment,
+			#'foreign_currency_rate':self.foreign_currency_rate,
 			'move_type':'out_invoice',
 			'fee_period':self.fee_period,
 		}
