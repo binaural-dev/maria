@@ -130,12 +130,13 @@ class AccountPaymentBinauralFacturacion(models.Model):
 
 	def action_post(self):
 		''' draft -> posted '''
+		self.move_id._post(soft=False)
 		try:
 			self.create_igtf(self.move_id)
 		except Exception as e:
 			_logger.info("E %s",e)
 			pass
-		self.move_id._post(soft=False)
+		
 
 	def action_cancel(self):
 		''' draft -> cancelled '''
@@ -159,7 +160,7 @@ class AccountPaymentBinauralFacturacion(models.Model):
 			line_vals_list_2.append((0,0,{
 				'name': 'IGTF',
 				'date_maturity': self.date,
-				'amount_currency': -self.amount_igtf,
+				#'amount_currency': -self.amount_igtf,
 				'currency_id': currency_id,
 				'debit': 0.0,
 				'credit':self.amount_igtf,
@@ -171,7 +172,7 @@ class AccountPaymentBinauralFacturacion(models.Model):
 			{
 				'name': 'IGTF',
 				'date_maturity': self.date,
-				'amount_currency':self.amount_igtf, #-self.amount_igtf * self.foreign_currency_rate,
+				#'amount_currency':self.amount_igtf, #-self.amount_igtf * self.foreign_currency_rate,
 				'currency_id': currency_id,
 				'debit': self.amount_igtf,
 				'credit': 0,
@@ -183,12 +184,14 @@ class AccountPaymentBinauralFacturacion(models.Model):
 				"journal_id": self.journal_id.id,
 				"ref": move.ref,
 				"company_id": move.company_id.id,
-				"name": "IGTF "+str(self.ref) if self.ref else "IGTF",
+				#"name": "IGTF "+str(self.ref) if self.ref else "IGTF",
 				"state": "draft",
 				"line_ids": line_vals_list_2,
+				"foreign_currency_rate":self.foreign_currency_rate,
 			}
 			m = self.env['account.move'].sudo().create(move_vals)
 			if m:
+				m._amount_all_foreign()
 				m._post()
 			self.move_igtf = m.id
 

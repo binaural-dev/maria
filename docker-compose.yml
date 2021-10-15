@@ -1,4 +1,4 @@
-version: '3.5'
+version: "2.3"
 services:
   web-integra14:
     #image: odoo:14
@@ -17,6 +17,8 @@ services:
       - ./custom:/mnt/another-addons
     environment:
       - PYTHONUNBUFFERED=0
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0"
   db-integra14:
     image: postgres:13
     environment:

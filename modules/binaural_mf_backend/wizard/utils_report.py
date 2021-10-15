@@ -98,9 +98,9 @@ class utils_report():
 			if resp:
 				return True, "Impresora Conectada Correctamente en: "
 			else:
-				return False, "Impresora no Conectada o Error Accediendo al Puerto"
+				return False, "Impresora no Conectada o Error Accediendo al Puertox"
 		except serial.SerialException:
-			return False, "Impresora no Conectada o Error Accediendo al Puerto"
+			return False, "Impresora no Conectada o Error Accediendo al Puertoz"
 
 	def estado_error(self):
 		self.estado = self.printer.ReadFpStatus()
