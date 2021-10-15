@@ -11,7 +11,8 @@ from datetime import (timedelta, datetime as pyDateTime, date as pyDate, time as
 from odoo import api, fields, SUPERUSER_ID
 import sys
 import unicodedata
-
+import logging
+_logger = logging.getLogger(__name__)
 class utils_print():
 
 	def __init__(self, tipo_conexion=True, host='', port=''):
@@ -101,6 +102,7 @@ class utils_print():
 				print("Estado",state)
 				print("error",error)
 				if state in ["4","5"] and error in ["0","1"]:#temporal
+					#if 1==1:
 					printed,invoice_msg = self.print_invoice_bin(invoice)
 					time.sleep(2)
 					self.cerrar_puerto()
@@ -296,7 +298,7 @@ class utils_print():
 		if valid and invoice_data:
 			try:
 				self.printer.SendCmd(str("iR*"+invoice_data.get("vat")))
-				self.printer.SendCmd(str("iS*"+invoice_data.get("business_name")))
+				self.printer.SendCmd(str("iS*"+invoice_data.get("name")))
 				self.printer.SendCmd(str("i00ACCION: "+invoice_data.get("action_number","")))
 				self.printer.SendCmd(str("i01TELEFONO: "+invoice_data.get("phone")))
 				self.printer.SendCmd(str("i02"+invoice_data.get("company_name", "")))
@@ -308,7 +310,7 @@ class utils_print():
 
 				self.printer.SendCmd(str("3"))  # sub total en factura
 				#poner todas como parcial
-				for payment in invoice_data.get("payments",[]):
+				"""for payment in invoice_data.get("payments",[]):
 					cmd_success = self.printer.SendCmd("2"+str(payment.get("code")+payment.get("amount")))
 					print("cmd_success", cmd_success)
 					if not cmd_success:
@@ -318,7 +320,8 @@ class utils_print():
 				time.sleep(1)
 				print(amount_due)
 				if amount_due > 0:
-					self.printer.SendCmd(str("101"))
+					self.printer.SendCmd(str("101"))"""
+				self.printer.SendCmd(str("101"))
 
 				print("termino de imprimir")
 				return True, "Factura impresa correctamente"
@@ -346,6 +349,7 @@ class utils_print():
 
 
 	def validate_invoice_parameter(self,invoice):
+		_logger.info("invoice %s",invoice)
 		invoice_data = {}
 		if not invoice:
 			return False,invoice_data
@@ -355,10 +359,10 @@ class utils_print():
 		else:
 			invoice_data["vat"] = invoice.vat
 		
-		if not invoice.partner_id.business_name:
+		if not invoice.partner_id.name:
 			return False,invoice_data
 		else:
-			invoice_data["business_name"] = invoice.partner_id.business_name
+			invoice_data["name"] = invoice.partner_id.name
 		
 		if not invoice.action_number:
 			#return False,invoice_data
@@ -379,15 +383,15 @@ class utils_print():
 		#recorrer todos los pagos asociados y verificar los diarios (son los medios de pago en la maquina) o anticipo y credito buscar
 		payments = []
 		if not invoice.is_credit:
-			print("cantidad de pagos asociados a la factura")
-			print(invoice._get_payments_vals())
-			print("--")
-			for pv in invoice._get_payments_vals():
+			_logger.info("cantidad de pagos asociados a la factura")
+			_logger.info(invoice.invoice_payments_widget)
+			_logger.info("_get_reconciled_info_JSON_values %s",invoice._get_reconciled_info_JSON_values())
+			for p in invoice._get_reconciled_info_JSON_values():
 				payment = {}
 				payment["amount"] = str(format(
 					invoice.currency_id.round(pv.get("amount")), '.2f')).replace('.', '').zfill(12)
 				journal_obj = invoice.env['account.journal'].search([('name','=',pv.get("journal_name"))])
-				
+		
 				if journal_obj.id_machine_payment:
 					code_payment = journal_obj.id_machine_payment
 				else:
@@ -412,6 +416,8 @@ class utils_print():
 				code = code_payment
 				payment["code"] = str(code.zfill(2))
 				payments.append(payment)
+				#print("es a credito no hay pagos asociados")"""
+
 		else:
 			print("es a credito no hay pagos asociados")
 			mp = invoice.env['bin_maquina_fiscal_medios_pago.payments_info_machine'].search(
@@ -420,7 +426,7 @@ class utils_print():
 				code_payment = mp.id_machine_payment
 			else:
 				code_payment = "16"#para evitar fallos
-			amount  = str(format(invoice.currency_id.round(invoice.amount_total), '.2f')).replace('.', '').zfill(12)
+			amount  = str(format(invoice.foreign_currency_id.round(invoice.foreign_amount_total), '.2f')).replace('.', '').zfill(12)
 			payment = {"code": code_payment,"amount":amount}
 			payments.append(payment)
 		
@@ -430,18 +436,18 @@ class utils_print():
 		for line in invoice.invoice_line_ids:
 			item = {}
 			item["price"] = str(format(
-				invoice.currency_id.round(line.price_unit), '.2f')).replace('.', ',').zfill(11)
+				invoice.foreign_currency_id.round(line.foreign_price_unit), '.2f')).replace('.', ',').zfill(11)
 			item["qty"] = str(format(line.quantity,'.3f').replace('.', ',').zfill(11))
 			item["code"] = "|"+line.name+"|" if line.name else ""
 			item["name"] = line.product_id.name
 			
 			ct = '0'
-			if len(line.invoice_line_tax_ids) > 0:
-				if line.invoice_line_tax_ids[0].caracter_tax_machine == '!':
+			if len(line.tax_ids) > 0:
+				if line.tax_ids[0].caracter_tax_machine == '!':
 					ct = '1'
-				elif line.invoice_line_tax_ids[0].caracter_tax_machine == '"':
+				elif line.tax_ids[0].caracter_tax_machine == '"':
 					ct = '2'
-				elif line.invoice_line_tax_ids[0].caracter_tax_machine == '#':
+				elif line.tax_ids[0].caracter_tax_machine == '#':
 					ct = '3'
 				else:
 					ct = '0'
@@ -581,10 +587,10 @@ class utils_print():
 		else:
 			invoice_data["vat"] = invoice.vat
 
-		if not invoice.partner_id.business_name:
+		if not invoice.partner_id.name:
 			return False, invoice_data
 		else:
-			invoice_data["business_name"] = invoice.partner_id.business_name
+			invoice_data["name"] = invoice.partner_id.name
 		#solo country
 		if not invoice.action_number:
 			#return False, invoice_data
@@ -613,7 +619,7 @@ class utils_print():
 					#if len(ori) >= 2:
 					#invoice_number = ori[2]
 					invoice_data["origin"] = str(invoice.origin.zfill(11))
-					date_format = invoice.refund_invoice_id.date.strftime("%d-%m-%Y")
+					date_format = invoice.refund_invoice_id.invoice_date.strftime("%d-%m-%Y")
 					invoice_data["origin_date"] = date_format
 					if invoice.refund_invoice_id.serial_machine:
 						invoice_data["serial_machine"] = invoice.refund_invoice_id.serial_machine
@@ -625,11 +631,12 @@ class utils_print():
 				return False, {}
 		else:
 			#es una nota sin factura asociada
+			#esto es una implementacion
 			try:
 				if not invoice.origin:
 					return False, {}
 				#origin debe tener solo el numero
-				invoice_data["origin"] = str(invoice.origin.zfill(11))
+				invoice_data["origin"] = str(invoice.invoice_origin.zfill(11))
 				if not invoice.origin_date:
 					return False, {}
 				date_format = invoice.origin_date.strftime("%d-%m-%Y")
@@ -647,10 +654,10 @@ class utils_print():
 		#falta aclarar duda de cual pago tomar, el ejemplo tiene efectivo
 		payments = []
 		if not invoice.is_credit:
-			for pv in invoice._get_payments_vals():
+			for p in invoice._get_reconciled_info_JSON_values():
 				payment = {}
 				payment["amount"] = str(format(
-					invoice.currency_id.round(pv.get("amount")), '.2f')).replace('.', '').zfill(12)
+					invoice.foreign_currency_id.round(pv.get("amount")), '.2f')).replace('.', '').zfill(12)
 				journal_obj = invoice.env['account.journal'].search(
 					[('name', '=', pv.get("journal_name"))])
 
@@ -680,7 +687,7 @@ class utils_print():
 				code_payment = mp.id_machine_payment
 			else:
 				code_payment = "16"  # para evitar fallos
-			amount = str(format(invoice.currency_id.round(
+			amount = str(format(invoice.foreign_currency_id.round(
 				invoice.amount_total), '.2f')).replace('.', '').zfill(12)
 			payment = {"code": code_payment, "amount": amount}
 			payments.append(payment)
@@ -692,7 +699,7 @@ class utils_print():
 			print("+++++++++++++++++++++++++++++++++++++++++++")
 			item = {}
 			item["price"] = str(format(
-				invoice.currency_id.round(line.price_unit), '.2f')).replace('.', ',').zfill(11)
+				invoice.foreign_currency_id.round(line.price_unit), '.2f')).replace('.', ',').zfill(11)
 			item["qty"] = str(format(line.quantity, '.3f').replace('.', ',').zfill(11))
 			item["code"] = "|"+line.name+"|" if line.name else ""
 			item["name"] = line.product_id.name
