@@ -40,7 +40,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 		#prevent validate invoice if has pending print 
 		if print_pending:
 			raise UserError(
-				"No se puede validar la factura, tiene pendiente por imprimir la factura: "+print_pending.number)
+				"No se puede validar la factura, tiene pendiente por imprimir la factura: "+print_pending.name)
 		return super(AccountMoveBinauralMFBackend, self).action_post()
 
 	@api.onchange('is_credit')
@@ -71,11 +71,11 @@ class AccountMoveBinauralMFBackend(models.Model):
 			utils_print2 = utils_print(
 				machine_info.local, machine_info.host, machine_info.port)
 			
-			# success_last_invoice, number = utils_print2.get_last_invoice_number("FAC")
-			# if not success_last_invoice:
-			# 	print("number",number)
-			# 	raise UserError("Error consultando ultima factura " + str(number))
-			#chequear que el ultmo + 1 coincida con el numero de la factura que vendra
+			success_last_invoice, number = utils_print2.get_last_invoice_number("FAC")
+			if not success_last_invoice:
+				_logger.info("number %s",number)
+				raise UserError("Error consultando ultima factura " + str(number))
+				#chequear que el ultmo + 1 coincida con el numero de la factura que vendra
 	
 			success,msg = utils_print2.print_customer_invoice(self)
 			if success:

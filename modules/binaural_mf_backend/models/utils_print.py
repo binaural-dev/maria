@@ -310,7 +310,7 @@ class utils_print():
 
 				self.printer.SendCmd(str("3"))  # sub total en factura
 				#poner todas como parcial
-				"""for payment in invoice_data.get("payments",[]):
+				for payment in invoice_data.get("payments",[]):
 					cmd_success = self.printer.SendCmd("2"+str(payment.get("code")+payment.get("amount")))
 					print("cmd_success", cmd_success)
 					if not cmd_success:
@@ -320,8 +320,8 @@ class utils_print():
 				time.sleep(1)
 				print(amount_due)
 				if amount_due > 0:
-					self.printer.SendCmd(str("101"))"""
-				self.printer.SendCmd(str("101"))
+					self.printer.SendCmd(str("101"))
+				
 
 				print("termino de imprimir")
 				return True, "Factura impresa correctamente"
@@ -386,10 +386,11 @@ class utils_print():
 			_logger.info("cantidad de pagos asociados a la factura")
 			_logger.info(invoice.invoice_payments_widget)
 			_logger.info("_get_reconciled_info_JSON_values %s",invoice._get_reconciled_info_JSON_values())
-			for p in invoice._get_reconciled_info_JSON_values():
+			for pv in invoice._get_reconciled_info_JSON_values():
 				payment = {}
+				amount = pv.get("amount") * invoice.foreign_currency_rate
 				payment["amount"] = str(format(
-					invoice.currency_id.round(pv.get("amount")), '.2f')).replace('.', '').zfill(12)
+					invoice.currency_id.round(amount), '.2f')).replace('.', '').zfill(12)
 				journal_obj = invoice.env['account.journal'].search([('name','=',pv.get("journal_name"))])
 		
 				if journal_obj.id_machine_payment:
@@ -654,10 +655,11 @@ class utils_print():
 		#falta aclarar duda de cual pago tomar, el ejemplo tiene efectivo
 		payments = []
 		if not invoice.is_credit:
-			for p in invoice._get_reconciled_info_JSON_values():
+			for pv in invoice._get_reconciled_info_JSON_values():
 				payment = {}
+				amount = pv.get("amount") * invoice.foreign_currency_rate
 				payment["amount"] = str(format(
-					invoice.foreign_currency_id.round(pv.get("amount")), '.2f')).replace('.', '').zfill(12)
+					invoice.foreign_currency_id.round(amount), '.2f')).replace('.', '').zfill(12)
 				journal_obj = invoice.env['account.journal'].search(
 					[('name', '=', pv.get("journal_name"))])
 
