@@ -102,6 +102,14 @@ class ResPartnerAction(models.Model):
         ('j', 'J'),
         ('g', 'G'),
     ], 'Prefijo Rif Usufructo', default='v',track_visibility='onchange')
+
+    prefix_vat = fields.Selection([
+        ('V', 'V'),
+        ('E', 'E'),
+        ('J', 'J'),
+        ('G', 'G'),
+        ('C', 'C'),
+    ], 'Prefijo Rif', required=False, default='V')
     vat_usufruct = fields.Char(string='RIF Usufruto',track_visibility='onchange')
     address_usufruct = fields.Text(string='Dirección fiscal Usufructo',track_visibility='onchange')
 
