@@ -19,6 +19,7 @@ services:
       - PYTHONUNBUFFERED=0
     devices:
       - "/dev/ttyACM0:/dev/ttyACM0"
+    restart: always
   db-integra14:
     image: postgres:13
     environment:
@@ -28,6 +29,7 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - odoo-db-integra14:/var/lib/postgresql/data/pgdata
+    restart: always
 volumes:
   odoo-web-integra14:
   odoo-db-integra14:
