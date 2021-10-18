@@ -160,10 +160,10 @@ class AccountPaymentBinauralFacturacion(models.Model):
 			line_vals_list_2.append((0,0,{
 				'name': 'IGTF',
 				'date_maturity': self.date,
-				'amount_currency': -self.amount_igtf * self.foreign_currency_rate,
+				'amount_currency': -self.amount_igtf,
 				'currency_id': currency_id,
 				'debit': 0.0,
-				'credit':self.amount_igtf,
+				'credit':self.amount_igtf / self.foreign_currency_rate if self.foreign_currency_rate > 0 else 0,
 				'partner_id': self.partner_id.id,
 				'account_id': self.journal_id.payment_debit_account_id.id if self.amount_igtf < 0.0 else self.journal_id.payment_credit_account_id.id,
 			}))
@@ -172,9 +172,9 @@ class AccountPaymentBinauralFacturacion(models.Model):
 			{
 				'name': 'IGTF',
 				'date_maturity': self.date,
-				'amount_currency':self.amount_igtf * self.foreign_currency_rate, #,
+				'amount_currency':self.amount_igtf,
 				'currency_id': currency_id,
-				'debit': self.amount_igtf,
+				'debit': self.amount_igtf / self.foreign_currency_rate if self.foreign_currency_rate > 0 else 0,
 				'credit': 0,
 				'partner_id': self.partner_id.id,
 				'account_id': account_igtf.destination_account_id.id,
