@@ -13,9 +13,12 @@ from odoo.addons.binaural_mf_backend.models.utils_print import *
 class AccountMoveBinauralMFBackend(models.Model):
 	_inherit = 'account.move'
 
-	serial_machine = fields.Char(string='Serial de máquina fiscal')
+	serial_machine = fields.Char(string='Serial de máquina fiscal',copy=False)
 	is_credit = fields.Boolean(string='A Crédito')
-	machine_invoice_number = fields.Char(string='Numero de factura de maquina')
+	machine_invoice_number = fields.Char(string='Numero de factura de maquina',copy=False)
+	
+	origin_country = fields.Char(string='Origen Country')
+	origin_date = fields.Char(string='Fecha origen')
 
 	def has_print_pending(self):
 		if not self:

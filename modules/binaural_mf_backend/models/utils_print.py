@@ -539,7 +539,7 @@ class utils_print():
 		if valid and invoice_data:
 			try:
 				self.printer.SendCmd(str("iR*"+invoice_data.get("vat")))
-				self.printer.SendCmd(str("iS*"+invoice_data.get("business_name")))
+				self.printer.SendCmd(str("iS*"+invoice_data.get("name")))
 				#Factura afectada
 				self.printer.SendCmd(str("iF*"+invoice_data.get("origin")))
 				self.printer.SendCmd(str("iD*"+invoice_data.get("origin_date")))
@@ -609,21 +609,21 @@ class utils_print():
 		else:
 			invoice_data["company_name"] = invoice.company_id.name
 
-		if invoice.refund_invoice_id:
+		if invoice.reversed_entry_id:
 			#es una nota con factura asociada
-			if invoice.refund_invoice_id.date:
+			if invoice.reversed_entry_id.invoice_date:
 				try:
 					#tomar de aqui o del numero de origen?
-					if not invoice.origin:
+					if not invoice.reversed_entry_id:
 						return False, {}
 					#ori = invoice.origin.split("/")
 					#if len(ori) >= 2:
 					#invoice_number = ori[2]
-					invoice_data["origin"] = str(invoice.origin.zfill(11))
-					date_format = invoice.refund_invoice_id.invoice_date.strftime("%d-%m-%Y")
+					invoice_data["origin"] = str(invoice.reversed_entry_id.machine_invoice_number.zfill(11))
+					date_format = invoice.reversed_entry_id.invoice_date.strftime("%d-%m-%Y")
 					invoice_data["origin_date"] = date_format
-					if invoice.refund_invoice_id.serial_machine:
-						invoice_data["serial_machine"] = invoice.refund_invoice_id.serial_machine
+					if invoice.reversed_entry_id.serial_machine:
+						invoice_data["serial_machine"] = invoice.reversed_entry_id.serial_machine
 				except Exception as e:
 					print(str(e))
 					return False, {}
@@ -634,10 +634,10 @@ class utils_print():
 			#es una nota sin factura asociada
 			#esto es una implementacion
 			try:
-				if not invoice.origin:
+				if not invoice.origin_country:
 					return False, {}
 				#origin debe tener solo el numero
-				invoice_data["origin"] = str(invoice.invoice_origin.zfill(11))
+				invoice_data["origin"] = str(invoice.origin_country.zfill(11))
 				if not invoice.origin_date:
 					return False, {}
 				date_format = invoice.origin_date.strftime("%d-%m-%Y")
@@ -690,7 +690,7 @@ class utils_print():
 			else:
 				code_payment = "16"  # para evitar fallos
 			amount = str(format(invoice.foreign_currency_id.round(
-				invoice.amount_total), '.2f')).replace('.', '').zfill(12)
+				invoice.foreign_amount_total), '.2f')).replace('.', '').zfill(12)
 			payment = {"code": code_payment, "amount": amount}
 			payments.append(payment)
 
@@ -700,8 +700,9 @@ class utils_print():
 		for line in invoice.invoice_line_ids:
 			print("+++++++++++++++++++++++++++++++++++++++++++")
 			item = {}
+			amount = pv.get("amount") * invoice.foreign_currency_rate
 			item["price"] = str(format(
-				invoice.foreign_currency_id.round(line.price_unit), '.2f')).replace('.', ',').zfill(11)
+				invoice.foreign_currency_id.round(amount), '.2f')).replace('.', ',').zfill(11)
 			item["qty"] = str(format(line.quantity, '.3f').replace('.', ',').zfill(11))
 			item["code"] = "|"+line.name+"|" if line.name else ""
 			item["name"] = line.product_id.name
@@ -717,14 +718,14 @@ class utils_print():
 			#		tax = "d0"
 			
 			tax = "0"
-			if len(line.invoice_line_tax_ids) > 0:
-				if line.invoice_line_tax_ids[0].caracter_tax_machine == "!":
+			if len(line.tax_ids) > 0:
+				if line.tax_ids[0].caracter_tax_machine == "!":
 					tax = "1"
-				if line.invoice_line_tax_ids[0].caracter_tax_machine == '"':
+				if line.tax_ids[0].caracter_tax_machine == '"':
 					tax = "2"
-				if line.invoice_line_tax_ids[0].caracter_tax_machine == '#':
+				if line.tax_ids[0].caracter_tax_machine == '#':
 					tax = "3"
-				if not line.invoice_line_tax_ids[0].caracter_tax_machine:
+				if not line.tax_ids[0].caracter_tax_machine:
 					tax = "0"	
 
 			item["tax"] = tax
