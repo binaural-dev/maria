@@ -19,7 +19,7 @@
     'version': '14.0.1.0.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['binaural_facturacion', 'account_reports'],
+    'depends': ['binaural_facturacion', 'account_reports', 'binaural_facturacion_reportes'],
 
     # always loaded
     'data': [
