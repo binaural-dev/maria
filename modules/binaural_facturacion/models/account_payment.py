@@ -160,7 +160,7 @@ class AccountPaymentBinauralFacturacion(models.Model):
 			line_vals_list_2.append((0,0,{
 				'name': 'IGTF',
 				'date_maturity': self.date,
-				'amount_currency': self.amount_igtf * self.foreign_currency_rate,
+				'amount_currency': -self.amount_igtf * self.foreign_currency_rate,
 				'currency_id': currency_id,
 				'debit': 0.0,
 				'credit':self.amount_igtf,
