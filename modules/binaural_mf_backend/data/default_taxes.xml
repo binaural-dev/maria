@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="1">
+        <record id="tax_16_bin" model="account.tax">
+        	<field name="name"> 16.0% Ventas</field>
+        	<field name="type_tax_use">sale</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">16</field>
+            <field name="caracter_tax_machine">!</field>
+            <field name="description">16,00%</field>
+            <field name="tax_position">1</field>
+        </record>
+        <record id="tax_8_bin" model="account.tax">
+        	<field name="name"> 8.0% Ventas</field>
+        	<field name="type_tax_use">sale</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">8</field>
+            <field name="caracter_tax_machine">"</field>
+            <field name="description">8,00%</field>
+            <field name="tax_position">2</field>
+            
+        </record>
+        
+        <record id="tax_31_bin" model="account.tax">
+        	<field name="name"> 31.0% Ventas</field>
+        	<field name="type_tax_use">sale</field>
+            <field name="amount_type">percent</field>
+            <field name="amount">31</field>
+            <field name="caracter_tax_machine">#</field>
+            <field name="description">31,00%</field>
+            <field name="tax_position">3</field>
+        </record>
+    </data>
+
+</odoo>

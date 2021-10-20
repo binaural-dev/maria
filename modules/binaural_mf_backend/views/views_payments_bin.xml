@@ -1,0 +1,57 @@
+<odoo>
+  <data>
+      <record id="view_config_payments_info_payments_info_machine_tree" model="ir.ui.view">
+        <field name="name">Medios de pago en máquina fiscal</field>
+        <field name="model">bin_maquina_fiscal_medios_pago.payments_info_machine</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="id_machine_payment"/>
+                <field name="description_machine_payment" />
+                <field name="active" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_config_fiscal_payments_info_machine_form" model="ir.ui.view">
+        <field name="name">view.fiscal.machine.form</field>
+        <field name="model">bin_maquina_fiscal_medios_pago.payments_info_machine</field>
+        <field name="arch" type="xml">
+            <form string="Medio de pago" create="true" edit="true">
+                <header>
+                
+                    <button name="action_sent_ot_machine" type="object" string="Enviar a maquina"/>
+
+                    <button name="get_payment_info"  groups="base.group_system" type="object" string="Programación"/>
+                        
+                   
+                    <!--<button string="Activar" name="action_active" type="object" states="" class="oe_highlight" attrs="{'invisible': [('state','in',['active'])]}"/>
+                    <button string="Desactivar" name="action_inactive" type="object" states="" class="oe_highlight" attrs="{'invisible': [('state','in',['inactive'])]}"/>
+                    <field name="state" widget="statusbar"/>-->
+                </header>
+                <sheet string="Medio de pago">
+                    <group>
+                      <field name="id_machine_payment"/>
+                      <field name="description_machine_payment" />
+                      <field name="active" />
+                        
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="binaural_mf_backend.action_config_fiscal_machine_payment" model="ir.actions.act_window" >
+            <field name="name">Registrar medio de pago</field>
+            <field name="res_model">bin_maquina_fiscal_medios_pago.payments_info_machine</field>
+            <field name="type">ir.actions.act_window</field>
+           
+            <field name="view_mode">tree,form</field>
+    </record>
+
+
+              
+      <menuitem name="Registrar medio de pago en máquina fiscal" action="binaural_mf_backend.action_config_fiscal_machine_payment"
+              id="id_config_fiscal_payments_info_machine"
+              parent="binaural_mf_backend.id_config_fiscal_machine"/>
+  </data>
+</odoo>

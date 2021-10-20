@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+bin_fiscal_machine_info,Bin_machine_info,model_bin_maquina_fiscal_machine_info,,1,1,1,0
+bin_fiscal_payments_info_machine,Bin_payments_info_machine,model_bin_maquina_fiscal_medios_pago_payments_info_machine,,1,1,1,0

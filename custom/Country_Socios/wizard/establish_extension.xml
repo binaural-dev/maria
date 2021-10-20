@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="form_establish_extension_wiz" model="ir.ui.view">
+        <field name="name">Establecer Prorroga</field>
+        <field name="model">wizard.establish.extension</field>
+        <field name="arch" type="xml">
+            <form string="Establecer Prorroga">
+                
+                    <group>
+                        <group>
+                            <field name="reason" />
+                            <field name="new_end_date" />
+                            <field name="partner_to_establish" invisible="1"/>
+                        </group>
+                    </group>
+                                      
+                <footer>
+                    <button name="establish_extension" string="Establecer Prorroga" type="object" class="oe_highlight" />
+                    <button string="Cancelar" class="btn-default" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+	    
+    </data>
+</odoo>
