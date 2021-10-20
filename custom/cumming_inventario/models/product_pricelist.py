@@ -58,6 +58,14 @@ class ProductPricelistItemCummingInventario(models.Model):
 		help='Pricelist Item applicable on selected option')
 
 
+	product_info = fields.Char(string='Producto info',compute="_compute_product_info",store=True)
+
+	@api.depends("product_tmpl_id")
+	def _compute_product_info(self):
+		for product in self:
+			product.product_info = str(product.product_tmpl_id.alternative_code) +" "+str(product.product_tmpl_id.alternative_manual) +" "+str(product.product_tmpl_id.default_code)+" "+str(product.product_tmpl_id.name)
+
+
 	cumming_list = fields.Selection([
 		('a', 'A'),
 		('b', 'B'),
