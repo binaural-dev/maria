@@ -9,17 +9,7 @@
         </record>
         <!---->
         <menuitem id="menu_product_pricelist_item" name="Precios de productos" parent="stock.menu_stock_inventory_control" action="product_pricelist_action_cumming"  sequence="3" active=""/><!--<menuitem id="menu_product_pricelist_main" name="Pricelists" parent="product_menu_catalog" action="product.product_pricelist_action2" groups="product.group_product_pricelist" sequence="3" active="False"/>-->
-        <!--buscador de pricelist item-->
-        <record id="item_price_search_cummin" model="ir.ui.view">
-            <field name="name">product.template.search.inherit.pricelist.item</field>
-            <field name="model">product.pricelist.item</field>
-            <field name="inherit_id" ref="product.product_pricelist_item_view_search"/>
-            <field name="arch" type="xml">
-                <field name="pricelist_id" position="before">
-                    <field string="Producto" name="alternative_full" />
-                </field>
-            </field>
-        </record>
+
         <!--form de product pricelist-->
         <record id="product_pricelist_cumming" model="ir.ui.view">
             <field name="name">Ajuste en lista de precios cumming</field>
@@ -99,6 +89,7 @@
                                         
                     <field name="price_list_a" attrs="{'invisible':[('cumming_list','=','a')]}"/>
                     <field name="price_list_b" attrs="{'invisible':[('cumming_list','=','b')]}"/>
+                    <field name="product_info" invisible="1"/>
                 </field>
                 <!--cambios para que se pueda editar en la lista, consultar, si se edita en formulario se podria dejar sin los cambios anteriores-->
                 <field name="min_quantity" position="attributes">
@@ -157,7 +148,21 @@
                    
                 </field>
             </field>
-        </record>       
+        </record>  
+
+
+
+        <!--buscador de pricelist item-->
+        <record id="item_price_search_cummin" model="ir.ui.view">
+            <field name="name">product.template.search.inherit.pricelist.item</field>
+            <field name="model">product.pricelist.item</field>
+            <field name="inherit_id" ref="product.product_pricelist_item_view_search"/>
+            <field name="arch" type="xml">
+                <field name="pricelist_id" position="before">
+                    <field string="Producto" name="product_info" />
+                </field>
+            </field>
+        </record>
              
     </data>
 </odoo>
