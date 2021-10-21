@@ -11,4 +11,12 @@ class AccountPaymentAction(models.Model):
         for record in self:
             record.action_number = record.partner_id.action_number.number
 
-    action_number = fields.Char(string='Número de Acción')
+    action_number = fields.Char(string='Número de Acción',compute="_get_action",store=True)
+
+    @api.depends('partner_id')
+    def _get_action(self):
+        for p in self:
+            if p.partner_id and p.partner_id.action_number:
+                p.action_number = p.partner_id.action_number.number
+            else:
+                p.action_number = ''
