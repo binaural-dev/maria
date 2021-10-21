@@ -87,7 +87,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 			
 			success_last_invoice, number = utils_print2.get_last_invoice_number("FAC")
 			if not success_last_invoice:
-				_logger.info("number %s",number)
+				#_logger.info("number %s",number)
 				raise UserError("Error consultando ultima factura " + str(number))
 				#chequear que el ultmo + 1 coincida con el numero de la factura que vendra
 	
