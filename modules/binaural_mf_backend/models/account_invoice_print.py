@@ -46,15 +46,16 @@ class AccountMoveBinauralMFBackend(models.Model):
 				"No se puede validar la factura, tiene pendiente por imprimir la factura: "+print_pending.name)
 
 		success = super(AccountMoveBinauralMFBackend, self).action_post()
-		ref = "ACC."+str(self.partner_id.action_number.number)
-		if self.move_type == 'out_invoice':
-			sequence = sequence = self._get_sequence()
-			new= self.journal_id.sequence_number_next#sequence.get_next_char(sequence.sequence_number_next)
-			ref += 'FACT.'+str(self.name)
-		if self.move_type == 'out_refund':
-			sequence = sequence = self._get_sequence()
-			new= 'NC.'+str(self.name) #sequence.get_next_char(sequence.sequence_number_next)
-		self.write({"ref":ref})
+		if self.move_type in ['out_invoice','out_refund']:
+			ref = "ACC."+str(self.partner_id.action_number.number)
+			if self.move_type == 'out_invoice':
+				sequence = sequence = self._get_sequence()
+				new= self.journal_id.sequence_number_next#sequence.get_next_char(sequence.sequence_number_next)
+				ref += 'FACT.'+str(self.name)
+			if self.move_type == 'out_refund':
+				sequence = sequence = self._get_sequence()
+				new= 'NC.'+str(self.name) #sequence.get_next_char(sequence.sequence_number_next)
+			self.write({"ref":ref})
 		return success
 
 	@api.onchange('is_credit')

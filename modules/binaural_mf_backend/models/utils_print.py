@@ -700,9 +700,9 @@ class utils_print():
 		for line in invoice.invoice_line_ids:
 			print("+++++++++++++++++++++++++++++++++++++++++++")
 			item = {}
-			amount = pv.get("amount") * invoice.foreign_currency_rate
+			
 			item["price"] = str(format(
-				invoice.foreign_currency_id.round(amount), '.2f')).replace('.', ',').zfill(11)
+				invoice.foreign_currency_id.round(line.foreign_price_unit), '.2f')).replace('.', ',').zfill(11)
 			item["qty"] = str(format(line.quantity, '.3f').replace('.', ',').zfill(11))
 			item["code"] = "|"+line.name+"|" if line.name else ""
 			item["name"] = line.product_id.name
@@ -733,6 +733,7 @@ class utils_print():
 		invoice_data["items"] = itemlist
 		print("invoice_Data",invoice_data)
 		return True, invoice_data
+
 
 	def get_amount_to_pay(self):
 		try:
