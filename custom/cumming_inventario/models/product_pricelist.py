@@ -75,8 +75,8 @@ class ProductPricelistItemCummingInventario(models.Model):
 
 	def _compute_prices_cumming_another(self):
 		for i in self:
-			i.price_list_a = self.env['product.pricelist.item'].sudo().search([('pricelist_id.cumming_list','=','a'),('product_tmpl_id','=',i.product_tmpl_id.id)]).fixed_price
-			i.price_list_b = self.env['product.pricelist.item'].sudo().search([('pricelist_id.cumming_list','=','b'),('product_tmpl_id','=',i.product_tmpl_id.id)]).fixed_price
+			i.price_list_a = self.env['product.pricelist.item'].sudo().search([('pricelist_id.cumming_list','=','a'),('product_tmpl_id','=',i.product_tmpl_id.id)],limit=1).fixed_price
+			i.price_list_b = self.env['product.pricelist.item'].sudo().search([('pricelist_id.cumming_list','=','b'),('product_tmpl_id','=',i.product_tmpl_id.id)],limit=1).fixed_price
 
 	@api.depends('fixed_price')
 	def _compute_prices_cumming(self):
