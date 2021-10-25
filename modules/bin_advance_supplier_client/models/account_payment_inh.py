@@ -19,10 +19,10 @@ class AccountPaymentInh(models.Model):
                 if pay.partner_id:
                     if pay.is_advance:
                         default_account = self.env['account.payment.config.advance'].search(
-                            [('company_id', '=', pay.company_id.id), ('active', '=', True),
-                             ('advance_type', '=', pay.partner_type)], limit=1)
+                            [('company_id', '=', self.env.user.company_id.id), ('active', '=', True),
+                             ('advance_type', '=', 'customer')], limit=1)
                         if not default_account:
-                            raise exceptions.UserError("Debe configurar la cuenta contable de anticipo")
+                            raise exceptions.UserError("Debe configurar la cuenta contable de anticipo %s-%s" % (pay.company_id.id, pay.partner_type))
                         pay.destination_account_id = default_account.advance_account_id.id
                     else:
                         pay.destination_account_id = pay.partner_id.with_company(pay.company_id).property_account_receivable_id
@@ -36,7 +36,7 @@ class AccountPaymentInh(models.Model):
                 if pay.partner_id:
                     if pay.is_advance:
                         default_account = self.env['account.payment.config.advance'].search(
-                            [('company_id', '=', pay.company_id.id), ('active', '=', True),
+                            [('company_id', '=', self.env.user.company_id.id), ('active', '=', True),
                              ('advance_type', '=', pay.partner_type)], limit=1)
                         if not default_account:
                             raise exceptions.UserError("Debe configurar la cuenta contable de anticipo")
