@@ -14,22 +14,21 @@ import re
 
 import logging
 _logger = logging.getLogger(__name__)
+class AccountBankStatementBinauralFacturacion(models.Model):
+    _inherit = 'account.bank.statement'
+    @api.onchange('journal_id')
+    def onchange_journal_bin(self):
+        _logger.info("DISPARO PADRE")
+        #resetear valores en caso de que diario tenga misma moneda que company
+        if self.journal_id.currency_id == self.journal_id.company_id.currency_id or not self.journal_id.currency_id:
+            for st_line in self.line_ids:
+                st_line.update({'foreign_currency_id':False,'amount_currency':False,'foreign_currency_rate':False})
+
+
+
 class AccountBankStatementLineBinauralFacturacion(models.Model):
     _inherit = 'account.bank.statement.line'
-    """@api.model_create_multi
-    def create(self, vals_list):
-
-
-        st_lines = super().create(vals_list)
-        _logger.info("vals_list en bank statement %s",vals_list)
-        _logger.info("St lines in bank statement %s",st_lines)
-        for i, st_line in enumerate(st_lines):
-            rate = vals_list[i].get('foreign_currency_rate')
-            st_line.move_id.write({'foreign_currency_rate':rate})
-
-        return st_lines"""
-
-    @api.onchange('amount','move_id.foreign_currency_rate','foreign_currency_rate')
+    @api.onchange('amount','move_id.foreign_currency_rate','foreign_currency_rate','statement_id.journal_id','move_id.journal_id','journal_id')
     def onchange_rate_amount(self):
         _logger.info("DISPARO")
         for l in self:
@@ -37,4 +36,6 @@ class AccountBankStatementLineBinauralFacturacion(models.Model):
                 #moneda de diario es distinta a moneda de company
                 l.foreign_currency_id = l.statement_id.journal_id.company_id.currency_id
                 l.amount_currency = l.amount/l.foreign_currency_rate if l.foreign_currency_rate > 0 else 0
-
+            else:
+                l.foreign_currency_id = False
+                l.amount_currency = False
