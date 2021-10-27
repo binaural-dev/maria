@@ -310,17 +310,18 @@ class utils_print():
 
 				self.printer.SendCmd(str("3"))  # sub total en factura
 				#poner todas como parcial
-				for payment in invoice_data.get("payments",[]):
-					cmd_success = self.printer.SendCmd("2"+str(payment.get("code")+payment.get("amount")))
-					print("cmd_success", cmd_success)
-					if not cmd_success:
-						return False,"Error enviando comando a la maquina"
-				time.sleep(1)
-				amount_due = self.get_amount_to_pay()
-				time.sleep(1)
-				print(amount_due)
-				if amount_due > 0:
-					self.printer.SendCmd(str("101"))
+				#for payment in invoice_data.get("payments",[]):
+				#	cmd_success = self.printer.SendCmd("2"+str(payment.get("code")+payment.get("amount")))
+				#	print("cmd_success", cmd_success)
+				#	if not cmd_success:
+				#		return False,"Error enviando comando a la maquina"
+				#time.sleep(1)
+				#amount_due = self.get_amount_to_pay()
+				#time.sleep(1)
+				#print(amount_due)
+				#if amount_due > 0:
+				#	self.printer.SendCmd(str("101"))
+				self.printer.SendCmd(str("101"))
 				
 
 				print("termino de imprimir")
@@ -556,19 +557,20 @@ class utils_print():
 
 				self.printer.SendCmd(str("3"))  # sub total en factura
 				#poner todas como parcial
-				for payment in invoice_data.get("payments", []):
-					cmd_success = self.printer.SendCmd(
-						"2"+str(payment.get("code")+payment.get("amount")))
-					print("cmd_success", cmd_success)
-					if not cmd_success:
-						return False, "Error enviando comando a la maquina"
-				time.sleep(1)
-				amount_due = self.get_amount_to_pay()
-				time.sleep(1)
-				print("amount due")
-				print(amount_due)
-				if amount_due > 0:
-					self.printer.SendCmd(str("101"))
+				#for payment in invoice_data.get("payments", []):
+				#	cmd_success = self.printer.SendCmd(
+				#		"2"+str(payment.get("code")+payment.get("amount")))
+				#	print("cmd_success", cmd_success)
+				#	if not cmd_success:
+				#		return False, "Error enviando comando a la maquina"
+				#time.sleep(1)
+				#amount_due = self.get_amount_to_pay()
+				#time.sleep(1)
+				#print("amount due")
+				#print(amount_due)
+				#if amount_due > 0:
+				#	self.printer.SendCmd(str("101"))
+				self.printer.SendCmd(str("101"))
 				print("termino de imprimir")
 				return True, "Factura impresa correctamente"
 			except Exception as e:
