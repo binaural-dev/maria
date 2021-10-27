@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 import datetime
-from pprint import pprint
+
 
 class ArcvWizard(models.TransientModel):
     _name = 'arcv.wizard'
@@ -51,7 +51,10 @@ class ArcvWizard(models.TransientModel):
                                     for payment_invoice in payment.reconciled_bill_ids:
                                         for line_invoice in line.invoice_id:
                                             if payment_invoice.id == line_invoice.id:
-                                                amount_total += payment.amount
+                                                if payment.currency_id.id == self.env.ref('base.VEF').id:
+                                                    amount_total += payment.amount
+                                                else:
+                                                    amount_total += (payment.amount * payment.foreign_currency_rate)
                 if amount_ret > 0:
                     json_obj = {
                         'period': str(period_fiscal_month_init)+"/"+str(period_fiscal.year),

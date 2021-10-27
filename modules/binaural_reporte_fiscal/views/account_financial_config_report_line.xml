@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_financial_config_line_tree_binaural" model="ir.ui.view">
+        <field name="name">Lineas de Formulario de reportes financieros</field>
+        <field name="model">account.financial.config.report.line</field>
+        <field name="arch" type="xml">
+            <tree string="Niveles plan de cuentas" multi_edit="1" editable="bottom">
+                <field name="nro_nivel"/>
+                <field name="code_length"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--My Dashboard Action-->
+    <record model="ir.actions.act_window" id="open_accounts_levels_action">
+        <field name="name">Niveles de cuentas contables</field>
+        <field name="res_model">account.financial.config.report.line</field>
+        <field name="view_mode">tree</field>
+        <field name="usage">menu</field>
+        <field name="view_id" ref="view_account_financial_config_line_tree_binaural"/>
+    </record>
+
+    <menuitem
+            id="menu_config_accounts_leves"
+            parent="account.menu_finance_configuration"
+            action="open_accounts_levels_action"/>
+
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_financial_report_form_binaural" model="ir.ui.view">
+        <field name="name">account.financial.html.report.form.binaural</field>
+        <field name="model">account.financial.html.report</field>
+        <field name="inherit_id" ref="account_reports.view_account_financial_report_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="succession_report_lines" type="object" string="Actualizar Niveles de cuentas"
+                            class="oe_highlight" />
+                </header>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_account_financial_report_line_form_binaural" model="ir.ui.view">
+        <field name="name">Configuración para las lineas de reportes financieros</field>
+        <field name="model">account.financial.html.report.line</field>
+        <field name="inherit_id" ref="account_reports.view_account_financial_report_line_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='parent_id']" position="after">
+                <field name="account_prefi" attrs="{'invisible': [('level', '!=', 0)]}"/>
+                <field name="type_control_ids" widget="many2many_tags"
+                       attrs="{'invisible': [('level', '!=', 0)]}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
