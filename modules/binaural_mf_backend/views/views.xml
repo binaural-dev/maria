@@ -1,0 +1,66 @@
+<odoo>
+  <data>
+      <record id="view_config_fiscal_machine_info_tree" model="ir.ui.view">
+        <field name="name">Maquinas Fiscales</field>
+        <field name="model">bin_maquina_fiscal.machine_info</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="machine_serial"/>
+                <field name="machine_brand" />
+                <field name="machine_model" />
+                <field name="machine_route" />
+                <field name="host" />
+                <field name="port" />
+                <field name="local" />
+                <field name="active" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_config_fiscal_machine_info_form" model="ir.ui.view">
+        <field name="name">view.fiscal.machine.form</field>
+        <field name="model">bin_maquina_fiscal.machine_info</field>
+        <field name="arch" type="xml">
+            <form string="Maquinas fiscales" create="true" edit="true">
+                <header>
+                    <!--<button string="Activar" name="action_active" type="object" states="" class="oe_highlight" attrs="{'invisible': [('state','in',['active'])]}"/>
+                    <button string="Desactivar" name="action_inactive" type="object" states="" class="oe_highlight" attrs="{'invisible': [('state','in',['inactive'])]}"/>
+                    <field name="state" widget="statusbar"/>-->
+                  
+                    <button name="get_status" string="Obtener Estado S1" groups="base.group_system" type="object"/>
+                    <button name="get_data_programed" string="Imprimir programacion" type="object" groups="base.group_system" />
+                </header>
+                <sheet string="Maquinas fiscales">
+                    <group>
+                      <field name="machine_serial"/>
+                      <field name="machine_brand" />
+                      <field name="machine_model" />
+                      <field name="machine_route" />
+                      <field name="host" attrs="{'readonly': [('local', '=',True )]}" force_save="1"/>
+                      <field name="port" attrs="{'readonly': [('local', '=',True )]}" force_save="1"/>
+                      <field name="local" />
+                      <field name="active" />
+                        
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="binaural_mf_backend.action_config_fiscal_machine" model="ir.actions.act_window" >
+            <field name="name">Registrar máquina fiscal</field>
+            <field name="res_model">bin_maquina_fiscal.machine_info</field>
+            <field name="type">ir.actions.act_window</field>
+            
+            <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem name="Configuración máquina fiscal" 
+              id="binaural_mf_backend.id_config_fiscal_machine"
+              parent="account.menu_finance_configuration"/>
+
+              
+    <menuitem name="Registrar máquina fiscal" action="binaural_mf_backend.action_config_fiscal_machine"
+              id="id_config_fiscal_machine_info"
+              parent="binaural_mf_backend.id_config_fiscal_machine"/>
+  </data>
+</odoo>
