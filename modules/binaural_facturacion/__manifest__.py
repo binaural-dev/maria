@@ -37,10 +37,12 @@
         'views/account_retention_islr.xml',
         'views/account_payment.xml',
         'views/account_journal.xml',
+        'views/account_bank_statement.xml',
         'wizard/account_payment_register.xml',
         'report/invoice_free_form_bs.xml',
         'report/invoice_free_form.xml',
         'report/report_invoice_document_override.xml',
+        
     ],
     # only loaded in demonstration mode
     'demo': [
