@@ -168,6 +168,59 @@ class BookSaleReport(models.TransientModel):
                 dict['Comprobante de Ret.'] = ''
                 dict['Fecha de Comprobante'] = ''
             lista.append(dict)
+        search_domain_only_retention = [
+            ('retention_id.date_accounting', '>=', self.date_start),
+            ('retention_id.date_accounting', '<=', self.date_end),
+            ('retention_id.type_retention', '=', 'iva'),
+            ('retention_id.state', 'in', ['emitted'])
+        ]
+        retention_lines_only = self.env['account.retention.line'].search(search_domain_only_retention)
+        for x in retention_lines_only:
+            dict = OrderedDict()
+            dict.update(dic)
+            dict['Nª de Ope'] = 0
+            f = x.invoice_id.invoice_date
+            fn = datetime.strptime(str(f), '%Y-%m-%d')
+            dict['Fecha'] = fn.strftime('%d/%m/%Y')
+            dict['R.I.F'] = x.invoice_id.partner_id.prefix_vat + x.invoice_id.partner_id.vat
+            dict['Nombre/Razón Social'] = x.invoice_id.partner_id.name
+            if x.invoice_id.move_type in ['out_invoice']:
+                dict['Tipo'] = 'FAC'
+            elif x.invoice_id.move_type == 'out_refund':
+                dict['Tipo'] = 'NC'
+            else:
+                dict['Tipo'] = 'ND'
+            dict['Nª de Doc'] = x.invoice_id.name
+            dict['Nª de Control'] = x.invoice_id.correlative
+            if x.invoice_id.move_type in ['out_invoice'] and x.invoice_id.state in ['posted']:
+                dict['Tipo Transacción'] = '01-REG'
+            if x.invoice_id.move_type in ['out_invoice'] and x.invoice_id.state in ['cancel']:
+                dict['Tipo Transacción'] = '03-ANU'
+            if x.invoice_id.move_type in ['out_refund', 'out_debit'] and x.invoice_id.state in ['posted']:
+                dict['Tipo Transacción'] = '02-REG'
+            if x.invoice_id.move_type in ['out_refund', 'out_debit'] and x.invoice_id.state in ['cancel']:
+                dict['Tipo Transacción'] = '03-ANU'
+            dict['Nª de Doc. Afectado'] = x.invoice_id.reversed_entry_id.name if x.invoice_id.reversed_entry_id else ''
+            dict['Total Ventas incluye IVA'] = 0.00
+            dict['Total Ventas Exentas'] = 0.00
+            dict['Imponible16'] = 0.00
+            dict['%16'] = 0.16
+            dict['Impuesto16'] = 0.00
+            dict['Imponible8'] = 0.00
+            dict['%8'] = 0.08
+            dict['Impuesto8'] = 0.00
+            if self.currency_sistem:
+                dict['Retenciones'] = x.retention_amount
+            else:
+                dict['Retenciones'] = x.foreign_retention_amount
+            dict['Comprobante de Ret.'] = x.retention_id.number
+            if x.retention_id.date_accounting:
+                fr = x.retention_id.date_accounting
+                fnr = datetime.strptime(str(fr), '%Y-%m-%d')
+                dict['Fecha de Comprobante'] = fnr.strftime('%d/%m/%Y')
+            else:
+                dict['Fecha de Comprobante'] = ''
+            lista.append(dict)
         lista.sort(key=lambda date: datetime.strptime(date['Fecha'], "%d/%m/%Y"))
         for item in lista:
             item['Nª de Ope'] = op
