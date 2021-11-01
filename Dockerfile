@@ -60,7 +60,7 @@ RUN pip3 install num2words xlwt xlrd openpyxl xlwt pytest-odoo pandas wheel
 ENV ODOO_VERSION 14.0
 #ARG ODOO_RELEASE=latest
 #ARG ODOO_SHA=aff621cdd7e1ee2e27769d26356954cc8d143be1
-ARG ODOO_RELEASE=20210415
+ARG ODOO_RELEASE=latest
 ARG ODOO_SHA=192b764692a2bb9d8ea74ca40c1457e031e98513
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     #&& echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
