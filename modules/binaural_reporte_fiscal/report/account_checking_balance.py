@@ -4,7 +4,8 @@ from odoo import models, fields, api, _
 from odoo.tools.misc import format_date, DEFAULT_SERVER_DATE_FORMAT
 from datetime import timedelta
 
-
+import logging
+_logger = logging.getLogger(__name__)
 class ReportAccountCheckingBalance(models.AbstractModel):
     _name = "account.checking.balance"
     _description = "Reporte balance de comprobacion"
@@ -85,6 +86,7 @@ class ReportAccountCheckingBalance(models.AbstractModel):
         for account, periods_results in accounts_results:
             # No comparison allowed in the General Ledger. Then, take only the first period.
             results = periods_results[0]
+            _logger.info("results********************* %s",results)
 
             is_unfolded = 'account_%s' % account.id in options['unfolded_lines']
 
@@ -108,11 +110,25 @@ class ReportAccountCheckingBalance(models.AbstractModel):
             total_credit += credit
             total_balance += balance
 
+            _logger.info("hara el if =======================================================")
+            _logger.info("has lines %s",has_lines)
+            _logger.info("unfold_all %s",unfold_all)
+            _logger.info("is_unfolded %s",is_unfolded)
+            #unfold_all = True
+
+            """account_init_bal = results.get('initial_balance', {})
+                _logger.info("account_init_bal %s",account_init_bal)
+
+                cumulated_balance = account_init_bal.get('balance', 0.0) + account_un_earn.get('balance', 0.0)"""
+
             if has_lines and (unfold_all or is_unfolded):
+                _logger.info("adentro del if de has_lines y unfold all o is unfolded")
                 # Initial balance line.
                 account_init_bal = results.get('initial_balance', {})
+                _logger.info("account_init_bal %s",account_init_bal)
 
                 cumulated_balance = account_init_bal.get('balance', 0.0) + account_un_earn.get('balance', 0.0)
+                _logger.info("cumulated_balance %s",cumulated_balance)
 
                 lines.append(self._get_initial_balance_line(
                     options, account,
@@ -694,6 +710,7 @@ class ReportAccountCheckingBalance(models.AbstractModel):
         if len(name) > max_length and not self._context.get('no_format'):
             name = name[:max_length] + '...'
         columns = [
+            #{'name': self.format_value(debit), 'class': 'number'},
             {'name': self.format_value(debit), 'class': 'number'},
             {'name': self.format_value(credit), 'class': 'number'},
             {'name': self.format_value(balance), 'class': 'number'},
@@ -710,12 +727,13 @@ class ReportAccountCheckingBalance(models.AbstractModel):
             'level': 2,
             'unfoldable': has_lines,
             'unfolded': has_lines and 'account_%d' % account.id in options.get('unfolded_lines') or unfold_all,
-            'colspan': 4,
+            'colspan': 5,
             'class': 'o_account_reports_totals_below_sections' if self.env.company.totals_below_sections else '',
         }
 
     @api.model
     def _get_initial_balance_line(self, options, account, amount_currency, debit, credit, balance):
+        _logger.info("EJECUTO: _get_initial_balance_line con balance %s",balance)
         columns = [
             {'name': self.format_value(debit), 'class': 'number'},
             {'name': self.format_value(credit), 'class': 'number'},
@@ -733,7 +751,7 @@ class ReportAccountCheckingBalance(models.AbstractModel):
             'name': _('Initial Balance'),
             'parent_id': 'account_%d' % account.id,
             'columns': columns,
-            'colspan': 4,
+            'colspan': 1,
         }
 
     @api.model
@@ -818,7 +836,7 @@ class ReportAccountCheckingBalance(models.AbstractModel):
             'parent_id': 'account_%s' % account.id,
             'name': _('Total %s', account["display_name"]),
             'columns': columns,
-            'colspan': 4,
+            'colspan': 5,
         }
 
     @api.model

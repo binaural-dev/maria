@@ -1,2 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_country_facturacion_country_facturacion,country_facturacion.country_facturacion,model_country_facturacion_country_facturacion,,1,0,0,0

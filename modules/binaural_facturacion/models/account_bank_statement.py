@@ -16,6 +16,9 @@ import logging
 _logger = logging.getLogger(__name__)
 class AccountBankStatementBinauralFacturacion(models.Model):
     _inherit = 'account.bank.statement'
+
+    check_rate = fields.Boolean(string='importes ajustados',default=False)
+    
     @api.onchange('journal_id')
     def onchange_journal_bin(self):
         _logger.info("DISPARO PADRE")
@@ -23,6 +26,22 @@ class AccountBankStatementBinauralFacturacion(models.Model):
         if self.journal_id.currency_id == self.journal_id.company_id.currency_id or not self.journal_id.currency_id:
             for st_line in self.line_ids:
                 st_line.update({'foreign_currency_id':False,'amount_currency':False,'foreign_currency_rate':False})
+
+    def check_rates(self):
+        _logger.info("check rates")
+        for i in self:
+            for st_line in self.line_ids:
+                st_line.onchange_rate_amount()
+            i.write({'check_rate':True})
+
+    def button_post(self):
+        _logger.info("check")
+
+        if self.journal_id and self.journal_id.currency_id and self.journal_id.currency_id != self.journal_id.company_id.currency_id and not self.check_rate:
+            #si tiene diario y es diferente al de la company
+            raise ValidationError("Debes ajustar importe por tasas antes de publicar")
+        else:
+            return super(AccountBankStatementBinauralFacturacion, self).button_post()
 
 
 
