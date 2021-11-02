@@ -1,5 +1,5 @@
 {
-    'name': "Binaural_Eventos",
+    'name': "country_eventos",
 
     'summary': """
        Binaural eventos invitaciones""",
