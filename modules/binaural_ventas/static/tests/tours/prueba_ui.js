@@ -13,7 +13,7 @@ odoo.define("binaural_ventas.tour", function (require) {
     tour.stepUtils.showAppsMenuItem(),
     {
       content: "select module",
-      trigger: "#result_app_1",
+      trigger: ".sale.sale_menu_root",
     },
     //Seleccionar submenu Orders
     {

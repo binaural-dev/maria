@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+     <template id="assets_tests" name="Binaural Ventas Assets Tests" inherit_id="web.assets_tests">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/binaural_facturacion/static/tests/tours/prueba_facturacion.js"></script>
+        </xpath>
+    </template>
+</odoo>
+
