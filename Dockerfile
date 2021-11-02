@@ -30,6 +30,8 @@ RUN apt-get update && \
     python3-watchdog \
     python3-xlrd \
     python3-xlwt \
+    python3-dev \
+    python3-pandas \
     xz-utils \
     && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.buster_amd64.deb \
     && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
@@ -79,9 +81,9 @@ RUN pip3 install num2words xlwt xlrd openpyxl xlwt pytest-odoo wheel websocket-c
 
 # Install Odoo
 ENV ODOO_VERSION 14.0
-#ARG ODOO_RELEASE=20210407
+#ARG ODOO_RELEASE=latest
 #ARG ODOO_SHA=aff621cdd7e1ee2e27769d26356954cc8d143be1
-ARG ODOO_RELEASE=20210415
+ARG ODOO_RELEASE=latest
 ARG ODOO_SHA=192b764692a2bb9d8ea74ca40c1457e031e98513
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     #&& echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \

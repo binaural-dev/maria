@@ -1,0 +1,46 @@
+<odoo>
+  <data>
+      <record id="wizard_reprint_reports_fiscal_machine_form_wizard2" model="ir.ui.view">
+        <field name="name">wizard.reprint.reports.fiscal.machine.form</field>
+        <field name="model">wizard.reprint.reports.fiscal.machine</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Reimpresión de reportes">
+                <sheet string="Reimpresión de reportes">
+                    <group>
+                        <group>
+                            <field name="type_report" />
+                            <field name="number" />
+                        </group>
+                        <group>
+
+                        </group>
+                    </group>
+
+                </sheet>
+                <footer>
+                    <button name="reprint_report" string="Reimprimir" type="object" class="oe_highlight" />
+                    <button string="Cancelar" class="btn-default" special="cancel" />
+                    <button name="print_x_report" string="Reporte X" type="object" class="oe_highlight" />
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="binaural_mf_backend.action_reprint_reports_fiscal_machine" model="ir.actions.act_window" >
+            <field name="name">Reimpresión de reportes</field>
+            <field name="res_model">wizard.reprint.reports.fiscal.machine</field>
+            <field name="type">ir.actions.act_window</field>
+            
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+    </record>
+
+    <menuitem name="Operaciones Fiscales" 
+              id="binaural_mf_backend.fiscal_operations"
+              parent="account.menu_finance"/>
+
+    <menuitem name="Reimpresión de reportes" action="binaural_mf_backend.action_reprint_reports_fiscal_machine"
+              id="id_reprint_reports_fiscal_machine"
+              parent="binaural_mf_backend.fiscal_operations"/>
+  </data>
+</odoo>

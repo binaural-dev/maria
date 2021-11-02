@@ -27,7 +27,7 @@
         'security/ir.model.access.csv',
         'data/config_sequence.xml',
         'data/formato_papel.xml',
-        'views/assets.xml',
+        'views/igtf_config.xml',
         'views/res_config.xml',
         'views/config_views.xml',
         'views/account_move_form_inh.xml',
@@ -37,10 +37,13 @@
         'views/account_retention_islr.xml',
         'views/account_payment.xml',
         'views/account_journal.xml',
+        'views/account_bank_statement.xml',
         'wizard/account_payment_register.xml',
         'report/invoice_free_form_bs.xml',
         'report/invoice_free_form.xml',
         'report/report_invoice_document_override.xml',
+        'views/assets.xml',
+        
     ],
     # only loaded in demonstration mode
     'demo': [

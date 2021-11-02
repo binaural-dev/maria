@@ -23,25 +23,108 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
     @api.onchange('foreign_currency_id', 'foreign_currency_date')
     def _compute_foreign_currency_rate(self):
         for record in self:
-            rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '<=')
+            if record.foreign_currency_rate == 0:
+                rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '<=')
 
-            if rate:
-                record.update({
-                    'foreign_currency_rate': rate.rate,
-                })
-            else:
-                rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '>=')
                 if rate:
                     record.update({
                         'foreign_currency_rate': rate.rate,
                     })
                 else:
-                    record.update({
-                        'foreign_currency_rate': 0.00,
-                    })
+                    rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '>=')
+                    if rate:
+                        record.update({
+                            'foreign_currency_rate': rate.rate,
+                        })
+                    else:
+                        record.update({
+                            'foreign_currency_rate': 0.00,
+                        })
 
     def _get_rate(self, foreign_currency_id, foreign_currency_date, operator):
         rate = self.env['res.currency.rate'].search([('currency_id', '=', foreign_currency_id),
                                                      ('name', operator, foreign_currency_date)], limit=1,
                                                     order='name desc')
         return rate
+
+
+    def _create_payment_vals_from_wizard(self):
+        payment_vals = {
+            'date': self.payment_date,
+            'amount': self.amount,
+            'payment_type': self.payment_type,
+            'partner_type': self.partner_type,
+            'ref': self.communication,
+            'journal_id': self.journal_id.id,
+            'currency_id': self.currency_id.id,
+            'partner_id': self.partner_id.id,
+            'partner_bank_id': self.partner_bank_id.id,
+            'payment_method_id': self.payment_method_id.id,
+            'destination_account_id': self.line_ids[0].account_id.id,
+            'foreign_currency_rate':self.foreign_currency_rate,
+        }
+
+        if not self.currency_id.is_zero(self.payment_difference) and self.payment_difference_handling == 'reconcile':
+            payment_vals['write_off_line_vals'] = {
+                'name': self.writeoff_label,
+                'amount': self.payment_difference,
+                'account_id': self.writeoff_account_id.id,
+            }
+        return payment_vals
+
+    @api.model
+    def _get_line_batch_key(self, line):
+        ''' Turn the line passed as parameter to a dictionary defining on which way the lines
+        will be grouped together.
+        :return: A python dictionary.
+        '''
+        return {
+            'partner_id': line.partner_id.id,
+            'account_id': line.account_id.id,
+            'foreign_currency_rate':line.foreign_currency_rate,
+            'currency_id': (line.currency_id or line.company_currency_id).id,
+            'partner_bank_id': line.move_id.partner_bank_id.id,
+            'partner_type': 'customer' if line.account_internal_type == 'receivable' else 'supplier',
+            'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
+        }
+
+    @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id',
+                 'payment_date')
+    def _compute_amount(self):
+        for wizard in self:
+            if wizard.source_currency_id == wizard.currency_id:
+                # Same currency.
+                wizard.amount = wizard.source_amount_currency
+            elif wizard.currency_id == wizard.company_id.currency_id:
+                # Payment expressed on the company's currency.
+                wizard.amount = wizard.source_amount
+            else:
+                # Foreign currency on payment different than the one set on the journal entries.
+                if wizard.currency_id.id == wizard.env.ref('base.VEF').id:
+                    amount_payment_currency = wizard.source_amount * wizard.foreign_currency_rate
+                else:
+                    amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount,
+                                                                                     wizard.currency_id,
+                                                                                     wizard.company_id,
+                                                                                     wizard.payment_date)
+                wizard.amount = amount_payment_currency
+
+    @api.depends('amount')
+    def _compute_payment_difference(self):
+        for wizard in self:
+            if wizard.source_currency_id == wizard.currency_id:
+                # Same currency.
+                wizard.payment_difference = wizard.source_amount_currency - wizard.amount
+            elif wizard.currency_id == wizard.company_id.currency_id:
+                # Payment expressed on the company's currency.
+                wizard.payment_difference = wizard.source_amount - wizard.amount
+            else:
+                if wizard.currency_id.id == wizard.env.ref('base.VEF').id:
+                    amount_payment_currency = wizard.source_amount * wizard.foreign_currency_rate
+                else:
+
+                    # Foreign currency on payment different than the one set on the journal entries.
+                    amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount,
+                                                                                     wizard.currency_id, wizard.company_id,
+                                                                                     wizard.payment_date)
+                wizard.payment_difference = amount_payment_currency - wizard.amount

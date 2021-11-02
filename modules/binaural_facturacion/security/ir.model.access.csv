@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_binaural_account_retention,binaural_account_retention,model_account_retention,base.group_user,1,1,1,1
 access_binaural_account_retention_line,binaural_account_retention_line,model_account_retention_line,base.group_user,1,1,1,1
+access_bin_payment_igtf_bin_payment_igtf,bin_payment_igtf.bin_payment_igtf,model_account_igtf_config,,1,1,1,0
