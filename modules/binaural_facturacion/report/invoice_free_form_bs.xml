@@ -362,7 +362,7 @@
                                                             <td>
                                                                 <span t-esc="amount_by_group[0]"/>
                                                                 <span class="text-nowrap">
-                                                                    <t t-esc="amount_by_group[4]"/>
+                                                                   sobre (<t t-esc="amount_by_group[4]"/>)
                                                                 </span>
                                                             </td>
                                                             <td class="text-right o_price_total">
