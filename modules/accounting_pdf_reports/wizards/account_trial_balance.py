@@ -10,7 +10,10 @@ class AccountBalanceReport(models.TransientModel):
 
     journal_ids = fields.Many2many('account.journal', 'account_balance_report_journal_rel', 'account_id', 'journal_id', string='Journals', required=True, default=[])
 
+    another_currency = fields.Boolean(string='Moneda Alterna')
+
     def _print_report(self, data):
         data = self.pre_print_report(data)
+        data['form'].update(self.read(['another_currency'])[0])
         records = self.env[data['model']].browse(data.get('ids', []))
         return self.env.ref('accounting_pdf_reports.action_report_trial_balance').report_action(records, data=data)

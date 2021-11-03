@@ -42,60 +42,120 @@
                                 <th class="text-right">Balance</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr t-foreach="Accounts" t-as="account">
-                                <t t-if="account['bold']">
-                                    <td style="font-weight: bold;">
-                                        <span t-att-style="style" t-esc="account['code']"/>
-                                    </td>
-                                    <td style="font-weight: bold; font-size: 12">
-                                        <span style="color: white;" t-esc="'..'"/>
-                                        <span t-att-style="style" t-esc="account['name']"/>
-                                    </td>
-                                    <td style="font-weight: bold; font-size: 12" class="text-right">
-                                         <span t-att-style="style" t-esc="account['init_balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                    <td style="font-weight: bold; font-size: 12" class="text-right">
-                                         <span t-att-style="style" t-esc="account['debit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                    <td style="font-weight: bold; font-size: 12" class="text-right">
-                                        <span t-att-style="style" t-esc="account['credit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                    <td style="font-weight: bold; font-size: 12" class="text-right">
-                                        <span t-att-style="style" t-esc="account['balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                </t>
-                                <t t-else="">
-                                    <td>
-                                        <span t-att-style="style" t-esc="account['code']"/>
-                                    </td>
-                                    <td>
-                                        <span style="color: white;" t-esc="'..'"/>
-                                        <span t-att-style="style" t-esc="account['name']"/>
-                                    </td>
-                                    <td class="text-right">
-                                         <span t-att-style="style" t-esc="account['init_balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                    <td class="text-right">
-                                         <span t-att-style="style" t-esc="account['debit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-att-style="style" t-esc="account['credit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-att-style="style" t-esc="account['balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
-                                    </td>
-                                </t>
-                            </tr>
-                            <tr>
-                                <td/>
-                                <td/>
-                                <td>--</td>
-                                <td><span t-esc="debit_total" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
-                                <td><span t-esc="credit_total" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
-                                <td><span t-esc="debit_total - credit_total" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
-                            </tr>
-                        </tbody>
+                        <t t-if="another_currency">
+                            <tbody>
+                                <tr t-foreach="Accounts" t-as="account">
+                                    <t t-if="account['bold']">
+                                        <td style="font-weight: bold;">
+                                            <span t-att-style="style" t-esc="account['code']"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12">
+                                            <span style="color: white;" t-esc="'..'"/>
+                                            <span t-att-style="style" t-esc="account['name']"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['init_balance']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['debit']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['credit']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['balance']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                    </t>
+                                    <t t-else="">
+                                        <td>
+                                            <span t-att-style="style" t-esc="account['code']"/>
+                                        </td>
+                                        <td>
+                                            <span style="color: white;" t-esc="'..'"/>
+                                            <span t-att-style="style" t-esc="account['name']"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['init_balance']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['debit']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['credit']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['balance']" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr>
+                                    <td/>
+                                    <td/>
+                                    <td>--</td>
+                                    <td><span t-esc="debit_total" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/></td>
+                                    <td><span t-esc="credit_total" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/></td>
+                                    <td><span t-esc="debit_total - credit_total" t-options="{'widget': 'monetary', 'display_currency': foreign_currency_id}"/></td>
+                                </tr>
+                            </tbody>
+
+                        </t>
+                        <t t-else="not another_currency">
+                            <tbody>
+                                <tr t-foreach="Accounts" t-as="account">
+                                    <t t-if="account['bold']">
+                                        <td style="font-weight: bold;">
+                                            <span t-att-style="style" t-esc="account['code']"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12">
+                                            <span style="color: white;" t-esc="'..'"/>
+                                            <span t-att-style="style" t-esc="account['name']"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['init_balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['debit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['credit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                        <td style="font-weight: bold; font-size: 12" class="text-right">
+                                            <span t-att-style="style" t-esc="account['balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                    </t>
+                                    <t t-else="">
+                                        <td>
+                                            <span t-att-style="style" t-esc="account['code']"/>
+                                        </td>
+                                        <td>
+                                            <span style="color: white;" t-esc="'..'"/>
+                                            <span t-att-style="style" t-esc="account['name']"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['init_balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['debit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['credit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-att-style="style" t-esc="account['balance']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr>
+                                    <td/>
+                                    <td/>
+                                    <td>--</td>
+                                    <td><span t-esc="debit_total" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
+                                    <td><span t-esc="credit_total" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
+                                    <td><span t-esc="debit_total - credit_total" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
+                                </tr>
+                            </tbody>
+
+                        </t>
                     </table>
                 </div>
             </t>
