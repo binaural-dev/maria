@@ -41,21 +41,24 @@ odoo.define("binaural_ventas.tour", function (require) {
       content: "Validar contacto",
       trigger: '.ui-menu-item a:contains("Daniela")',
     },
-    //Seleccionar un contacto (cliente o proveedor)
-    {
-      content: "Click en input ",
-      trigger: 'select.o_input.o_field_widget[name="filter_partner"]',
-    },
-    {
-      content: "Selecciono tipo",
-      trigger: '.o_input.o_field_widget option[value="customer"]',
-    },
-    //Buscar al customer Daniela Gomez
-
-    // // Validar que el cliente exite
+    // //Seleccionar un contacto (cliente o proveedor)
     // {
-    //   content: "Valid customer",
-    //   trigger: '.ui-menu-item-wrapper:contains("Daniela Gomez")',
+    //   content: "Click en input ",
+    //   trigger: 'select.o_input.o_field_widget[name="filter_partner"]',
     // },
+    {
+      content: "Añadir linea a factura",
+      trigger:
+        "div[name=invoice_line_ids] .o_field_x2many_list_row_add a:not([data-context])",
+    },
+    {
+      content: "Seleccionar un producto",
+      trigger: "div[name=invoice_line_ids] div[name=product_id] div input",
+      run: "text Escritorio grande",
+    },
+    {
+      content: "Presionar boton guardar",
+      trigger: ".o_form_button_save ",
+    },
   ]);
 });
