@@ -70,10 +70,10 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="menu_aged_payable"
+    <!--<menuitem id="menu_aged_payable"
         name="Aged Payable PDF"
         sequence="30"
         action="action_account_aged_payable"
-        parent="menu_finance_partner_reports"/>
+        parent="menu_finance_partner_reports"/>-->
 
 </odoo>

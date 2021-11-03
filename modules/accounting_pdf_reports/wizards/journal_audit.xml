@@ -25,13 +25,13 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem
+    <!--<menuitem
         id="menu_print_journal"
         name="Journals Audit PDF"
         sequence="40"
         parent="menu_finance_audit_reports"
         action="action_account_print_journal_menu"
         groups="account.group_account_manager,account.group_account_user"
-       />
+       />-->
 
 </odoo>

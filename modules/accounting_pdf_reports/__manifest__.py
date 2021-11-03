@@ -14,7 +14,7 @@
     'maintainer': 'Odoo Mates',
     'support': 'odoomates@gmail.com',
     'website': 'https://www.odoomates.tech',
-    'depends': ['account'],
+    'depends': ['account','binaural_facturacion'],
     'live_test_url': 'https://www.youtube.com/watch?v=Qu6R3yNKR60',
     'demo': [],
     'data': [
