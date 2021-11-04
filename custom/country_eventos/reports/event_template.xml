@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 	<!-- script -->
-	<template id="website_event.event_script" inherit_id="website.assets_frontend" name="Country Events Snippet Script">
+	<template id="country_eventos.event_script" inherit_id="website.assets_frontend" name="Country Events Snippet Script">
 		<xpath expr="/t" position="inside">
 			<script type="text/javascript" src="/website_event/static/src/js/website_geolocation.js"></script>
 			<script type="text/javascript" src="/country_eventos/static/src/js/event.js"></script>
