@@ -192,12 +192,18 @@ class account_payment_inh(models.Model):
             lambda line: line.account_id.user_type_id.type in ('receivable', 'payable') and not line.reconciled):
             cta = c.account_id.id
         if payment.is_advance:
+            line_payment_advance = payment.move_id.line_ids.filtered(lambda line: line.account_id == payment.destination_account_id)
+            min_amount = 0
+            if -line_payment_advance[0].amount_residual < self.amount_residual:
+                min_amount = -line_payment_advance[0].amount_residual
+            else:
+                min_amount = self.amount_residual
             if payment.currency_id and payment.currency_id == self.currency_id:
-                amount = abs(payment.amount_residual)
+                amount = abs(min_amount)
                 amount = self.currency_id.round(amount)
             else:
                 currency = payment.company_id.currency_id
-                amount = currency._convert(abs(payment.amount_residual), self.currency_id,
+                amount = currency._convert(abs(min_amount), self.currency_id,
                                            self.company_id, payment.date or fields.Date.today())
                 amount = currency.round(amount)
             if self.move_type in ['out_invoice', 'in_refund']:
@@ -270,3 +276,39 @@ class AccountMoveLineBinAdvance(models.Model):
     _inherit = "account.move.line"
 
     payment_id_advance = fields.Many2one('account.payment', string='Pago de anticipo asociado')
+
+    def _compute_amount_residual(self):
+        """ Computes the residual amount of a move line from a reconcilable account in the company currency and the line's currency.
+            This amount will be 0 for fully reconciled lines or lines from a non-reconcilable account, the original line amount
+            for unreconciled lines, and something in-between for partially reconciled lines.
+        """
+        for line in self:
+            if line.id and (line.account_id.reconcile or line.account_id.internal_type == 'liquidity'):
+                _logger.info('COMPUTE AMOUNT RESIDUAL')
+                reconciled_balance = sum(line.matched_credit_ids.mapped('amount')) \
+                                     - sum(line.matched_debit_ids.mapped('amount'))
+                _logger.info('RECONCILED BALANCE')
+                _logger.info(reconciled_balance)
+                reconciled_amount_currency = sum(line.matched_credit_ids.mapped('debit_amount_currency')) \
+                                             - sum(line.matched_debit_ids.mapped('credit_amount_currency'))
+                _logger.info('RECONCILED AMOUNT CURRENCY')
+                _logger.info(reconciled_amount_currency)
+                line.amount_residual = line.balance - reconciled_balance
+                _logger.info('LINE AMOUNT RESIDUAL')
+                _logger.info(line.amount_residual)
+                if line.currency_id:
+                    line.amount_residual_currency = line.amount_currency - reconciled_amount_currency
+                else:
+                    line.amount_residual_currency = 0.0
+                _logger.info('LINE AMOUNT RESIDUAL CURRENCY')
+                _logger.info(line.amount_residual_currency)
+                line.reconciled = line.company_currency_id.is_zero(line.amount_residual) \
+                                  and (not line.currency_id or line.currency_id.is_zero(line.amount_residual_currency))
+                _logger.info('LINE RECONCILED')
+                _logger.info(line.reconciled)
+            else:
+                _logger.info('ELSE COMPUTE AMOUNT RESIDUAL')
+                # Must not have any reconciliation since the line is not eligible for that.
+                line.amount_residual = 0.0
+                line.amount_residual_currency = 0.0
+                line.reconciled = False
