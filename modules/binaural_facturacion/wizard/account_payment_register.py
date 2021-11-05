@@ -20,7 +20,7 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
     foreign_currency_rate = fields.Monetary(string="Tasa", tracking=True, currency_field='foreign_currency_id')
     foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
-    @api.onchange('foreign_currency_id', 'foreign_currency_date')
+    @api.onchange('foreign_currency_id', 'foreign_currency_date','foreign_currency_rate')
     def _compute_foreign_currency_rate(self):
         for record in self:
             if record.foreign_currency_rate == 0:
@@ -89,7 +89,7 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
         }
 
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id',
-                 'payment_date')
+                 'payment_date','foreign_currency_rate')
     def _compute_amount(self):
         for wizard in self:
             if wizard.source_currency_id == wizard.currency_id:
