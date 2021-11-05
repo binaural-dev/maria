@@ -7,8 +7,11 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
                 <field name="partner_id" position="after">
-                    <field name="action_number" force_save="1"/>
+                    <field name="action_number" force_save="1" invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund','out_receipt')"/>
                 </field>
+				<xpath expr="//notebook/page/field[@name='line_ids']/tree//field[@name='partner_id']" position="before">
+	                <field name="action_number"/>
+                </xpath>
             </field>
         </record>
 
@@ -18,7 +21,7 @@
             <field name="inherit_id" ref="account.view_invoice_tree"/>
             <field name="arch" type="xml">
                 <field name="partner_id" position="after">
-                    <field name="action_number"/>
+	                <field name="action_number" invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund','out_receipt')"/>
                 </field>
             </field>
         </record>
