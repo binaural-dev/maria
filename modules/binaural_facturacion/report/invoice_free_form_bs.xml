@@ -192,7 +192,7 @@
 
 
                                         </tr>
-                                        <tr>
+                                        <!--<tr>
                                             <td colspan="2">
                                                 Vendedor:
                                                 <t t-set="seller_name" t-value="invoice.invoice_user_id.name[0:17]"/>
@@ -202,10 +202,7 @@
                                             </td>
                                             <td colspan="5">
                                             </td>
-                                            <!--<td colspan="3" style="text-align:right">Nro Salida:
-                                                t-if="len(invoice.picking_ids) > 0"<span t-field="invoice.picking_ids[0].name"/>
-                                            </td>-->
-                                        </tr>
+                                        </tr>-->
                                     </table>
                                 </section>
                                 <!--<br/>-->
@@ -277,7 +274,7 @@
                                                             <t t-set="product_name" t-value=""/>
                                                         </t>
                                                         <td style="width:420px;text-align:left;"><!--border: 1px solid black;-->
-                                                            <span t-esc="product_name"/>
+                                                            <span t-esc="line.name"/>
 
                                                         </td>
                                                     </t>
@@ -353,6 +350,9 @@
                                                         <t t-if="len(o.line_ids.filtered(lambda line: line.tax_line_id)) in [0, 1] and o.foreign_amount_untaxed == amount_by_group[2]">
                                                             <td>
                                                                 <span class="text-nowrap" t-esc="amount_by_group[0]"/>
+                                                                <span class="text-nowrap">
+                                                                   sobre (<t t-esc="amount_by_group[4]"/>)
+                                                                </span>
                                                             </td>
                                                             <td class="text-right o_price_total">
                                                                 <span class="text-nowrap" t-esc="amount_by_group[3]"/>
@@ -362,7 +362,7 @@
                                                             <td>
                                                                 <span t-esc="amount_by_group[0]"/>
                                                                 <span class="text-nowrap">
-                                                                    <t t-esc="amount_by_group[4]"/>
+                                                                   sobre (<t t-esc="amount_by_group[4]"/>)
                                                                 </span>
                                                             </td>
                                                             <td class="text-right o_price_total">

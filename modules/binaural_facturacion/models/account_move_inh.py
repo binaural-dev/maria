@@ -70,11 +70,13 @@ class AccountMoveBinauralFacturacion(models.Model):
         Compute the foreign total amounts of the SO.
         """
         for order in self:
+            #se cambio de sumar en $ y luego multiplicar a sumar el subtotal en bs directamente
             foreign_amount_untaxed = foreign_amount_tax = 0.0
             for line in order.invoice_line_ids:
-                foreign_amount_untaxed += line.price_subtotal
+                #foreign_amount_untaxed += line.price_subtotal
+                foreign_amount_untaxed +=line.foreign_subtotal
             foreign_amount_tax += order.amount_tax
-            foreign_amount_untaxed *= order.foreign_currency_rate
+            #foreign_amount_untaxed *= order.foreign_currency_rate
             foreign_amount_tax *= order.foreign_currency_rate
             order.update({
                 'foreign_amount_untaxed': foreign_amount_untaxed,
@@ -692,6 +694,7 @@ class AcoountMoveLineBinauralFact(models.Model):
         """
         Compute the foreign total amounts of the SO.
         """
+        #duda el precio subtotal no deberia ser mejor precio unitario en bs por la cantidad? o se deja asi el subtotal en bs por la tasa
         for order in self:
             order.update({
                 'foreign_price_unit': order.price_unit * order.move_id.foreign_currency_rate,
