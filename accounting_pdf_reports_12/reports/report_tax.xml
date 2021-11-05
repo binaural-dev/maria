@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_tax">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <!--<h3> Informe de Impuestos</h3>-->
+                    <div class="row">
+                        <div class="col-12" style="text-align:center">
+
+                            <div class="">
+                                <strong> <p t-esc="res_company.name"/></strong>
+                                 <strong> <p t-esc="res_company.vat"/></strong>
+                            </div>
+                            <t t-if="data['date_from']"><strong>Periodo:</strong> <span t-esc="datetime.datetime.strptime(data['date_from'], '%Y-%m-%d').strftime('%d/%m/%Y')"/></t>
+                            <t t-if="data['date_to']"><strong>Hasta:</strong> <span t-esc="datetime.datetime.strptime(data['date_to'], '%Y-%m-%d').strftime('%d/%m/%Y')"/></t>
+                      
+                        </div>
+                    </div>
+                    <table class="table table-sm table-reports table-bordered" style="font-size:10px">
+                        <thead>
+                            <tr class="text-center">
+                                <th style="text-align:left;text-transform:uppercase">Resumen del periodo de ventas y debitos fiscales</th>
+                                <th>Base Imponible</th>
+                                <th>Debito Fiscal</th>
+                            </tr>
+                        </thead>
+                        <tr t-foreach="lines['sale']" t-as="line">
+                            <td><span t-esc="line.get('name')"/></td>
+                            <td style="text-align:right"><span t-att-style="style" t-esc="line.get('net')" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
+                            <td style="text-align:right"><span t-att-style="style" t-esc="line.get('tax')" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
+                        </tr>
+                            
+                            <tr class="text-center">
+                                <th style="text-align:left;text-transform:uppercase">Resumen del periodo de Compras y creditos fiscales</th>
+                                <th>Base Imponible</th>
+                                <th>Credito Fiscal</th>
+                            </tr>
+                    
+                        <tr t-foreach="lines['purchase']" t-as="line">
+                            <td><span t-esc="line.get('name')"/></td>
+                            <td style="text-align:right"><span t-att-style="style" t-esc="line.get('net')" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
+                            <td style="text-align:right"><span t-att-style="style" t-esc="line.get('tax')" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
