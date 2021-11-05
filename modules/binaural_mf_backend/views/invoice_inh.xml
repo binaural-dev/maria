@@ -40,7 +40,7 @@
                         <attribute name="domain"/>
                     </xpath>
                     <xpath expr="//div[@name='journal_div']" position="after">
-                        <field name="serial_machine" attrs="{'invisible': [('serial_machine', '=', False)]}" readonly="1" force_save="1" />
+                        <field name="serial_machine"  force_save="1" /><!--attrs="{'invisible': [('serial_machine', '=', False)]}" readonly="1"-->
                     </xpath>
 
                     <xpath expr="//div[@name='journal_div']" position="after">
@@ -48,7 +48,7 @@
                     </xpath>
 
                     <xpath expr="//div[@name='journal_div']" position="after">
-                        <field name="machine_invoice_number"  attrs="{'invisible': [('serial_machine', '=', False)]}" readonly="1" force_save="1"/>
+                        <field name="machine_invoice_number"   force_save="1"/><!--attrs="{'invisible': [('serial_machine', '=', False)]}" readonly="1"-->
                     </xpath>
 
                     <xpath expr="//page[@name='other_info']" position="inside">
