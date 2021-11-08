@@ -31,7 +31,7 @@ class WizardStatusBatch(models.TransientModel):
 		('inactive', 'Inactivo'),
 	], 'Nuevo Estado', required=True)
 
-	partners_ids = fields.Many2many('res.partner', string='Socios',required=True,domain=[('customer','=',True)])
+	partners_ids = fields.Many2many('res.partner', string='Socios',required=True,domain=[('customer_rank','>',0)])
 
 	def change_status(self):
 		if not self.status:
