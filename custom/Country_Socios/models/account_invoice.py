@@ -55,4 +55,4 @@ class AccountMoveAction(models.Model):
 class AccountMoveLineAction(models.Model):
     _inherit = 'account.move.line'
 
-    action_number = fields.Char(related='move_id.partner_id.action_number.number', string='Número de Acción')
+    action_number = fields.Char(related='partner_id.action_number.number', string='Número de Acción')
