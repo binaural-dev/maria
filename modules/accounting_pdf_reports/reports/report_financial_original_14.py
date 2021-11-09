@@ -3,11 +3,11 @@
 import time
 from odoo import api, models, _
 from odoo.exceptions import UserError
-import re
 
 
 class ReportFinancial(models.AbstractModel):
     _name = 'report.accounting_pdf_reports.report_financial'
+    _description = 'Financial Reports'
 
     def _compute_account_balance(self, accounts):
         """ compute the balance, debit and credit for the provided accounts
@@ -84,7 +84,6 @@ class ReportFinancial(models.AbstractModel):
         account_report = self.env['account.financial.report'].search([('id', '=', data['account_report_id'][0])])
         child_reports = account_report._get_children_by_order()
         res = self.with_context(data.get('used_context'))._compute_report_balance(child_reports)
-        account_len = int(self.env['ir.config_parameter'].sudo().get_param('longitude_account', default=8))
         if data['enable_filter']:
             comparison_res = self.with_context(data.get('comparison_context'))._compute_report_balance(child_reports)
             for report_id, value in comparison_res.items():
@@ -93,15 +92,9 @@ class ReportFinancial(models.AbstractModel):
                 if report_acc:
                     for account_id, val in comparison_res[report_id].get('account').items():
                         report_acc[account_id]['comp_bal'] = val['balance']
-
         for report in child_reports:
-            n = report.name
-            if n == 'Estado de Resultado':
-                n = 'Total Ganancias y Perdidas'
-            print("report.name",n)
             vals = {
-                #'name': report.name,
-                'name': n,
+                'name': report.name,
                 'balance': res[report.id]['balance'] * float(report.sign),
                 'type': 'report',
                 'level': bool(report.style_overwrite) and report.style_overwrite or report.level,
@@ -113,11 +106,11 @@ class ReportFinancial(models.AbstractModel):
 
             if data['enable_filter']:
                 vals['balance_cmp'] = res[report.id]['comp_bal'] * float(report.sign)
+
             lines.append(vals)
             if report.display_detail == 'no_detail':
                 #the rest of the loop is used to display the details of the financial report, so it's not needed here.
                 continue
-
             if res[report.id].get('account'):
                 sub_lines = []
                 for account_id, value in res[report.id]['account'].items():
@@ -126,23 +119,11 @@ class ReportFinancial(models.AbstractModel):
                     #financial reports for Assets, liabilities...)
                     flag = False
                     account = self.env['account.account'].browse(account_id)
-                    nro_lvl = len(account.code) if len(account.code) > 3 else 3
-                    for detail_account in self.env['account.account'].search([('code', 'ilike', account.code)]):
-                        if len(detail_account.code) == account_len:
-                            if detail_account.id in res[report.id]['account'].keys():
-                                if res[report.id]['account'][detail_account.id]['balance'] != 0:
-                                    regex = re.search('^' + account.code, detail_account.code)
-                                    if regex:
-                                        flag = True
-                                        if len(account.code) != account_len:
-                                            value['balance'] += res[report.id]['account'][detail_account.id]['balance'] * float(report.sign)
-
-                    account = self.env['account.account'].browse(account_id)
                     vals = {
                         'name': account.code + ' ' + account.name,
                         'balance': value['balance'] * float(report.sign) or 0.0,
                         'type': 'account',
-                        'level': report.display_detail == 'detail_with_hierarchy' and nro_lvl,
+                        'level': report.display_detail == 'detail_with_hierarchy' and 4,
                         'account_type': account.internal_type,
                     }
                     if data['debit_credit']:
