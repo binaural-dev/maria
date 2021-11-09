@@ -78,10 +78,12 @@ class AccountMoveBinauralFacturacion(models.Model):
             foreign_amount_tax += order.amount_tax
             #foreign_amount_untaxed *= order.foreign_currency_rate
             foreign_amount_tax *= order.foreign_currency_rate
+            foreign_amount_residual = order.amount_residual * order.foreign_currency_rate
             order.update({
                 'foreign_amount_untaxed': foreign_amount_untaxed,
                 'foreign_amount_tax': foreign_amount_tax,
                 'foreign_amount_total': foreign_amount_untaxed + foreign_amount_tax,
+                'foreign_amount_residual': foreign_amount_residual,
             })
 
     @api.model_create_multi
@@ -159,7 +161,9 @@ class AccountMoveBinauralFacturacion(models.Model):
                                             compute='_compute_invoice_taxes_by_group')
     foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo",
                                                  compute='_compute_invoice_taxes_by_group')
-    
+
+    foreign_amount_residual = fields.Binary(string="Importe adeudado alterno",
+                                                 compute='_amount_all_foreign')
     retention_iva_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'iva')])
     generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False, copy=False)
 
