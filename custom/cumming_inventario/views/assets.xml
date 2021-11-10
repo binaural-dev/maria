@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-
-        <template id="assets_backend_cumming_inventario" name="cumming_inventario assets" inherit_id="web.assets_backend">
-             <xpath expr="." position="inside">
-                 <link rel="stylesheet" href="/cumming_inventario/static/src/css/cumming_inventario.scss"/>
-             </xpath>
-         </template>
-</odoo>

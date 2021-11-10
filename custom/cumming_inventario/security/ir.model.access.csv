@@ -1,4 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_cumming_inventario,cumming_inventario.cumming_inventario,model_product_pattern,,1,1,1,1
-access_cumming_inventario_price,cumming_inventario.cumming_inventario_price,model_price_by_pricelist,,1,1,1,1
-access_cumming_price_lot,cumming_inventario.cumming_inventario_price_lot,model_update_price_lot,,1,1,1,1
