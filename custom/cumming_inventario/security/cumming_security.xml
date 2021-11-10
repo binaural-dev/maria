@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+    <record id="group_show_cost_on_product" model="res.groups">
+        <field name="name">Mostrar Costo de producto</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="comment">Mostrar Costo de producto</field>
+    </record>
+</data>
+</odoo>

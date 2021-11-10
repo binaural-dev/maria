@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+    <record id="group_force_picking" model="res.groups">
+        <field name="name">Permitir Generar Orden de inventario desde pedido de venta</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="comment">Permitir Generar Orden de inventario desde pedido de venta aunque este desactivada</field>
+    </record>
+</data>
+</odoo>

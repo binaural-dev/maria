@@ -1,0 +1,390 @@
+<odoo>
+    <data>
+
+        <record id="product_template_only_form_view_cummi" model="ir.ui.view">
+            <field name="name">product.template.product.form.cumm_only</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="priority" eval="5"/>
+            <field name="arch" type="xml">
+                <!--codigo -->
+                <xpath expr="//field[@name='default_code']" position="attributes">
+                    <attribute name="required">1</attribute>
+                    <attribute name="string">Código</attribute>
+                    
+                    
+                </xpath>
+                
+
+                <xpath expr="//field[@name='barcode']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath> 
+                <!--<xpath expr="//field[@name='type']" position="before">
+                    <xpath expr="//field[@name='default_code'][1]" position="move">
+                    </xpath>
+                </xpath>--> 
+            </field>
+        </record>
+      
+
+        <!--form de product template-->
+        <record id="product_pattern_id" model="ir.ui.view">
+            <field name="name">Nombre de modelo</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="priority">100</field>
+            <field name="arch" type="xml">
+
+                <xpath expr="//form" position="attributes">
+                    <attribute name="class">cumming_product_form</attribute>
+                </xpath>
+                <xpath expr="//field[@name='categ_id']" position="attributes">
+                    <attribute name="string">Línea</attribute>
+                    <!--<attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>-->
+                </xpath>
+                <xpath expr="//field[@name='type']" position="attributes">
+                    <attribute name="string">Tipo concepto</attribute>
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                </xpath> 
+
+                <xpath expr="//field[@name='type']" position="before">
+                    <field name="default_code"></field>
+                </xpath> 
+
+                <field name="categ_id" position="after">
+                    <field name="alternative_code" string="Equivalencias"/>
+                    <field name="alternative_manual" string="Otras Equivalencias" />
+                    <field name="alternative_full" invisible="1"/>
+                    <field name="used_for" invisible="1"/>
+                    <field name="brand_id" string="Marca" required="1"/>
+                    <field name="pattern_id" string="Modelo" required="1" />
+                    
+                    <button groups="base.group_system" invisible="1" name="trigger_onchange_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Sync">
+                            
+                    </button>
+                    <field name="barcode" />
+                    
+                </field>
+           
+
+                
+
+                <!--<field name="standard_price" position="attributes">
+                    
+                    <attribute name="string">Costo CIF</attribute>
+                </field>-->
+                <xpath expr="//field[@name='standard_price']" position="attributes">
+                    <attribute name="string">Costo CIF</attribute>
+                    <attribute name="required">1</attribute>
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                </xpath> 
+                <label for="standard_price" position="replace">
+                    <label string="Costo CIF" for="standard_price"  />
+                </label>
+                
+                <field name="company_id" position="before">
+                    <field required="1" name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id'}"/>
+                    <field name="percent_dif_cost"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
+                    
+                </field>
+
+                
+
+                <field name="list_price" position="after" >
+                    
+                    <button  invisible="1" name="onchange_list_price_price_pricelist" type="object" class="oe_stat_button" icon="fa-" string="Recalcular Precios">
+                            
+                    </button>
+                    
+                </field>
+                <field name="taxes_id" position="attributes">
+                   
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                </field>
+
+                <field name="list_price" position="attributes">
+                    <attribute name="required">0</attribute>
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                    <attribute name="invisible">1</attribute>
+                </field>
+
+                <field name="company_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+               
+                
+                <field name="seller_ids" position="attributes">
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                </field>
+
+                <xpath expr="//div[hasclass('oe_title')]/label" position="before">
+                    <h1>
+                        <field name="default_code" readonly="1" force_save="1"/>
+                    </h1>
+                </xpath>
+            
+                <xpath expr="//div[@name='pricing']" position="after">
+                    
+                    <!--<field> name="list_price" position="after">-->
+                        <field name="price_b" string="PRECIO DETAL" force_save="1" readonly="1"/>
+                        <field name="price_a" string="PRECIO MAYOR" force_save="1" readonly="1"/>
+                        
+                        <field name="price_c" string="PRECIO C" force_save="1" readonly="1" invisible="1"/>
+                        <field name="price_d" string="PRECIO D" force_save="1" readonly="1" invisible="1"/>
+                        
+                        <field name="price_pricelist_names" style="white-space:break-spaces !important" invisible="1"/>
+                        <!--<field name="price_by_pricelist" widget="many2many_tags"/>-->
+                    <!--</field>-->
+                </xpath>
+                <xpath expr="//div[@name='pricing']" position="attributes">
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                </xpath>
+                <xpath expr="//label[@for='list_price']" position="attributes">
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                </xpath>
+                <xpath expr="//label[@for='standard_price']" position="attributes">
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                </xpath>
+                
+                <field name="company_id" position="before" >
+                    <field name="provider_names" style="white-space:break-spaces !important" groups="cumming_inventario.group_show_cost_on_product"/>
+                </field>
+              
+                
+                <notebook position="inside">
+                    <page string="Precios" invisible="1">
+                        <separator string="Precios" colspan="4" />
+                        <field name="price_by_pricelist" colspan="4" nolabel="1">
+                            <tree string="Precios">
+                                <field name="pricelist_name" />
+                                <field name="price" />
+                                
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+               
+               
+                
+            </field>
+        </record>
+
+        <!--tree de product template-->
+        <record id="view_stock_product_template_tree_cuming" model="ir.ui.view">
+            <field name="name">product.template.stock.tree.inherit.cumming</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="class">cumming_product_tree</attribute>
+                </xpath>
+                <field name="list_price" position="after">
+                    <field name="price_b" optional="show" string="Precio Detal"/>
+                    <field name="price_a" optional="show" string="Precio Mayor"/>
+                    
+                    <field name="price_c" optional="hide" invisible="1"/>
+                    <field name="price_d" optional="hide" invisible="1"/>
+                    <field name="price_by_pricelist" widget="many2many_tags" invisible="1"/>
+                    
+                </field>
+                 <field name="list_price" position="before">
+                    <field name="pattern_id" optional="hide"/>
+                    
+                </field>
+                <field name="responsible_id" position="before">
+                    <field name="seller_ids" widget="many2many_tags" optional="hide"/>
+                </field>
+
+                <field name="responsible_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                
+
+             
+
+                <field name="standard_price" position="attributes">
+                    <attribute name="groups">cumming_inventario.group_show_cost_on_product</attribute>
+                    <attribute name="string">Costo CIF</attribute>
+                </field>
+
+                <field name="standard_price" position="after">
+                    <field name="fob_cost" optional="hide" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
+                    <field name="percent_dif_cost" optional="hide"  groups="cumming_inventario.group_show_cost_on_product" widget="percentage"/>
+                    
+                </field>
+            </field>
+        </record>
+
+        <!--ocultar menu de variantes, dejar solo para admin-->
+        <record model="ir.ui.menu" id="stock.product_product_menu">
+            <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+        </record>
+        <!--ocultar variantes en ventas-->
+        <record model="ir.ui.menu" id="sale.menu_product_template_action">
+            <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+        </record>
+
+
+        <record id="product_pattern_action" model="ir.actions.act_window">
+            <field name="name">Modelos de productos</field>
+            <field name="res_model">product.pattern</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <record id="product_pattern_view" model="ir.ui.view">
+            <field name="name">Modelos de productos</field>
+            <field name="model">product.pattern</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                       
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only" string="Nombre"/>
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                            <div name="options_active" />
+                        </div>
+                        <group>
+                            <field name="product_count" style="width:40px;"/>
+                        </group>
+
+
+                        <notebook>
+                            <page string="Products">
+                                <field name="member_ids" widget="many2many" options="{'not_delete': True}">
+                                    <kanban quick_create="false" create="true" delete="true">
+                                        <field name="id"/>
+                                        <field name="name"/>
+                                        <templates>
+                                            <t t-name="kanban-box">
+                                                <div class="oe_kanban_global_click" style="max-width: 200px">
+                                                    <div class="o_kanban_record_top">
+                                                        <img t-att-src="kanban_image('product.template', 'image_128', record.id.raw_value)" class="oe_avatar oe_kanban_avatar_smallbox o_image_40_cover mb0" alt="Avatar"/>
+                                                        <div class="o_kanban_record_headings ml8">
+                                                            <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </templates>
+                                    </kanban>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!--search de produc template-->
+        <record id="pattern_group_by" model="ir.ui.view">
+            <field name="name">product.template.search.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field string="Modelo" name="pattern_id" invisible="1"/>
+                    <field string="Proveedor" name="seller_ids" invisible="1"/>
+                    <field string="Nombre proveedor" name="provider_names" invisible="1"/>
+                </field>
+
+                <xpath expr="//search" position="inside">
+                    <filter string="Modelo" name="Pattern" context="{'group_by':'pattern_id'}" invisible="1"/>
+                    <filter string="Proveedor" name="provider_names" context="{'group_by':'provider_names'}" invisible="0"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <menuitem id="product_pattern_inventory"
+                   name="Modelos de productos"
+                   action="product_pattern_action"
+                   parent="stock.menu_stock_inventory_control"
+                   sequence="2"/>
+
+        <!--heredar kanban y agregar mas informacion-->
+        <record id="product_template_kanban_view_inherit_cumming" model="ir.ui.view">
+            <field name="name">product.template.kanban.cumming</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//div[@class='oe_kanban_details']" position="replace">
+                    <div class="oe_kanban_details" style="font-size:1.2em !important">
+                        <strong class="o_kanban_record_title" style="font-size:1.3em !important">
+                            <field name="default_code"/>
+                        </strong>
+                        <!--<t t-if="record.default_code.value">[<field name="default_code"/>]</t>-->
+                        <div>
+                            <field name="name" />
+                        </div>
+                        <!--<div t-if="record.product_variant_count.value &gt; 1" groups="product.group_product_variant">
+                            <strong>
+                                <t t-esc="record.product_variant_count.value"/> Variants
+                            </strong>
+                        </div>-->
+                        <div name="product_lst_price" class="mt-1" >
+                            Price: <field name="lst_price" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"></field>
+                        </div>
+                     </div>
+                </xpath>
+
+
+               <!-- <xpath expr="//field[@name='name']" position="before">
+                    <xpath expr="//field[@name='default_code']" position="move"/>
+                </xpath> -->
+
+                <div name="product_lst_price" position="attributes">
+                    <attribute name="class">d-none</attribute>
+                </div>
+                <div name="product_lst_price" position="after">
+                    <div>
+                        <field name="price_by_pricelist" widget="many2many_tags" invisible="1"/>
+                        
+                    </div>
+                    <div>
+                        PRECIO DETAL: <field name="price_b" string="PRECIO DETAL"/>
+                    </div>
+                    <div>
+                        PRECIO MAYOR: <field name="price_a" string="PRECIO MAYOR"/>
+                    </div>
+                    <div groups="cumming_inventario.group_show_cost_on_product">
+                        COSTO CIF: <field name="standard_price" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
+                    </div> 
+                    <div groups="cumming_inventario.group_show_cost_on_product">                      
+                        COSTO FOB: <field name="fob_cost" groups="cumming_inventario.group_show_cost_on_product" widget='monetary' options="{'currency_field': 'cost_currency_id', 'field_digits': True}" />
+                    </div>
+                    <!--<div>
+                        Precio C: <field name="price_c" string="Precio C"/>
+                    </div>-->
+                    <!--
+                    <div>
+                        Precio D: <field name="price_d" string="Precio "/>
+                    </div>-->
+                    <!--csa y repubus estan en el modulo de quantity by location-->
+                    <!--<div>
+                        <div t-if="record.type.raw_value == 'product'">Disp por Vender: <field name="available_qty"/> <field name="uom_id"/></div>
+                       
+                    </div>-->
+                    <div groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
+                        <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse" invisible="1"/>
+                        CSA: <field name="quantity_csa" />
+                    </div>
+                    <div groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
+                        REP: <field name="quantity_repubus" />
+                    </div>
+                    <div>
+                        <field name="alternative_code" string="Equivalencias"/>
+                        <field name="alternative_manual" string="Otras Equivalencias" />
+                    </div>
+            
+                </div>
+             
+
+
+            </field>
+        </record>
+    
+    
+    
+    </data>
+</odoo>

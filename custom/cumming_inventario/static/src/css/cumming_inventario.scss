@@ -1,0 +1,40 @@
+
+// The goal of this file is to contain CSS hacks related to allowing
+
+
+
+.cumming_product_form{
+    font-size: 1.6em!important;
+    label{
+        font-size: 1em !important;
+    }
+    text-transform: uppercase !important;
+}
+
+.cumming_product_tree{
+    table{
+        thead{
+            position: sticky;
+            width: 100%;
+            top: 0;
+            z-index: 999;
+            /*tr{
+                width: 100%;
+                th{
+                    width: auto;
+                }
+            }*/
+        }
+        tbody{
+            tr{
+                td{
+                    border-right: 1px solid gray !important;
+
+                }
+                td.o_list_record_selector{
+                    border-right:none !important ;
+                }
+            }
+        }
+    }
+}

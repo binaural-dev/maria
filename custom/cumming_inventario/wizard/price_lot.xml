@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+	    <record id="view_update_price_percentage_cumming_form" model="ir.ui.view">
+	        <field name="name">Ajuste de precios por porcentaje</field>
+	        <field name="model">update.price.lot</field>
+	        <field name="arch" type="xml">
+	            <form string="Ajuste de Precios" create="false" edit="false" delete="false">
+				<sheet>
+								<group>
+									<field name="id" invisible="1"/>
+
+									
+									<field name="create_uid" string="Creado por" attrs="{'invisible':[('id','=', False)]}"/>
+
+									<field name="action_to_do" widget='radio' options="{'horizontal': true}" readonly="0"/>
+									<field name="percentage" readonly="0"/>
+									<field name="date" invisible="1"  force_save="1"/>
+									<!--<field name="base_pricelist" readonly="0"  force_save="1"/>-->
+
+									<field name="pricelist_id"/>
+									<field name="filter_products" />
+
+									<field name="brand_id" attrs="{'invisible':[('filter_products','!=', 'brand')]}"/>
+									<field name="pattern_id" attrs="{'invisible':[('filter_products','!=', 'pattern')]}"/>
+									<field name="categ_id" attrs="{'invisible':[('filter_products','!=', 'category')]}"/>
+									<field name="supplier_id" attrs="{'invisible':[('filter_products','!=', 'supplier')]}"/>
+								
+									<field name="products_list" attrs="{'invisible':[('pricelist_id','=',False)]}"/>
+									
+
+								</group>
+						<footer ><!--attrs="{'invisible':[('id','!=', False)]}"--> 
+							<button name="update_price" type="object" string="Actualizar" confirm="¿Esta seguro que quiere realizar la actualización de precios?"/> 
+							<button name="cancel" string="Cancelar" special="cancel" class="oe_link"/>
+						</footer>
+				</sheet>
+	            
+	            </form>
+	         
+	            
+	        </field>
+	    </record>
+
+	    <record id="action_update_price_percentage_form" model="ir.actions.act_window">
+	        <field name="name">Ajuste de precios por porcentaje</field>
+	        <field name="type">ir.actions.act_window</field>
+	        <field name="res_model">update.price.lot</field>
+	       <!-- <field name="view_type">form</field>-->
+	        <field name="view_mode">form</field>
+	        <field name="view_id" ref="view_update_price_percentage_cumming_form"/>
+			<field name="target">new</field>
+	    </record>
+
+
+	
+
+
+	    <menuitem name="Actualizar precios en Lote" groups="base.group_system" id="cumming_inventario.group_show_cost_on_product" sequence="0" parent="stock.menu_stock_inventory_control" action="action_update_price_percentage_form"/>
+
+	    
+
+
+    </data>
+</odoo>
