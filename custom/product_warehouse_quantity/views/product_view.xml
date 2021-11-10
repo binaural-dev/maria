@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--Extending existing form view for Quantity per Warehouse field-->
+    <record id="product_template_form_view_inherit_warehouse_quantity" model="ir.ui.view">
+        <field name="name">product.template.common.form.warehouse.quantity</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml"> 
+            <xpath expr="//field[@name='type']" position="after">
+                  <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse" invisible="1"/>
+            </xpath> 
+                <xpath expr="//div[hasclass('oe_title')]/h1" position="after">
+                    <h2>
+                        <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse" invisible="1"/>
+                    </h2>
+                </xpath>  
+        </field>
+    </record>
+
+
+    <!--tree view-->
+        <record id="view_stock_product_template_tree_warehouse_qty" model="ir.ui.view">
+            <field name="name">product.template.stock.tree.inherit.warehouse_qty</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="qty_available" position="before">
+                    <!--<field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>-->
+                    <field name="quantity_csa" string="CSA"/>
+                    <field name="quantity_repubus" string="REP"/>
+                </field>
+                <field name="qty_available" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <field name="virtual_available" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+            </field>
+        </record>
+
+
+    <!--Extending existing kanban view for Quantity per Warehouse field-->
+   <!-- <record id="product_template_kanban_view_inherit_warehouse_quantity" model="ir.ui.view">
+        <field name="name">product.template.kanban.warehouse.quantity</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            
+                se puso directo en cumming
+                <div name="product_lst_price" position="after">
+                <div>
+                    <field name="warehouse_quantity" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse"/>
+                </div>
+                </div>
+        </field>
+    </record>-->
+
+        <!--agregar campo disp por vender en el header-->
+        <record id="product_template_only_form_view_product_add_warehouse_qty_header" model="ir.ui.view">
+            <field name="name">product.template.form.inherit.button.header.warhouse.qty</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.product_template_form_view_procurement_button"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//button[@name='action_open_quants']" position="before">
+                    <button type="object" name="button_dummy_ware" attrs="{'invisible':[('type', '!=', 'product')]}"
+                            class="oe_stat_button"
+                            icon="fa-cubes" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
+                        <div class="o_field_widget o_stat_info" name="button_available_qty_1">
+                            <span class="o_stat_value" widget="statinfo">
+                                CSA: <field name="quantity_csa" widget="statinfo" nolabel="1" class="mr4"/>
+                                
+                            </span>
+                            <span class="o_stat_text"><field name="uom_name"/></span>
+                        </div>
+                    </button>
+                    <button type="object" name="button_dummy_ware_2" attrs="{'invisible':[('type', '!=', 'product')]}"
+                            class="oe_stat_button"
+                            icon="fa-cubes" groups="product_warehouse_quantity.group_show_product_quantity_per_warehouse">
+                        <div class="o_field_widget o_stat_info" name="button_available_qty_1">
+                            <span class="o_stat_value" widget="statinfo">
+                               REP: <field name="quantity_repubus" widget="statinfo" nolabel="1" class="mr4"/>
+                                
+                            </span>
+                            <span class="o_stat_text"><field name="uom_name"/></span>
+                        </div>
+                    </button>
+                </xpath>
+              
+            </field>
+        </record>
+</odoo>

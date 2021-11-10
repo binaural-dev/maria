@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_partner_credit_form" model="ir.ui.view">
+            <field name="name">credit limit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <div class="o_address_format" position="after">
+                    <field name="credit_limit" widget="monetary" options="{'currency_field': 'currency_id'}" string="Límite de crédito"/>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>
