@@ -50,3 +50,9 @@ class AccountMoveAction(models.Model):
         invoice_id = self.env.context.get('active_id', False)
         val.update({'action_number': invoice.action_number})
         return val
+    
+    
+class AccountMoveLineAction(models.Model):
+    _inherit = 'account.move.line'
+
+    action_number = fields.Char(related='partner_id.action_number.number', string='Número de Acción')

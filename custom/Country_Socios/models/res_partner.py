@@ -18,7 +18,7 @@ class ResPartnerAction(models.Model):
         return [('number', 'not in', actions)]#tesoreria es disponible para asignar
     
     def compute_solvent(self):
-        partner_ids = self.env['res.partner'].search([('customer', '=', True)])
+        partner_ids = self.env['res.partner'].search([('customer_rank', '>', 0)])
         for record in partner_ids:
             invoices = record.invoice_ids.filtered(lambda x: x.state in ['draft', 'open'])
             if len(invoices) > 0:

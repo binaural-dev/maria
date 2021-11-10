@@ -13,7 +13,7 @@
 	                <field name="customer_rank" invisible="1"/>
 
                     <field name="action_number" attrs="{'invisible':['|',('supplier_rank','>', 0),('customer_rank','=',0)]}"/>
-	                <field name="type_relation" required="1"/>
+	                <field name="type_relation"/>
                     <field name="state_action" attrs="{'invisible':['|',('supplier_rank','>', 0),('customer_rank','=',0)]}"/>
                     <field name="state_partner" string="Estado del socio"/>
                     <field name="can_access_club" attrs="{'invisible':[('supplier_rank','>', 0)]}"/>
@@ -134,7 +134,7 @@
 
                     <field name="member_gender" attrs="{'invisible' : [('type', '!=', 'contact')]}" />
 
-                    <field name="type_relation"  attrs="{'invisible' : [('type', '!=', 'contact')]}" required="1"/>
+                    <field name="type_relation"  attrs="{'invisible' : [('type', '!=', 'contact')]}" />
                 </xpath>
 
                 <!--heredar kanban de contacto y direcciones-->

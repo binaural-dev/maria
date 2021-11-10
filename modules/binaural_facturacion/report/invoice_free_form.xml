@@ -194,7 +194,7 @@
 
 
                                         </tr>
-                                        <tr>
+                                        <!--<tr>
                                             <td colspan="2">
                                                 Vendedor:
                                                <t t-set="seller_name" t-value="invoice.invoice_user_id.name[0:17]"/>
@@ -204,10 +204,7 @@
                                             </td>
                                             <td colspan="5">
                                             </td>
-                                            <!--<td colspan="3" style="text-align:right">Nro Salida:
-                                                t-if="len(invoice.picking_ids) > 0"<span t-field="invoice.picking_ids[0].name"/>
-                                            </td>-->
-                                        </tr>
+                                        </tr>-->
                                      
                                     </table>
                                 </section>
@@ -279,7 +276,7 @@
                                                             <t t-set="product_name" t-value=""/>
                                                         </t>
                                                         <td style="width:350px;text-align:left;"><!--border: 1px solid black;-->
-                                                            <span t-esc="product_name"/>
+                                                            <span t-esc="line.name"/>
 
                                                         </td>
                                                     </t>
