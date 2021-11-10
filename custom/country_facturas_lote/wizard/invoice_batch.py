@@ -132,8 +132,8 @@ class WizardInvoiceBatch(models.TransientModel):
 				'url': base_url,
 				'target': 'self',
 			}"""
-		else:
-			raise UserError("Algo no salio bien, error generando Facturas")
+		#else:
+		#	raise UserError("Algo no salio bien, error generando Facturas")
 		#raise RedirectWarning(msg, action.id, _('Continuar'))
 	@api.returns('account.move')
 	def _recurring_create_invoice(self, automatic=False):
@@ -150,18 +150,34 @@ class WizardInvoiceBatch(models.TransientModel):
 			if not sub.vat:
 				raise UserError("Socio no posee rif o cedula")
 			try:
-				invoices.append(AccountInvoice.create(self._prepare_invoice(sub)))
-				invoices[-1].message_post_with_view('mail.message_origin_link',
-					 values={'self': invoices[-1], 'origin': self},
-					 subtype_id=self.env.ref('mail.mt_note').id)
-				invoices[-1]._onchange_recompute_dynamic_lines()
-				invoices[-1]._compute_foreign_currency_rate()
+				#buscar factura del mismo periodo
+				already_invoiced = False
+				prev_invoices = self.env['account.move'].sudo().search([('partner_id','=',sub.id),('move_type','=','out_invoice'),('state','!=','cancel')])
+				if len(prev_invoices)>0:
+					for prev_invoice in prev_invoices:
+						if prev_invoice.fee_period:
+							prev_month = prev_invoice.fee_period.month
+							prev_year = prev_invoice.fee_period.year
+							#si mes y a#o de periodos son iguales buscar si hay concepto fijo en la existente
+							if self.fee_period.month == prev_month and self.fee_period.year == prev_year:
+								#tiene factura con mismo periodo verificar si la cuota esta facturada si es si no hacer factura
+								if any(line.product_id.fixed_concept for line in prev_invoice.invoice_line_ids):
+									already_invoiced = True
+									break
+				if not already_invoiced:
+					invoices.append(AccountInvoice.create(self._prepare_invoice(sub)))
+					invoices[-1].message_post_with_view('mail.message_origin_link',
+						values={'self': invoices[-1], 'origin': self},
+						subtype_id=self.env.ref('mail.mt_note').id)
+					invoices[-1]._onchange_recompute_dynamic_lines()
+					invoices[-1]._compute_foreign_currency_rate()
 				
 				if automatic:
 					self.env.cr.commit()
 			except Exception as error:
 				print("error interno")
 				print(error)
+				_logger.info("ERRORRRRRRRRRRRRRRRRRRR: %s",error)
 				if automatic:
 					self.env.cr.rollback()
 					_logger.exception('Fail to create recurring invoice for partner %s', sub.name)
