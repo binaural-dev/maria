@@ -171,6 +171,7 @@ class BookSaleReport(models.TransientModel):
         search_domain_only_retention = [
             ('retention_id.date_accounting', '>=', self.date_start),
             ('retention_id.date_accounting', '<=', self.date_end),
+            ('retention_id.type', 'in', ['out_invoice', 'out_refund', 'out_debit', 'out_contingence']),
             ('retention_id.type_retention', '=', 'iva'),
             ('retention_id.state', 'in', ['emitted'])
         ]
