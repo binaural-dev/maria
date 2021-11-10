@@ -29,7 +29,6 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - odoo-db-integra14:/var/lib/postgresql/data/pgdata
-    restart: always
 volumes:
   odoo-web-integra14:
   odoo-db-integra14:
