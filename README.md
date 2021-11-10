@@ -3,7 +3,7 @@ Nota: se tenia anteriormente el submodulo pero el mismo causaba conflicto en odo
 
 Para verificar que el contenedor este corriendo satisfactoriamente ejecutar ./test_deploy_local.sh
 
-El contenedor de Cumming Supply corre por el puerto : 15100
+El contenedor corre por el puerto : 15000
 
 Enlace con Tutorial para correr pruebas unitarias: https://reedrehg.medium.com/writing-tests-in-odoo-4355f33e4a36
 
