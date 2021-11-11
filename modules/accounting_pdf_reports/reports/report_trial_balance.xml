@@ -65,12 +65,6 @@
                                     <span t-if="data['display_account'] == 'not_zero'">Con balancee distinto de cero</span>
                                 </p>
                             </div>
-                            <!--<div class="col-xs-4">
-                                <p>
-                                    <t t-if="data['date_from']"><strong>Fecha de inicio:</strong> <span t-esc="data['date_from']"/><br/></t>
-                                    <t t-if="data['date_to']"><strong>Fecha de fin:</strong> <span t-esc="data['date_to']"/></t>
-                                </p>
-                            </div>-->
                                 <div class="col-4" style="text-align:center;font-size:0.9em;">
                                     <h6 class="text-uppercase">Balance de Comprobación</h6>
                                     <!--<h5>DEL <span t-esc="datetime.datetime.strptime(data['date_from'], '%Y-%m-%d').strftime('%d/%m/%Y')"></span> AL <span t-esc="datetime.datetime.strptime(data['date_to'], '%Y-%m-%d').strftime('%d/%m/%Y')"></span></h5>-->
