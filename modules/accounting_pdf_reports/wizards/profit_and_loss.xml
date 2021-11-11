@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="action_account_report_pl" model="ir.actions.act_window">
-        <field name="name">Profit and Loss</field>
+        <field name="name">Estado de resultado</field>
         <field name="res_model">accounting.report</field>
         <field name="type">ir.actions.act_window</field>
         <field name="view_mode">form</field>
@@ -12,7 +12,7 @@
     </record>
 
     <menuitem id="menu_account_report_pl"
-              name="Profit and Loss PDF PL"
+              name="Estado de resultado (Ganancias y Perdidas)"
               sequence="6"
               action="action_account_report_pl"
               parent="accounting_pdf_reports.menu_finance_legal_statement"

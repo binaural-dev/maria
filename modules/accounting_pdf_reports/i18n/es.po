@@ -256,14 +256,14 @@ msgstr "Formateo automático"
 #: model_terms:ir.ui.view,arch_db:accounting_pdf_reports.report_partnerledger
 #: model_terms:ir.ui.view,arch_db:accounting_pdf_reports.report_trialbalance
 msgid "Balance"
-msgstr "Saldo Pendiente"
+msgstr "Balance"
 
 #. module: accounting_pdf_reports
 #: model:account.financial.report,name:accounting_pdf_reports.account_financial_report_balancesheet0
 #: model:ir.actions.act_window,name:accounting_pdf_reports.action_account_report_bs
 #: model:ir.ui.menu,name:accounting_pdf_reports.menu_account_report_bs
 msgid "Balance Sheet"
-msgstr "Hoja de Balance"
+msgstr "Estado de situación financiera"
 
 #. module: accounting_pdf_reports
 #: model_terms:ir.ui.view,arch_db:accounting_pdf_reports.report_journal

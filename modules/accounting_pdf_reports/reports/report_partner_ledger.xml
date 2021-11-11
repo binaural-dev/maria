@@ -26,8 +26,8 @@
                         </div>
                         <div class="col-3">
                             <strong>Target Moves:</strong>
-                            <p t-if="data['form']['target_move'] == 'all'">All Entries</p>
-                            <p t-if="data['form']['target_move'] == 'posted'">All Posted Entries</p>
+                            <p t-if="data['form']['target_move'] == 'all'">Todos los asientos</p>
+                            <p t-if="data['form']['target_move'] == 'posted'">Todos los asientos validados</p>
                         </div>
                     </div>
 

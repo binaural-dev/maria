@@ -31,8 +31,8 @@
                         <div class="col-3">
                             <strong>Target Moves:</strong>
                             <p>
-                                <span t-if="data['target_move'] == 'all'">All Entries</span>
-                                <span t-if="data['target_move'] == 'posted'">All Posted Entries</span>
+                                <span t-if="data['target_move'] == 'all'">Todos los asientos</span>
+                                <span t-if="data['target_move'] == 'posted'">Todos los asientos validados</span>
                             </p>
                         </div>
                     </div>
