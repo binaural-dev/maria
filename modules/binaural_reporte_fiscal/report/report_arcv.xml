@@ -90,7 +90,7 @@
 								        <span class="tal">Teléfono: </span>
 								        <span class="fw tal" t-esc="res_company.partner_id.phone"/><br/>
 								        <span class="tal">RIF: </span>
-								        <span class="fw tal" t-esc="res_company.partner_id.prefix_vat"/><span t-esc="res_company.partner_id.vat"/>
+								        <span t-esc="res_company.partner_id.vat"/>
 							        </td>
 							        <td style="text-align: left;border: 1px solid black;padding-left: 10px;" colspan="6">
 								        <span class="tal">Nombre o Razón Social:</span><br/>
@@ -124,10 +124,10 @@
                                         <t t-foreach="docs['retentions']['data']" t-as="line">
                                             <tr>
                                                 <td class="text-center"><span t-esc="line['period']"/></td>
-                                                <td style="text-align: right"><span t-esc="line['amount_total']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'>--</span></td>
-                                                <td style="text-align: right"><span t-esc="line['amount_obj_retention']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
-                                                <td style="text-align: right"><span t-esc="line['tariff']"/> % <t t-if="line['tariff_sub'] != 0"> - <span t-esc="line['tariff_sub']" t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/></t></td>
-                                                <td style="text-align: right"><span t-esc="line['amount_ret']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                                <td style="text-align: center"><span t-esc="line['amount_total']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'>--</span></td>
+                                                <td style="text-align: center"><span t-esc="line['amount_obj_retention']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
+                                                <td style="text-align: right"><span t-esc="line['tariff']"/> % <t t-if="line['tariff_sub'] != 0"> - <span t-esc="line['tariff_sub']" t-options='{"widget": "float", "precision": foreign_currency_id.decimal_places}'/></t></td>
+                                                <td style="text-align: right"><span t-esc="line['amount_ret']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
                                             </tr>
                                         </t>
                                     </t>
@@ -143,10 +143,10 @@
 
                                     <tr style="font-weight: bold;">
                                         <td class="text-center"><span>Totales</span></td>
-                                        <td style="text-align: right"><span t-esc="docs['total_amount_year']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
-                                        <td style="text-align: right"><span t-esc="docs['total_amount_obj_retention_year']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                        <td style="text-align: center"><span t-esc="docs['total_amount_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
+                                        <td style="text-align: center"><span t-esc="docs['total_amount_obj_retention_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
                                         <td class="text-center"><span>---</span></td>
-                                        <td style="text-align: right"><span t-esc="docs['total_amount_ret_year']" t-options='{"widget": "monetary", "display_currency": res_company.currency_id}'/></td>
+                                        <td style="text-align: right"><span t-esc="docs['total_amount_ret_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
                                     </tr>
                                 </table>
 	                        </table>
