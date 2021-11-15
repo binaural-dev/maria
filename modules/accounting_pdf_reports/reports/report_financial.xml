@@ -102,6 +102,7 @@
                                     <tr t-foreach="get_account_lines" t-as="a">
                                     
                                         <t t-if="a['level'] != 0">
+                                            
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="int(not a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
@@ -114,6 +115,7 @@
                                     </tr>
                                     <tr t-foreach="get_account_lines" t-as="a">
                                         <t t-if="a['level'] == 0">
+                                            
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
@@ -179,6 +181,7 @@
                                     <tr t-foreach="get_account_lines" t-as="a">
                                 
                                         <t t-if="a['level'] != 0">
+
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
                                             
@@ -200,6 +203,7 @@
                                     </tr>
                                     <tr t-foreach="get_account_lines" t-as="a">
                                         <t t-if="a['level'] == 0">
+                                        
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
@@ -237,6 +241,7 @@
                                     </tr>
                                     <tr t-foreach="get_account_lines" t-as="a">
                                         <t t-if="a['level'] == 0">
+                                       
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 
@@ -274,6 +279,7 @@
                                     </tr>
                                     <tr t-foreach="get_account_lines" t-as="a">
                                         <t t-if="a['level'] == 0">
+                                            
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
 

@@ -7,10 +7,10 @@
                   sequence="10"
                   parent="account.menu_finance_reports"/>
 
-        <menuitem id="menu_finance_partner_reports"
+        <!--<menuitem id="menu_finance_partner_reports"
                   name="Partner Reports PDF"
                   sequence="20"
-                  parent="account.menu_finance_reports"/>
+                  parent="account.menu_finance_reports"/>-->
 
         <menuitem id="menu_finance_audit_reports"
                   name="Audit Reports PDF"

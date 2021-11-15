@@ -34,11 +34,11 @@
     </record>
 
 
-    <menuitem id="menu_aged_trial_balance"
+    <!--<menuitem id="menu_aged_trial_balance"
         name="Aged Partner Balance PDF"
         sequence="10"
         action="action_account_aged_balance_view"
-        parent="menu_finance_partner_reports"/>
+        parent="menu_finance_partner_reports"/>-->
 
 
     <record id="action_account_aged_receivable" model="ir.actions.act_window">
@@ -52,11 +52,11 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="menu_aged_receivable"
+    <!--<menuitem id="menu_aged_receivable"
         name="Aged Receivable PDF"
         sequence="20"
         action="action_account_aged_receivable"
-        parent="menu_finance_partner_reports"/>
+        parent="menu_finance_partner_reports"/>-->
 
 
     <record id="action_account_aged_payable" model="ir.actions.act_window">

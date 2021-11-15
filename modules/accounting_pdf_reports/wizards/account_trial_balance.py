@@ -10,7 +10,7 @@ class AccountBalanceReport(models.TransientModel):
 
     journal_ids = fields.Many2many('account.journal', 'account_balance_report_journal_rel', 'account_id', 'journal_id', string='Journals', required=True, default=[])
 
-    another_currency = fields.Boolean(string='Moneda Alterna')
+    another_currency = fields.Boolean(string='En Bolivares')
 
     def _print_report(self, data):
         data = self.pre_print_report(data)

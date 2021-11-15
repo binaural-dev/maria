@@ -24,7 +24,7 @@ class AccountingReport(models.TransientModel):
     date_to_cmp = fields.Date(string='End Date')
     debit_credit = fields.Boolean(string='Display Debit/Credit Columns', help="This option allows you to get more details about the way your balances are computed. Because it is space consuming, we do not allow to use it while doing a comparison.")
 
-    another_currency = fields.Boolean(string='Moneda Alterna')
+    another_currency = fields.Boolean(string='En Bolivares')
     def _build_comparison_context(self, data):
         result = {}
         result['journal_ids'] = 'journal_ids' in data['form'] and data['form']['journal_ids'] or False

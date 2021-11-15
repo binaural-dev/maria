@@ -175,13 +175,15 @@ class ReportTrialBalance(models.AbstractModel):
 								_logger.info("detail_code %s",detail_code)
 								_logger.info("account.code %s",account.code)
 								if detail_code == account.code:
+									ib = 0
 									for result_init in result_init_balance:
 										if result_init['id'] == detail_account.id:
 											res['init_balance'] += result_init['init_balance'] or 0.0
+											ib += result_init['init_balance'] or 0.0
 									_logger.info("ESTOY ACUMULANDO EN LOS BOLD")
 									res['debit'] += account_result[detail_account.id].get('debit')
 									res['credit'] += account_result[detail_account.id].get('credit')
-									res['balance'] += account_result[detail_account.id].get('balance')
+									res['balance'] += account_result[detail_account.id].get('balance') + ib
 								else:
 									if detail_code == account.code:
 										for result_init in result_init_balance:
@@ -190,8 +192,9 @@ class ReportTrialBalance(models.AbstractModel):
 										res['balance'] = res['init_balance'] + res['debit'] - res['credit']
 							else:
 								_logger.info("no esta en account result %s",account_result)
-				if res['balance'] != 0:
-					account_res.append(res)
+				#if res['balance'] != 0:
+				#	account_res.append(res)
+				account_res.append(res)
 			if display_account == 'not_zero' and not currency.is_zero(res['balance']):
 				account_res.append(res)
 			if display_account == 'movement' and (not currency.is_zero(res['debit']) or not currency.is_zero(res['credit'])):

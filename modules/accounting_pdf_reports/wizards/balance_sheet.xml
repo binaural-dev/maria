@@ -152,25 +152,27 @@
         <field name="sequence">3</field>
     </record>
 
-
+    <!--este que viene no se usa-->
 
     <record id="account_financial_report_liabilitysum0" model="account.financial.report">
         <field name="name">Liability</field>
         <!--<field name="parent_id" ref="account_financial_report_balancesheet0"/> Este no se usa-->
         <field name="display_detail">no_detail</field>
+        <!--<feld name="sequence">999</field>-->
         <field name="type">sum</field>
     </record>
 
 
 
-
-    <record id="account_financial_report_profitloss_toreport0" model="account.financial.report">
-        <field name="name">Profit (Loss) to report</field>
-        <field name="parent_id" ref="account_financial_report_liabilitysum0"/>
+    <!--poner como seccion aparte o hijo de otra?-->
+    <!--<record id="account_financial_report_profitloss_toreport0" model="account.financial.report">
+        <field name="name">Profit (Loss) to report</field>-->
+        <!--<field name="parent_id" ref="account_financial_report_liabilitysum0"/> este no va-->
+        <!--<field name="parent_id" ref="account_financial_report_liability0Capital"/> 
         <field name="display_detail">no_detail</field>
         <field name="type">account_report</field>
         <field name="account_report_id" ref="account_financial_report_profitandloss0"/>
-    </record>
+    </record>-->
 
 
 
@@ -183,7 +185,7 @@
         <field name="inherit_id" ref="account.account_common_report_view"/>
         <field name="arch" type="xml">
             <field name="target_move" position="before">
-                <field name="account_report_id" domain="[('parent_id','=',False)]"/>
+                <field name="account_report_id" domain="[('parent_id','=',False)]" readonly="1" force_save="1"/><!--('sequence','!=',999)-->
             </field>
             <field name="target_move" position="after">
                 <field name="another_currency" />
