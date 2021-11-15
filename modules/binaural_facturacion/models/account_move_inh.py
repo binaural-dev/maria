@@ -710,7 +710,10 @@ class AcoountMoveLineBinauralFact(models.Model):
     foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True,
                                        compute='_amount_all_foreign', tracking=4)
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
-    foreign_currency_rate = fields.Float(string="Tasa", related='move_id.foreign_currency_rate', tracking=True)
+
+    #foreign_currency_rate = fields.Float(string="Tasa", related='move_id.foreign_currency_rate', tracking=True)
+    foreign_currency_rate = fields.Float(string="Tasa", related='move_id.foreign_currency_rate', digits=(16, 2),
+                                        tracking=True, store=True)
 
     def reconcile(self):
         ''' Reconcile the current move lines all together.

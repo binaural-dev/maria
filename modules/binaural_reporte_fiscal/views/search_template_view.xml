@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="search_template" inherit_id="account_reports.search_template">
+            <xpath expr="//div[@id='extra_options_dropdown']" position="after">
+                <div class="btn-group o_dropdown o_account_reports_filter_currency_bin">
+                    <t t-call="binaural_reporte_fiscal.search_template_currency_bin"/>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="search_template_currency_bin">
+            <button type="button" class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+                Moneda:
+                <t t-set="selected_currency" t-value="', '.join(currency.get('name') for currency in options['currency'] if currency.get('selected'))"/>
+                <t t-esc="selected_currency"/>
+
+            </button>
+            <div class="o_dropdown_menu dropdown-menu o_filter_menu" role="menu">
+                <t t-foreach="options.get('currency')" t-as="j">
+                    <a role="menuitem" class="dropdown-item js_account_report_group_choice_currency_filter" data-filter="currency" t-att-data-id="j.get('id')">
+                        <t t-esc="j.get('name')"/>
+                    </a>
+                </t>
+            </div>
+        </template>
+    </data>
+</odoo>
