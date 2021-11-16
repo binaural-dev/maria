@@ -2,6 +2,7 @@
 <odoo>
     <record id="accounting_pdf_reports.action_report_financial" model="ir.actions.report">
             <field name="paperformat_id" ref="paperformat_custom_integra"/>
+           
     </record>
     <template id="report_financial">
         <t t-call="web.html_container">
@@ -59,6 +60,8 @@
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
                                             
+                                           <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
@@ -79,6 +82,10 @@
                                         <t t-if="a['level'] == 0">
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
@@ -105,6 +112,9 @@
                                             
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="int(not a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
@@ -118,6 +128,9 @@
                                             
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
@@ -143,6 +156,9 @@
                                         <t t-if="a['level'] != 0">
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
                                             <td>
                                                 <span style="color: white;" t-esc="'..'"/>
                                                 <span t-att-style="style" t-esc="a.get('name')"/>
@@ -155,6 +171,9 @@
                                         <t t-if="a['level'] == 0">
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
@@ -184,9 +203,12 @@
 
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
-                                            
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
 
                                             <td>
+                                                
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
                                                 <span t-att-style="style" t-esc="a.get('name')"/>
                                             </td>
@@ -206,6 +228,8 @@
                                         
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                           <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
@@ -231,10 +255,16 @@
                                         <t t-if="a['level'] != 0">
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="int(not a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            
+                                            <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
+                                            
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
                                                 <span t-att-style="style" t-esc="a.get('name')"/>
+                                                
                                             </td>
                                             <td class="text-right"><span t-att-style="style" t-esc="a.get('balance')" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/></td>
                                         </t>
@@ -244,6 +274,9 @@
                                        
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>
@@ -269,6 +302,9 @@
                                         <t t-if="a['level'] != 0">
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
                                             <td>
                                                 <span style="color: white;" t-esc="'..'"/>
                                                 <span t-att-style="style" t-esc="a.get('name')"/>
@@ -282,6 +318,9 @@
                                             
                                             <t t-if="int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: normal;'"/></t>
                                             <t t-if="not int(a.get('level')) &gt; 4"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                               <t t-if="int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: bold;'"/></t>
+                                            <t t-if="not int(a.get('level')) &lt; int(account_len)"><t t-set="style" t-value="'font-weight: normal;'"/></t>
+
 
                                             <td>
                                                 <span style="color: white;" t-esc="'..' * int(a.get('level', 0))"/>

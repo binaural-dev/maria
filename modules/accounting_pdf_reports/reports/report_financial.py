@@ -185,6 +185,7 @@ class ReportFinancial(models.AbstractModel):
 		if alternate_currency:
 			foreign_currency_id = self.env['res.currency'].sudo().browse(int(alternate_currency))
 		_logger.info("foreign_currency_id %s",foreign_currency_id)
+		account_len = int(self.env['ir.config_parameter'].sudo().get_param('longitude_account', default=8))
 		return {
 			'doc_ids': self.ids,
 			'doc_model': model,
@@ -194,4 +195,5 @@ class ReportFinancial(models.AbstractModel):
 			'get_account_lines': report_lines,
 			'another_currency':another_currency,
 			'foreign_currency_id':foreign_currency_id,
+			'account_len':account_len,
 		}
