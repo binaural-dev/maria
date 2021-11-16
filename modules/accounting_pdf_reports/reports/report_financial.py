@@ -104,8 +104,10 @@ class ReportFinancial(models.AbstractModel):
 
 		for report in child_reports:
 			n = report.name
-			if n == 'Estado de Resultado':
-				n = 'Total Ganancias y Perdidas'
+			#if n == 'Estado de Resultado':
+			if n == 'Estado de resultado (Ganancias y Perdidas)':
+				#n = 'Total Ganancias y Perdidas'
+				n = 'Utilidad y/o pérdida del ejercicio'
 			print("report.name",n)
 			vals = {
 				#'name': report.name,
@@ -121,7 +123,7 @@ class ReportFinancial(models.AbstractModel):
 
 			if data['enable_filter']:
 				vals['balance_cmp'] = res[report.id]['comp_bal'] * float(report.sign)
-			lines.append(vals)
+			lines.append(vals) 
 			if report.display_detail == 'no_detail':
 				#the rest of the loop is used to display the details of the financial report, so it's not needed here.
 				continue
