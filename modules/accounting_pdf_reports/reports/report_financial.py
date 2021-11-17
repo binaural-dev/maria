@@ -92,7 +92,7 @@ class ReportFinancial(models.AbstractModel):
 		account_report = self.env['account.financial.report'].search([('id', '=', data['account_report_id'][0])])
 		child_reports = account_report._get_children_by_order()
 		res = self.with_context(data.get('used_context'))._compute_report_balance(child_reports,data)
-		account_len = int(self.env['ir.config_parameter'].sudo().get_param('longitude_account', default=8))
+		account_len = int(self.env['ir.config_parameter'].sudo().get_param('account_longitude_report', default=8))
 		if data['enable_filter']:
 			comparison_res = self.with_context(data.get('comparison_context'))._compute_report_balance(child_reports,data)
 			for report_id, value in comparison_res.items():
@@ -105,7 +105,7 @@ class ReportFinancial(models.AbstractModel):
 		for report in child_reports:
 			n = report.name
 			#if n == 'Estado de Resultado':
-			if n == 'Estado de resultado (Ganancias y Perdidas)':
+			if n == 'Estado de resultado (Ganancias y Pérdidas)':
 				#n = 'Total Ganancias y Perdidas'
 				n = 'Utilidad y/o pérdida del ejercicio'
 			print("report.name",n)
@@ -185,7 +185,7 @@ class ReportFinancial(models.AbstractModel):
 		if alternate_currency:
 			foreign_currency_id = self.env['res.currency'].sudo().browse(int(alternate_currency))
 		_logger.info("foreign_currency_id %s",foreign_currency_id)
-		account_len = int(self.env['ir.config_parameter'].sudo().get_param('longitude_account', default=8))
+		account_len = int(self.env['ir.config_parameter'].sudo().get_param('account_longitude_report', default=8))
 		return {
 			'doc_ids': self.ids,
 			'doc_model': model,

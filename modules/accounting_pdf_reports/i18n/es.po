@@ -813,7 +813,7 @@ msgstr "Beneficio (pérdida) para informar"
 #: model:ir.actions.act_window,name:accounting_pdf_reports.action_account_report_pl
 #: model:ir.ui.menu,name:accounting_pdf_reports.menu_account_report_pl
 msgid "Profit and Loss"
-msgstr "Estado de resultado (Ganancias y Perdidas)"
+msgstr "Estado de resultado (Ganancias y Pérdidas)"
 
 #. module: accounting_pdf_reports
 #: model:ir.model.fields.selection,name:accounting_pdf_reports.selection__account_aged_trial_balance__result_selection__customer
