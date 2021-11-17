@@ -24,6 +24,10 @@ class AccountingReport(models.TransientModel):
     date_to_cmp = fields.Date(string='End Date')
     debit_credit = fields.Boolean(string='Display Debit/Credit Columns', help="This option allows you to get more details about the way your balances are computed. Because it is space consuming, we do not allow to use it while doing a comparison.")
 
+    #sobreescrbiri
+    target_move = fields.Selection([('posted', 'Todos los asientos validados'),
+                                    ('all', 'Todos los asientos'),
+                                    ], string='Movimientos destino', required=True, default='posted')
     another_currency = fields.Boolean(string='En Bolivares')
     def _build_comparison_context(self, data):
         result = {}

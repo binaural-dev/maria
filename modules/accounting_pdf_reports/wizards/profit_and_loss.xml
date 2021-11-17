@@ -12,7 +12,7 @@
     </record>
 
     <menuitem id="menu_account_report_pl"
-              name="Estado de resultado (Ganancias y Perdidas)"
+              name="Estado de resultado (Ganancias y Pérdidas)"
               sequence="6"
               action="action_account_report_pl"
               parent="accounting_pdf_reports.menu_finance_legal_statement"
