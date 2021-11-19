@@ -1,0 +1,48 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    
+    <record model="ir.ui.view" id="country_facturas_lote.config_invoice_batch_journal_tree">
+      <field name="name">Configuración facturas en lote</field>
+      <field name="model">country.batch.invoice.config</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="journal_id"/>
+          <field name="company_id" invisible="1" force_save="1"/>
+          <field name="active"/>
+        </tree>
+      </field>
+    </record>
+
+        <!-- View: Form -->
+        <record id="country_facturas_lote.config_batch_journal_form" model="ir.ui.view">
+            <field name="name">Configuración facturas en lote</field>
+            <field name="model">country.batch.invoice.config</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group col="1">
+                            <field name="journal_id"/>
+                            <field name="company_id" invisible="1" force_save="1"/>
+                            <field name="active"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+    <!-- actions opening views on models -->
+
+    <record model="ir.actions.act_window" id="country_facturas_lote.config_invoice_batch_journal">
+      <field name="name">Configuración facturas en lote</field>
+      <field name="res_model">country.batch.invoice.config</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <menuitem name="Configuración facturas en lote" id="country_facturas_lote.menu_config_invoice_batch" parent="account.menu_finance_configuration"
+              action="country_facturas_lote.config_invoice_batch_journal"/>
+  </data>
+</odoo>

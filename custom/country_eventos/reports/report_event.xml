@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+
+	    <record id="paperformat_event_report" model="report.paperformat">
+              <field name="name">Formato de PDF invitados</field>
+              <field name="format">custom</field>
+              <field name="default" eval="True"/>
+              <field name="page_height">281</field>
+              <field name="page_width">219</field>
+              <field name="orientation">Portrait</field>
+              <field name="margin_top">35</field>
+              <field name="margin_bottom">0</field>
+              <field name="margin_left">0</field>
+              <field name="margin_right">0</field>
+              <field name="header_line" eval="False"/>
+              <field name="header_spacing">0</field>
+              <field name="dpi">90</field>
+        </record>
+   
+        <report id="event_report"
+                string="PDF de invitados"
+                model="event.event"
+                report_type="qweb-pdf"
+                name="Binaural_Eventos.event_report"
+                paperformat="paperformat_event_report"/>
+
+        <template id="Binaural_Eventos.event_report">
+	        <t t-call="web.html_container">
+		        <xpath expr="//t[@t-call='web.report_layout']" position="replace">
+			       <div class="article" style="">
+		                <t t-foreach="docs" t-as="o">
+		                    <div>
+		                        <table class="table-condensed table-bordered" style="width:100%;height:100%;font-size:10px">
+		                            <tr>
+		                                <td><img t-if="res_company.logo" t-att-src="'data:image/png;base64,%s' % to_text(res_company.logo)" style="max-height: 45px;"/></td>
+		                                <td>
+			                                <span t-field="o.company_id.name"/><br/>
+			                                <span t-field="o.company_id.partner_id.prefix_vat"/><span t-field="o.company_id.partner_id.vat"/><br/>
+			                                <span t-field="o.company_id.partner_id.phone"/><br/>
+			                                <span t-field="o.company_id.partner_id.street"/> <span t-field="o.company_id.partner_id.street2"/><br/>
+			                                <span t-field="o.company_id.partner_id.city"/> <span t-field="o.company_id.partner_id.state_id.name"/> <span t-field="o.company_id.partner_id.country_id.name"/>
+		                                </td>
+		                            </tr>
+		                        </table>
+		                    </div>
+		                    <div class="page">
+		                        <style>
+		                            th,td,h1,h2{ white-space: nowrap;overflow: hidden;text-overflow: ellipsis;text-align: center;}
+		                            thead { display: table-header-group }
+		                            tfoot { display: table-row-group }
+		                            tr { page-break-inside: avoid }
+		                            .clth{
+		                                    border-top: 2px solid black;
+		                                    border-bottom: 2px solid black;
+		                            }
+		                            .cltt{
+		                                    border-top: 2px solid black;
+		                                    font-weight: 600;
+		                            }
+		                        </style>
+								<h1>Información del Evento</h1>
+			                    <table name="table_event" style="width:925px">
+				                    <tr>
+			                            <td>Fecha Inicio:</td>
+			                            <td colspan="3"> <span t-field="o.date_begin"/></td>
+		                            </tr>
+				                    <tr>
+			                            <td>Fecha Fin:</td>
+			                            <td colspan="3"> <span t-field="o.date_end"/></td>
+		                            </tr>
+		                            <tr>
+			                            <td>Nombre del evento:</td>
+			                            <td colspan="3"> <span t-field="o.name"/></td>
+		                            </tr>
+	                            </table>
+
+			                    <h2>Listado de invitados</h2>
+
+			                    <table name="table_event_list" style="width:925px">
+				                    <tr>
+			                            <th>Nro. Documento</th>
+			                            <th colspan="3">Nombre del invitado</th>
+		                            </tr>
+				                    <t t-foreach="o.registration_ids" t-as="reg">
+										<tr>
+				                            <td><span t-field="reg.name"/></td>
+				                            <td colspan="3"> <span t-field="reg.prefix_vat"/>-<span t-field="reg.vat"/></td>
+			                            </tr>
+				                    </t>
+	                            </table>
+		                    </div>
+		                </t>
+		            </div>
+		        </xpath>
+	        </t>
+        </template>
+    </data>
+</odoo>
+
+
+
+
+
+
