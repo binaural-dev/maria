@@ -99,6 +99,47 @@
 		                    </div>
 		                </div-->
 		            </div>
+
+			        <h2>Retenciones Municipales</h2>
+			        <div class="col-12 o_setting_box" id="use_retention">
+	                    <div class="o_setting_left_pane">
+	                    </div>
+				        <div class="o_setting_right_pane">
+                            <div class="row mt16">
+                                <label for="use_municipal_retention" class="col-lg-3 o_light_label"/>
+                                <field name="use_municipal_retention" options="{'no_create_edit': True, 'no_open': True}"/>
+                            </div>
+	                    </div>
+	                </div>
+			        <div attrs="{'invisible':[('use_municipal_retention','=', False)]}" class="row mt16 o_settings_container">
+				        <div class="col-12 col-lg-6 o_setting_box" id="cta_municipal_retention">
+		                    <div class="o_setting_left_pane">
+		                    </div>
+					        <div class="o_setting_right_pane">
+	                            <div>
+		                            <span class="o_form_label">Cuenta de Retenciones Municipales</span>
+			                        <div class="text-muted">
+			                            Ingrese la cuenta contable asignada para la retención de impuestos municipales
+			                        </div>
+	                                <field name="account_municipal_retention" attrs="{'required':[('use_municipal_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+	                            </div>
+		                    </div>
+		                </div>
+
+				        <div class="col-12 col-lg-6 o_setting_box" id="jnal_municipal_retention">
+					        <div class="o_setting_left_pane">
+		                    </div>
+					        <div class="o_setting_right_pane">
+	                            <div>
+		                            <span class="o_form_label">Diario de Retenciones Municipales</span>
+			                        <div class="text-muted">
+			                            Ingrese el diario para las retenciones de impuestos municipales
+			                        </div>
+	                                <field name="journal_municipal_retention" attrs="{'required':[('use_municipal_retention','=', True)]}" options="{'no_create_edit': True, 'no_open': True}"/>
+	                            </div>
+		                    </div>
+	                    </div>
+		            </div>
 				</xpath>
 		        <xpath expr="//div[@id='invoicing_settings']" position="inside">
 				    <div class="col-12 col-lg-6 o_setting_box">

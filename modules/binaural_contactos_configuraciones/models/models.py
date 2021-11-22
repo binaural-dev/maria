@@ -183,3 +183,35 @@ class ResCountryCityBinaural(models.Model):
     country_id = fields.Many2one('res.country', string="Pais", required=True)
     state_id = fields.Many2one('res.country.state', string="Estado", required=True)
     name = fields.Char(string="Ciudad", required=True)
+    
+    
+class ResCountryMunicipalityBinaural(models.Model):
+    _name = 'res.country.municipality'
+    _rec_name = 'name'
+    _sql_constraints = [('name_uniq', 'unique (name,country_id,state_id)',
+                         'No puede registrar un município con el mismo nombre para el estado y el pais seleccionado')]
+
+    country_id = fields.Many2one('res.country', string="Pais", required=True)
+    state_id = fields.Many2one('res.country.state', string="Estado", required=True)
+    name = fields.Char(string="Município", required=True)
+    
+
+class EconomicBrandBinaural(models.Model):
+    _name = 'economic.branch'
+    _rec_name = 'name'
+    _sql_constraints = [('name_uniq', 'unique (name)',
+                         'No puede registrar un ramo económico con el mismo nombre')]
+
+    name = fields.Char(string="Nombre", required=True)
+    code = fields.Char('Código', required=True)
+    
+    
+class EconomicActivity(models.Model):
+    _name = 'economic.activity'
+
+    name = fields.Char('Actividad Económica', required=True)
+    code = fields.Char('Código', required=True)
+    state_id = fields.Many2one('res.country.state', string="Estado", required=True)
+    municipality_id = fields.Many2one('res.country.municipality', string="Município", required=True)
+    branch_id = fields.Many2one('economic.branch', string="Ramo Económico", required=True)
+    alicuota = fields.Float(string='Alicuota', required=True)

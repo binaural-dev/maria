@@ -352,5 +352,142 @@
 	    <!--MENU-->
         <menuitem name="Ciudad" id="menu_res_city" parent="binaural_contactos_configuraciones.master_configuration" action="action_res_city"/>
         <!--RES COUNTRY CITY-->
+
+
+	    <!--RES COUNTRY MUNICIPALITY-->
+	    <!--TREE-->
+		<record id="view_res_country_municipality_tree" model="ir.ui.view">
+            <field name="name">Município</field>
+            <field name="model">res.country.municipality</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="country_id"/>
+                    <field name="state_id"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--FORM-->
+        <record id="view_res_country_municipality_form" model="ir.ui.view">
+            <field name="name">Município</field>
+            <field name="model">res.country.municipality</field>
+            <field name="arch" type="xml">
+                <form string="Município">
+                    <sheet string="Município">
+	                    <group>
+	                        <field name="country_id"/>
+	                        <field name="state_id"/>
+	                        <field name="name"/>
+	                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--ACTION-->
+        <record id="action_res_municipality" model="ir.actions.act_window">
+            <field name="name">Município</field>
+            <field name="res_model">res.country.municipality</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+	    <!--MENU-->
+        <menuitem name="Município" id="menu_res_municipality" parent="binaural_contactos_configuraciones.master_configuration" action="action_res_municipality"/>
+        <!--RES COUNTRY MUNICIPALITY-->
+
+	    <!--RAMO ECONOMICO-->
+	    <!--TREE-->
+		<record id="view_economic_branch_tree" model="ir.ui.view">
+            <field name="name">Ramo Económico</field>
+            <field name="model">economic.branch</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="code"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--FORM-->
+        <record id="view_economic_branch_form" model="ir.ui.view">
+            <field name="name">Ramo Económico</field>
+            <field name="model">economic.branch</field>
+            <field name="arch" type="xml">
+                <form string="Ramo Económico">
+                    <sheet string="Ramo Económico">
+	                    <group>
+	                        <field name="code"/>
+	                        <field name="name"/>
+	                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--ACTION-->
+        <record id="action_economic_branch" model="ir.actions.act_window">
+            <field name="name">Ramo Económico</field>
+            <field name="res_model">economic.branch</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+	    <!--MENU-->
+        <menuitem name="Ramo Económico" id="menu_economic_branch" parent="binaural_contactos_configuraciones.master_configuration" action="action_economic_branch"/>
+        <!--RAMO ECONOMICO-->
+
+	    <!--ACTIVIDAD ECONOMICA-->
+	    <!--TREE-->
+		<record id="view_economic_activity_tree" model="ir.ui.view">
+            <field name="name">Actividad Económica</field>
+            <field name="model">economic.activity</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="branch_id"/>
+                    <field name="state_id"/>
+                    <field name="municipality_id"/>
+                    <field name="alicuota"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--FORM-->
+        <record id="view_economic_activity_form" model="ir.ui.view">
+            <field name="name">Actividad Económica</field>
+            <field name="model">economic.activity</field>
+            <field name="arch" type="xml">
+                <form string="Actividad Económica">
+                    <sheet string="Actividad Económica">
+	                    <group>
+	                        <field name="code"/>
+	                        <field name="name"/>
+		                    <field name="branch_id"/>
+		                    <field name="state_id"/>
+		                    <field name="municipality_id"/>
+		                    <field name="alicuota"/>
+	                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--ACTION-->
+        <record id="action_economic_activity" model="ir.actions.act_window">
+            <field name="name">Actividad Económica</field>
+            <field name="res_model">economic.activity</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+	    <!--MENU-->
+        <menuitem name="Actividad Económica" id="menu_economic_activity" parent="binaural_contactos_configuraciones.master_configuration" action="action_economic_activity"/>
+        <!--RAMO ECONOMICO-->
   </data>
 </odoo>
