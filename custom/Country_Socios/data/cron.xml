@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--cron para remover suspension automaticamente-->
+        <record id="cron_remove_suspend_auto" model="ir.cron">
+            <field name="name">Remover suspensión automaticamente</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">1</field>
+            <field name="model_id" ref="model_wizard_remove_suspend_partner"/>
+            <field name="state">code</field>
+            <field name="code">model.remove_suspend_auto()</field>
+
+        </record>
+
+        <!--cron para archivar socios automaticamente-->
+        <record id="cron_archive_end_date_auto" model="ir.cron">
+            <field name="name">Archivar socio automaticamente</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">1</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">model.archive_members_auto()</field>
+
+        </record>
+
+        <!--cron para alerta de socios de fecha de fin-->
+        <record id="cron_alert_end_date_auto" model="ir.cron">
+            <field name="name">Alerta de fecha de fin de la acción</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">1</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">model.alert_end_date_members_auto()</field>
+        </record>
+
+	    <!--cron para verificar la solvencia de los socios-->
+        <record id="cron_partner_is_solvent" model="ir.cron">
+            <field name="name">Verificar solvencia de socios</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">1</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">model.compute_solvent()</field>
+        </record>
+
+	    <!--cron para actualizar la accion del socio en el display_name de contacto-->
+        <record id="cron_update_action_partner_contact" model="ir.cron">
+            <field name="name">Actualizar la accion en los contactos</field>
+            <field name="active" eval="False" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">1</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">model.update_action_contact()</field>
+        </record>
+
+	    <!--cron para actualizar el parentesco de socios y asociados-->
+        <record id="cron_update_action_relationship_partner" model="ir.cron">
+            <field name="name">Actualizar parentesco socios y asociados</field>
+            <field name="active" eval="False" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">1</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">model.update_relationship_partner()</field>
+        </record>
+    </data>
+</odoo>

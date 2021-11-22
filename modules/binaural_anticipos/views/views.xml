@@ -1,0 +1,29 @@
+<odoo>
+  	<data>
+  	    <record id="binaural_anticipos.action_account_payments_payable_advance_supplier" model="ir.actions.act_window">
+            <field name="name">Anticipos de Proveedores</field>
+            <field name="res_model">account.payment</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_payment_type': 'outbound', 'default_partner_type': 'supplier','default_is_advance':1}</field>
+            <field name="domain">[('is_advance','=',True),('partner_type','=','supplier')]</field>
+            <field name="view_id" ref="account.view_account_supplier_payment_tree"/>
+        </record>
+
+    	<menuitem name="Anticipos de Proveedores" id="bin_advance_supplier" parent="account.menu_finance_payables"
+              action="binaural_anticipos.action_account_payments_payable_advance_supplier"/>
+
+        <record id="binaural_anticipos.action_account_payments_payable_advance_customer" model="ir.actions.act_window">
+            <field name="name">Anticipos de Clientes</field>
+            <field name="res_model">account.payment</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_payment_type': 'inbound', 'default_partner_type': 'customer','default_is_advance':1}</field>
+            <field name="domain">[('is_advance','=',True),('partner_type','=','customer')]</field>
+            <field name="view_id" ref="account.view_account_payment_tree"/>
+        </record>
+
+    	<menuitem name="Anticipos de Clientes" id="bin_advance_customer" parent="account.menu_finance_receivables"
+              action="binaural_anticipos.action_account_payments_payable_advance_customer"/>
+  	</data>
+</odoo>

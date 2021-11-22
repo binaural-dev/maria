@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+wizard.invoice.batch.lines_acces,Lineas de factura en lote,model_wizard_invoice_batch_lines,,1,1,1,1
+wizard.invoice.batch.config,Configuracion facturas en lote,model_country_batch_invoice_config,,1,1,1,1
+wizard.invoice.batch, facturas en lote,model_wizard_invoice_batch,,1,1,1,1

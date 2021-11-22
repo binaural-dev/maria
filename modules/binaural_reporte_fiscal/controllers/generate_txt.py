@@ -9,7 +9,7 @@ class GenerateTxt(http.Controller):
     @http.route('/web/binary/download_txt', type='http', auth='user')
     def download_txt(self, date_start, date_end, **kw):
         retention = request.env['account.retention'].search([('date', '>=', date_start), ('date', '<=', date_end),
-                                                             ('state', '=', 'emitted')])
+                                                             ('state', '=', 'emitted'),('type_retention', '=', 'iva'), ('type', '=', 'in_invoice')])
         data = request.env['txt.wizard']
         tabla, lista = data._retention_iva(retention)
         f = StringIO()
