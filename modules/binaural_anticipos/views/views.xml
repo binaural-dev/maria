@@ -25,5 +25,16 @@
 
     	<menuitem name="Anticipos de Clientes" id="bin_advance_customer" parent="account.menu_finance_receivables"
               action="binaural_anticipos.action_account_payments_payable_advance_customer"/>
+
+	    <record id="view_form_move_inherited_binaural_anticipos_form" model="ir.ui.view">
+            <field name="name">Extension de formulario factura: agregar widget anticipos</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <field name="invoice_outstanding_credits_debits_widget" position="after">
+                        <field name="invoice_outstanding_credits_debits_widget2" class="oe_invoice_outstanding_credits_debits" colspan="2" nolabel="1" widget="payment" attrs="{'invisible': ['|', ('state', '!=', 'posted'), ('move_type', 'in', ('out_receipt', 'in_receipt'))]}"/>
+                </field>
+            </field>
+        </record>
   	</data>
 </odoo>
