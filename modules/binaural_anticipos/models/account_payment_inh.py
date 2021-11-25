@@ -13,8 +13,6 @@ class AccountPaymentInh(models.Model):
         ''' posted -> draft '''
         aml_anticipos = self.env['account.move.line'].search(
             [('payment_id_advance', '=', self.id)])
-        _logger.info('AML ANTICIPOS')
-        _logger.info('aml_anticipos')
         if not aml_anticipos:
             self.move_id.button_draft()
         else:
