@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 class ReportFinancial(models.AbstractModel):
 	_name = 'report.accounting_pdf_reports.report_financial'
 
-	def _compute_account_balance(self, accounts,data):
+	def _compute_account_balance(self, accounts,data,report):
 		""" compute the balance, debit and credit for the provided accounts
 		"""
 		if data['another_currency']:
@@ -45,6 +45,9 @@ class ReportFinancial(models.AbstractModel):
 			params = (tuple(accounts._ids),) + tuple(where_params)
 			self.env.cr.execute(request, params)
 			for row in self.env.cr.dictfetchall():
+				_logger.info("ROW ==============%s",row)
+				prev_b = row.get('balance')
+				#row.update({'balance':prev_b*float(report.sign)})
 				res[row['id']] = row
 		return res
 
@@ -63,14 +66,14 @@ class ReportFinancial(models.AbstractModel):
 			res[report.id] = dict((fn, 0.0) for fn in fields)
 			if report.type == 'accounts':
 				# it's the sum of the linked accounts
-				res[report.id]['account'] = self._compute_account_balance(report.account_ids,data)
+				res[report.id]['account'] = self._compute_account_balance(report.account_ids,data,report)
 				for value in res[report.id]['account'].values():
 					for field in fields:
 						res[report.id][field] += value.get(field)
 			elif report.type == 'account_type':
 				# it's the sum the leaf accounts with such an account type
 				accounts = self.env['account.account'].search([('user_type_id', 'in', report.account_type_ids.ids)])
-				res[report.id]['account'] = self._compute_account_balance(accounts,data)
+				res[report.id]['account'] = self._compute_account_balance(accounts,data,report)
 				for value in res[report.id]['account'].values():
 					for field in fields:
 						res[report.id][field] += value.get(field)
@@ -89,6 +92,45 @@ class ReportFinancial(models.AbstractModel):
 						res[report.id][field] += value[field] 
 		return res
 
+
+	def prev(self,data):
+		_logger.info("PREV")
+		if data:
+			_logger.info("DATA")
+			##############################buscar cuenta utilidad y/o pérdida del ejercicio esta es la cuenta unica que trae saldo anterior
+			account_type = self.env.ref('account.data_unaffected_earnings').id
+			date_from = datetime.strptime(data['date_from'], "%Y-%m-%d") if data['date_from'] else False
+			if data['another_currency']:
+				request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
+									" AND account_move_line.move_id=account_move_line__move_id.id" \
+									" AND account_move_line__move_id.date < '" + str(data["date_from"]) +\
+									"' GROUP BY account_id"
+			else:
+				request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
+								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
+						date_from.month).zfill(2) + "-01" + \
+								"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
+
+			accounts = self.env['account.account'].sudo().search([('user_type_id','=',account_type)],limit=1)
+			params_init = (tuple(accounts.ids),)
+			#_logger.info("REQUEST -------> %s",request_init)
+			self.invalidate_cache()
+			self.env.cr.execute(request_init, params_init)
+			result_init_balance = self.env.cr.dictfetchone()
+			self.invalidate_cache()
+			#_logger.info("----------------------------------------------------------> %s",result_init_balance)
+			vals_init = {
+				'name': accounts.code + ' ' + accounts.name,
+				'balance': result_init_balance.get('init_balance',0), #* float(report.sign) or 0.0,
+				'type': 'account',
+				'level': 3,#report.display_detail == 'detail_with_hierarchy' and 3,#duda
+				'account_type': accounts.internal_type,
+			}
+			_logger.info("HARE RETURN %s",vals_init)
+			return vals_init
+			###############################################
+
 	def get_account_lines(self, data):
 		lines = []
 		account_report = self.env['account.financial.report'].search([('id', '=', data['account_report_id'][0])])
@@ -103,49 +145,20 @@ class ReportFinancial(models.AbstractModel):
 				if report_acc:
 					for account_id, val in comparison_res[report_id].get('account').items():
 						report_acc[account_id]['comp_bal'] = val['balance']
-
-
-		##############################buscar cuenta utilidad y/o pérdida del ejercicio esta es la cuenta unica que trae saldo anterior
-		account_type = self.env.ref('account.data_unaffected_earnings').id
-		date_from = datetime.strptime(data['date_from'], "%Y-%m-%d") if data['date_from'] else False
-		if data['another_currency']:
-			request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
-								" AND account_move_line.move_id=account_move_line__move_id.id" \
-								" AND account_move_line__move_id.date < '" + str(data["date_from"]) +\
-								"' GROUP BY account_id"
-		else:
-			request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
-							" AND account_move_line.move_id=account_move_line__move_id.id" \
-							" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
-					date_from.month).zfill(2) + "-01" + \
-							"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
-
-		accounts = self.env['account.account'].sudo().search([('user_type_id','=',account_type)],limit=1)
-		params_init = (tuple(accounts.ids),)
-		_logger.info("REQUEST -------> %s",request_init)
-		self.invalidate_cache()
-		self.env.cr.execute(request_init, params_init)
-		result_init_balance = self.env.cr.dictfetchone()
-		self.invalidate_cache()
-		_logger.info("----------------------------------------------------------> %s",result_init_balance)
-		vals_init = {
-			'name': accounts.code + ' ' + accounts.name,
-			'balance': result_init_balance['init_balance'], #* float(report.sign) or 0.0,
-			'type': 'account',
-			'level': 3,#report.display_detail == 'detail_with_hierarchy' and 3,#duda
-			'account_type': accounts.internal_type,
-		}
-		###############################################
-
 		for report in child_reports:
 			n = report.name
+			#vals_init = False
 			#if n == 'Estado de Resultado':
 			if n == 'Estado de resultado (Ganancias y Pérdidas)':
 				#n = 'Total Ganancias y Perdidas'
 				n = 'Utilidad y/o pérdida del ejercicio'
 			if n == 'Estado de situación financiera':
 				n = 'Utilidad y/o pérdida no asignadas del año en curso'
-			print("report.name",n)
+				flag_prev = True
+				#vals_init = self.prev(data)
+				#_logger.info("vals init retornado %s",vals_init)
+			
+			_logger.info("report.name %s",n)
 			vals = {
 				#'name': report.name,
 				'name': n,
@@ -154,8 +167,8 @@ class ReportFinancial(models.AbstractModel):
 				'level': bool(report.style_overwrite) and report.style_overwrite or report.level,
 				'account_type': report.type or False, #used to underline the financial report balances
 			}
-			if n == 'Patrimonio':
-				vals['balance']+= vals_init['balance']
+			#if n == 'Patrimonio':
+			#	vals['balance']+= vals_init['balance']
 			if data['debit_credit']:
 				vals['debit'] = res[report.id]['debit']
 				vals['credit'] = res[report.id]['credit']
@@ -180,7 +193,7 @@ class ReportFinancial(models.AbstractModel):
 					nro_lvl = len(account.code) if len(account.code) > 3 else 3
 					for detail_account in self.env['account.account'].search([('code', 'ilike', account.code)]):
 						if len(detail_account.code) == account_len:
-							_logger.info("detail_account %s",detail_account.name)
+							#_logger.info("detail_account %s",detail_account.name)
 							if detail_account.id in res[report.id]['account'].keys():
 								if res[report.id]['account'][detail_account.id]['balance'] != 0:
 									regex = re.search('^' + account.code, detail_account.code)
@@ -201,9 +214,11 @@ class ReportFinancial(models.AbstractModel):
 						'level': report.display_detail == 'detail_with_hierarchy' and nro_lvl,
 						'account_type': account.internal_type,
 					}
-					_logger.info("VALS NAME %s",vals.get('name'))
-					if vals.get('name') == '3 PATRIMONIO':
-						_logger.info("PASOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+					#_logger.info("VALS NAME %s",vals.get('name'))
+					#_logger.info("VALS INIT %s",vals_init)
+					if vals.get('name') == '3 PATRIMONIO' and flag_prev:
+						#_logger.info("PASOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+						vals_init = self.prev(data)
 						sub_lines.append(vals_init)
 						vals['balance']+=vals_init['balance']
 
@@ -228,7 +243,7 @@ class ReportFinancial(models.AbstractModel):
 				first = lines[i]
 				del lines[i]
 				break
-		_logger.info("FIRST %s :",first)
+		#_logger.info("FIRST %s :",first)
 		if first:
 			lines.append(first)
 		return lines
@@ -246,7 +261,7 @@ class ReportFinancial(models.AbstractModel):
 		foreign_currency_id = False
 		if alternate_currency:
 			foreign_currency_id = self.env['res.currency'].sudo().browse(int(alternate_currency))
-		_logger.info("foreign_currency_id %s",foreign_currency_id)
+		#_logger.info("foreign_currency_id %s",foreign_currency_id)
 		account_len = int(self.env['ir.config_parameter'].sudo().get_param('account_longitude_report', default=8))
 		return {
 			'doc_ids': self.ids,
