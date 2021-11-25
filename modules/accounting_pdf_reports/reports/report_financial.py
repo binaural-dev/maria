@@ -7,6 +7,7 @@ import re
 import logging
 _logger = logging.getLogger(__name__)
 
+from datetime import datetime, timedelta
 class ReportFinancial(models.AbstractModel):
 	_name = 'report.accounting_pdf_reports.report_financial'
 
@@ -82,9 +83,10 @@ class ReportFinancial(models.AbstractModel):
 			elif report.type == 'sum':
 				# it's the sum of the children of this account.report
 				res2 = self._compute_report_balance(report.children_ids,data)
+				#_logger.info("RES 2 SUM %s",res2)
 				for key, value in res2.items():
 					for field in fields:
-						res[report.id][field] += value[field]
+						res[report.id][field] += value[field] 
 		return res
 
 	def get_account_lines(self, data):
@@ -102,12 +104,47 @@ class ReportFinancial(models.AbstractModel):
 					for account_id, val in comparison_res[report_id].get('account').items():
 						report_acc[account_id]['comp_bal'] = val['balance']
 
+
+		##############################buscar cuenta utilidad y/o pérdida del ejercicio esta es la cuenta unica que trae saldo anterior
+		account_type = self.env.ref('account.data_unaffected_earnings').id
+		date_from = datetime.strptime(data['date_from'], "%Y-%m-%d") if data['date_from'] else False
+		if data['another_currency']:
+			request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
+								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line__move_id.date < '" + str(data["date_from"]) +\
+								"' GROUP BY account_id"
+		else:
+			request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
+							" AND account_move_line.move_id=account_move_line__move_id.id" \
+							" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
+					date_from.month).zfill(2) + "-01" + \
+							"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
+
+		accounts = self.env['account.account'].sudo().search([('user_type_id','=',account_type)],limit=1)
+		params_init = (tuple(accounts.ids),)
+		_logger.info("REQUEST -------> %s",request_init)
+		self.invalidate_cache()
+		self.env.cr.execute(request_init, params_init)
+		result_init_balance = self.env.cr.dictfetchone()
+		self.invalidate_cache()
+		_logger.info("----------------------------------------------------------> %s",result_init_balance)
+		vals_init = {
+			'name': accounts.code + ' ' + accounts.name,
+			'balance': result_init_balance['init_balance'], #* float(report.sign) or 0.0,
+			'type': 'account',
+			'level': 3,#report.display_detail == 'detail_with_hierarchy' and 3,#duda
+			'account_type': accounts.internal_type,
+		}
+		###############################################
+
 		for report in child_reports:
 			n = report.name
 			#if n == 'Estado de Resultado':
 			if n == 'Estado de resultado (Ganancias y Pérdidas)':
 				#n = 'Total Ganancias y Perdidas'
 				n = 'Utilidad y/o pérdida del ejercicio'
+			if n == 'Estado de situación financiera':
+				n = 'Utilidad y/o pérdida no asignadas del año en curso'
 			print("report.name",n)
 			vals = {
 				#'name': report.name,
@@ -117,13 +154,17 @@ class ReportFinancial(models.AbstractModel):
 				'level': bool(report.style_overwrite) and report.style_overwrite or report.level,
 				'account_type': report.type or False, #used to underline the financial report balances
 			}
+			if n == 'Patrimonio':
+				vals['balance']+= vals_init['balance']
 			if data['debit_credit']:
 				vals['debit'] = res[report.id]['debit']
 				vals['credit'] = res[report.id]['credit']
 
 			if data['enable_filter']:
 				vals['balance_cmp'] = res[report.id]['comp_bal'] * float(report.sign)
-			lines.append(vals) 
+			lines.append(vals)
+			#if n == 'Patrimonio':
+			#	lines.append(vals_init)
 			if report.display_detail == 'no_detail':
 				#the rest of the loop is used to display the details of the financial report, so it's not needed here.
 				continue
@@ -139,13 +180,18 @@ class ReportFinancial(models.AbstractModel):
 					nro_lvl = len(account.code) if len(account.code) > 3 else 3
 					for detail_account in self.env['account.account'].search([('code', 'ilike', account.code)]):
 						if len(detail_account.code) == account_len:
+							_logger.info("detail_account %s",detail_account.name)
 							if detail_account.id in res[report.id]['account'].keys():
 								if res[report.id]['account'][detail_account.id]['balance'] != 0:
 									regex = re.search('^' + account.code, detail_account.code)
 									if regex:
 										flag = True
 										if len(account.code) != account_len:
-											value['balance'] += res[report.id]['account'][detail_account.id]['balance'] * float(report.sign)
+											value['balance'] += res[report.id]['account'][detail_account.id]['balance']# * float(report.sign)
+							
+							#if detail_account.user_type_id.id == account_type:
+							#	#es la de gyp
+							#	value['balance'] += vals_init['balance']
 
 					account = self.env['account.account'].browse(account_id)
 					vals = {
@@ -155,6 +201,12 @@ class ReportFinancial(models.AbstractModel):
 						'level': report.display_detail == 'detail_with_hierarchy' and nro_lvl,
 						'account_type': account.internal_type,
 					}
+					_logger.info("VALS NAME %s",vals.get('name'))
+					if vals.get('name') == '3 PATRIMONIO':
+						_logger.info("PASOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+						sub_lines.append(vals_init)
+						vals['balance']+=vals_init['balance']
+
 					if data['debit_credit']:
 						vals['debit'] = value['debit']
 						vals['credit'] = value['credit']
@@ -169,6 +221,16 @@ class ReportFinancial(models.AbstractModel):
 					if flag:
 						sub_lines.append(vals)
 				lines += sorted(sub_lines, key=lambda sub_line: sub_line['name'])
+	
+		first = False
+		for i in range(len(lines)):
+			if lines[i]['name'] == 'Utilidad y/o pérdida del ejercicio' or lines[i]['name'] == 'Utilidad y/o pérdida no asignadas del año en curso':
+				first = lines[i]
+				del lines[i]
+				break
+		_logger.info("FIRST %s :",first)
+		if first:
+			lines.append(first)
 		return lines
 
 	@api.model

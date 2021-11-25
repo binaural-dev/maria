@@ -150,6 +150,7 @@
         <field name="type">account_type</field>
         <field name="account_type_ids" eval="[(4,ref('account.data_account_type_equity'))]"/>
         <field name="sequence">3</field>
+        <field name="sign" >-1</field>
     </record>
 
     <!--este que viene no se usa-->
