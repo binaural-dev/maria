@@ -218,6 +218,7 @@ class account_payment_inh(models.Model):
                     'partner_id': self.partner_id.id,
                     'credit': amount,
                     'debit': 0,
+                    'foreign_currency_rate': payment.foreign_currency_rate,
                     'payment_id_advance': payment.id,
                     'reconciled': False,
                 }), (0, 0, {
@@ -226,6 +227,7 @@ class account_payment_inh(models.Model):
                     'partner_id': self.partner_id.id,
                     'debit': amount,
                     'credit': 0,
+                    'foreign_currency_rate': payment.foreign_currency_rate,
                     'payment_id_advance': payment.id,
                     'reconciled': False,
                 })]
@@ -237,6 +239,7 @@ class account_payment_inh(models.Model):
                     'partner_id': self.partner_id.id,
                     'debit': amount,
                     'credit': 0,
+                    'foreign_currency_rate': payment.foreign_currency_rate,
                     'payment_id_advance': payment.id,
                     'reconciled': False,
                 }), (0, 0, {
@@ -245,13 +248,14 @@ class account_payment_inh(models.Model):
                     'partner_id': self.partner_id.id,
                     'debit': 0,
                     'credit': amount,
+                    'foreign_currency_rate': payment.foreign_currency_rate,
                     'payment_id_advance': payment.id,
                     'reconciled': False,
                 })]
             move_obj = self.env['account.move'].create({
                 'name': self.name + payment.name,
                 'date': fields.Date.today(),
-                'journal_id': self.journal_id.id if self.journal_id else 1,
+                'journal_id': payment.journal_id.id if payment.journal_id else 1,
                 'state': 'draft',
                 'line_ids': line_ret,
                 'company_id': self.company_id.id,
