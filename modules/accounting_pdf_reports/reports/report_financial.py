@@ -127,18 +127,20 @@ class ReportFinancial(models.AbstractModel):
 			self.env.cr.execute(request_init, params_init)
 			result_init_balance = self.env.cr.dictfetchone()
 			self.invalidate_cache()
+			values = {}
 			#_logger.info("----------------------------------------------------------> %s",result_init_balance)
-			vals_init = {
-				'name': accounts.code + ' ' + accounts.name,
-				'balance': result_init_balance.get('init_balance',0), #* float(report.sign) or 0.0,
-				'type': 'account',
-				'level': 3,#report.display_detail == 'detail_with_hierarchy' and 3,#duda
-				'account_type': accounts.internal_type,
-			}
-			values = {
-				'id':accounts.id,
-				'balance':result_init_balance.get('init_balance',0),
-			}
+			if result_init_balance and result_init_balance != None:
+				vals_init = {
+					'name': accounts.code + ' ' + accounts.name,
+					'balance': result_init_balance.get('init_balance',0), #* float(report.sign) or 0.0,
+					'type': 'account',
+					'level': 3,#report.display_detail == 'detail_with_hierarchy' and 3,#duda
+					'account_type': accounts.internal_type,
+				}
+				values = {
+					'id':accounts.id,
+					'balance':result_init_balance.get('init_balance',0),
+				}
 			_logger.info("HARE RETURN %s",values)
 			return values
 			###############################################
