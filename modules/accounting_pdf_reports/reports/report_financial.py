@@ -28,6 +28,7 @@ class ReportFinancial(models.AbstractModel):
 			}
 
 		res = {}
+		prev = self.prev(data)
 		for account in accounts:
 			res[account.id] = dict.fromkeys(mapping, 0.0)
 		if accounts:
@@ -45,10 +46,17 @@ class ReportFinancial(models.AbstractModel):
 			params = (tuple(accounts._ids),) + tuple(where_params)
 			self.env.cr.execute(request, params)
 			for row in self.env.cr.dictfetchall():
-				_logger.info("ROW ==============%s",row)
+				#_logger.info("ROW ==============%s",row)
+				if row.get('id') == prev.get('id',0):
+					_logger.info("ESTA ES LA CUENTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+					_logger.info("ROW %s",row)
+					row.update({
+						'balance':prev.get('balance',0)
+					})
 				prev_b = row.get('balance')
 				#row.update({'balance':prev_b*float(report.sign)})
 				res[row['id']] = row
+		#_logger.info("RESSSSSSSSSSSSSSSS %s",res)
 		return res
 
 	def _compute_report_balance(self, reports,data):
@@ -127,8 +135,12 @@ class ReportFinancial(models.AbstractModel):
 				'level': 3,#report.display_detail == 'detail_with_hierarchy' and 3,#duda
 				'account_type': accounts.internal_type,
 			}
-			_logger.info("HARE RETURN %s",vals_init)
-			return vals_init
+			values = {
+				'id':accounts.id,
+				'balance':result_init_balance.get('init_balance',0),
+			}
+			_logger.info("HARE RETURN %s",values)
+			return values
 			###############################################
 
 	def get_account_lines(self, data):
@@ -216,11 +228,11 @@ class ReportFinancial(models.AbstractModel):
 					}
 					#_logger.info("VALS NAME %s",vals.get('name'))
 					#_logger.info("VALS INIT %s",vals_init)
-					if vals.get('name') == '3 PATRIMONIO' and flag_prev:
+					"""if vals.get('name') == '3 PATRIMONIO' and flag_prev:
 						#_logger.info("PASOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 						vals_init = self.prev(data)
 						sub_lines.append(vals_init)
-						vals['balance']+=vals_init['balance']
+						vals['balance']+=vals_init['balance']"""
 
 					if data['debit_credit']:
 						vals['debit'] = value['debit']
