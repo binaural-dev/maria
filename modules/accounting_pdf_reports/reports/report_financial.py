@@ -130,18 +130,17 @@ class ReportFinancial(models.AbstractModel):
 			##############################buscar cuenta utilidad y/o pérdida del ejercicio esta es la cuenta unica que trae saldo anterior
 			account_type = self.env.ref('account.data_unaffected_earnings').id
 			accounts = self.env['account.account'].sudo().search([('user_type_id','=',account_type)],limit=1)
-			date_from = datetime.strptime(data['date_from'], "%Y-%m-%d") if data['date_from'] else False
+			date_to = datetime.strptime(data['date_to'], "%Y-%m-%d") if data['date_to'] else False
+			#_logger.info("DATE TOOOOOOOOOOOOOOOOOOOOO %s",data['date_to'])
 			if data['another_currency']:
 				request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 									" AND account_move_line.move_id=account_move_line__move_id.id" \
-									" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
-									date_from.month).zfill(2) + "-01" + \
+									" AND account_move_line__move_id.date < '" + str(data['date_to']) + \
 									"' GROUP BY account_id"
 			else:
 				request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
-								" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
-						date_from.month).zfill(2) + "-01" + \
+								" AND account_move_line__move_id.date < '" + str(data['date_to']) + \
 								"' GROUP BY account_id"
 
 			#' AND account_move_line__move_id.state = 'posted'
@@ -289,6 +288,8 @@ class ReportFinancial(models.AbstractModel):
 	def _get_report_values(self, docids, data=None):
 		if not data.get('form') or not self.env.context.get('active_model') or not self.env.context.get('active_id'):
 			raise UserError(_("Form content is missing, this report cannot be printed."))
+		if not data['form'].get('date_to'):
+			raise UserError("Fechas obligatorias")
 
 		model = self.env.context.get('active_model')
 		docs = self.env[model].browse(self.env.context.get('active_id'))
