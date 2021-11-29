@@ -806,7 +806,7 @@ msgstr ""
 #. module: accounting_pdf_reports
 #: model:account.financial.report,name:accounting_pdf_reports.account_financial_report_profitloss_toreport0
 msgid "Profit (Loss) to report"
-msgstr "Beneficio (pérdida) para informar"
+msgstr "Utilidad y/o pérdida no asignadas del año en curso"
 
 #. module: accounting_pdf_reports
 #: model:account.financial.report,name:accounting_pdf_reports.account_financial_report_profitandloss0
