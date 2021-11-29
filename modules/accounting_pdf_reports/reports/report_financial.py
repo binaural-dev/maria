@@ -136,12 +136,12 @@ class ReportFinancial(models.AbstractModel):
 				request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 									" AND account_move_line.move_id=account_move_line__move_id.id" \
 									" AND account_move_line__move_id.date <= '" + str(data['date_to']) + \
-									"' GROUP BY account_id"
+									"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
 			else:
 				request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
 								" AND account_move_line__move_id.date <= '" + str(data['date_to']) + \
-								"' GROUP BY account_id"
+								"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
 
 			#' AND account_move_line__move_id.state = 'posted'
 			params_init = (tuple(accounts.ids),)
