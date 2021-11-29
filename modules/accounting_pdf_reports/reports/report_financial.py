@@ -38,23 +38,45 @@ class ReportFinancial(models.AbstractModel):
 			if where_clause.strip():
 				wheres.append(where_clause.strip())
 			filters = " AND ".join(wheres)
+			#_logger.info("FILTROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS %s",filters)
 			request = "SELECT account_id as id, " + ', '.join(mapping.values()) + \
 					   " FROM " + tables + \
 					   " WHERE account_id IN %s " \
 							+ filters + \
 					   " GROUP BY account_id"
+			#_logger.info("WHERE PARAMSSSSSSSSSSSSSSSSSSS %s",where_params)
 			params = (tuple(accounts._ids),) + tuple(where_params)
 			self.env.cr.execute(request, params)
-			for row in self.env.cr.dictfetchall():
-				#_logger.info("ROW ==============%s",row)
-				if row.get('id') == prev.get('id',0):
-					_logger.info("ESTA ES LA CUENTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-					_logger.info("ROW %s",row)
-					row.update({
-						'balance':prev.get('balance',0)
-					})
-				prev_b = row.get('balance')
-				#row.update({'balance':prev_b*float(report.sign)})
+			all_accounts_info = self.env.cr.dictfetchall()
+			####################solo financiera ojo con caso que pueda salir doble
+			#self.invalidate_cache()
+			account_type = self.env.ref('account.data_unaffected_earnings').id
+			accounts_prev = self.env['account.account'].sudo().search([('user_type_id','=',account_type)],limit=1)
+			new_row = {
+				'id':accounts_prev.id,
+				'balance':prev.get('balance',0),
+				'debit':0,
+				'credit':0,
+			}
+			
+			####################################
+			
+			_logger.info("alll account info %s",all_accounts_info)
+			rt = self.env.ref('accounting_pdf_reports.account_financial_report_liability0Capital').id
+			_logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %s",report.id)#detectar cual es el padre y ponerlo guiarse por el xml donde se armo
+			#account_financial_report_liability0Capital
+			if rt == report.id:
+				all_accounts_info.append(new_row)
+			for row in all_accounts_info:
+				_logger.info("ROW ==============%s",row)
+				#if row.get('id') == prev.get('id',0):
+				#	_logger.info("ESTA ES LA CUENTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+				#	_logger.info("ROW %s",row)
+				#	row.update({
+				#		'balance':prev.get('balance',0)
+				#	})
+			
+				
 				res[row['id']] = row
 		#_logger.info("RESSSSSSSSSSSSSSSS %s",res)
 		return res
@@ -107,20 +129,22 @@ class ReportFinancial(models.AbstractModel):
 			_logger.info("DATA")
 			##############################buscar cuenta utilidad y/o pérdida del ejercicio esta es la cuenta unica que trae saldo anterior
 			account_type = self.env.ref('account.data_unaffected_earnings').id
+			accounts = self.env['account.account'].sudo().search([('user_type_id','=',account_type)],limit=1)
 			date_from = datetime.strptime(data['date_from'], "%Y-%m-%d") if data['date_from'] else False
 			if data['another_currency']:
 				request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 									" AND account_move_line.move_id=account_move_line__move_id.id" \
-									" AND account_move_line__move_id.date < '" + str(data["date_from"]) +\
+									" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
+									date_from.month).zfill(2) + "-01" + \
 									"' GROUP BY account_id"
 			else:
 				request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
 								" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
 						date_from.month).zfill(2) + "-01" + \
-								"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
+								"' GROUP BY account_id"
 
-			accounts = self.env['account.account'].sudo().search([('user_type_id','=',account_type)],limit=1)
+			#' AND account_move_line__move_id.state = 'posted'
 			params_init = (tuple(accounts.ids),)
 			#_logger.info("REQUEST -------> %s",request_init)
 			self.invalidate_cache()
@@ -167,7 +191,7 @@ class ReportFinancial(models.AbstractModel):
 				#n = 'Total Ganancias y Perdidas'
 				n = 'Utilidad y/o pérdida del ejercicio'
 			if n == 'Estado de situación financiera':
-				n = 'Utilidad y/o pérdida no asignadas del año en curso'
+				n = 'Activo - (Pasivo + Capital)'
 				flag_prev = True
 				#vals_init = self.prev(data)
 				#_logger.info("vals init retornado %s",vals_init)
@@ -253,11 +277,10 @@ class ReportFinancial(models.AbstractModel):
 	
 		first = False
 		for i in range(len(lines)):
-			if lines[i]['name'] == 'Utilidad y/o pérdida del ejercicio' or lines[i]['name'] == 'Utilidad y/o pérdida no asignadas del año en curso':
+			if lines[i]['name'] == 'Utilidad y/o pérdida del ejercicio' or lines[i]['name'] == 'Activo - (Pasivo + Capital)':
 				first = lines[i]
 				del lines[i]
 				break
-		#_logger.info("FIRST %s :",first)
 		if first:
 			lines.append(first)
 		return lines
