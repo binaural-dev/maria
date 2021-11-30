@@ -302,7 +302,6 @@ class AccountPaymentBinauralFacturacion(models.Model):
 
 	@api.depends('move_id.line_ids.amount_residual', 'move_id.line_ids.amount_residual_currency', 'move_id.line_ids.account_id')
 	def _compute_reconciliation_status(self):
-		_logger.info("COMPUTEEEEEEEEEEEE ",)
 		''' Compute the field indicating if the payments are already reconciled with something.
 		This field is used for display purpose (e.g. display the 'reconcile' button redirecting to the reconciliation
 		widget).
@@ -317,17 +316,13 @@ class AccountPaymentBinauralFacturacion(models.Model):
 				pay.is_reconciled = True
 				pay.is_matched = True
 			else:
-				_logger.info("liquidity_lines %s",liquidity_lines)
 				residual_field = 'amount_residual' if pay.currency_id == pay.company_id.currency_id else 'amount_residual_currency'
 				if pay.journal_id.default_account_id and pay.journal_id.default_account_id in liquidity_lines.account_id:
 					# Allow user managing payments without any statement lines by using the bank account directly.
 					# In that case, the user manages transactions only using the register payment wizard.
 					pay.is_matched = True
 				else:
-					a = sum(liquidity_lines.mapped('amount_residual'))
-					_logger.info("AAAAAAAAAAAAa %s",a)
-					b = sum(liquidity_lines.mapped('amount_residual_currency'))
-					_logger.info("BBBBBBBB %s",b)
+					#se cambio variable residual_field -> amount_residual 
 					pay.is_matched = pay.currency_id.is_zero(sum(liquidity_lines.mapped('amount_residual')))
 
 				reconcile_lines = (counterpart_lines + writeoff_lines).filtered(lambda line: line.account_id.reconcile)
