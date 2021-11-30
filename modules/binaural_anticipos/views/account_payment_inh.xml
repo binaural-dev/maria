@@ -14,7 +14,7 @@
     </record>
 
     <!--Add column is advance in list-->
-    <record id="view_list_account_payment_list_inh_bin" model="ir.ui.view">
+    <!--record id="view_list_account_payment_list_inh_bin" model="ir.ui.view">
         <field name="name">Extension de listado de pagos registrados</field>
         <field name="model">account.payment</field>
         <field name="inherit_id" ref="account.view_account_supplier_payment_tree"/>
@@ -24,7 +24,7 @@
             </xpath>
 
         </field>
-    </record>
+    </record-->
     <record id="invoice_inh_a" model="ir.ui.view">
         <field name="name">Extension de factura</field>
         <field name="model">account.move</field>

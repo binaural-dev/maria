@@ -84,7 +84,8 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
             'foreign_currency_rate':line.foreign_currency_rate,
             'currency_id': (line.currency_id or line.company_currency_id).id,
             'partner_bank_id': line.move_id.partner_bank_id.id,
-            'partner_type': 'customer' if line.account_internal_type == 'receivable' else 'supplier',
+            'partner_type': 'customer' if line.account_internal_type == 'receivable' or \
+                        (line.account_id.user_type_id.type == 'other' and line.account_id.user_type_id.name == 'Pasivo circulantes') else 'supplier',
             'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
         }
 
