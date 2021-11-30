@@ -21,7 +21,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','account', 'account_accountant'],
+    'depends': ['base','account', 'account_accountant', 'binaural_facturacion'],
 
     # always loaded
     'data': [
