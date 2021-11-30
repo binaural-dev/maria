@@ -259,6 +259,8 @@ class account_payment_inh(models.Model):
                 'state': 'draft',
                 'line_ids': line_ret,
                 'company_id': self.company_id.id,
+                'foreign_currency_rate': payment.foreign_currency_rate,
+                'foreign_currency_id': int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id')),
             })
             _logger.info('MOVIMIENTO PUENTE')
             _logger.info(move_obj)
