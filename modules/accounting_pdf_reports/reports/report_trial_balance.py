@@ -162,25 +162,22 @@ class ReportTrialBalance(models.AbstractModel):
 				#_logger.info("Comparacion de longitud : len(account.code) %s",len(account.code))
 				#_logger.info("Comparacion de longitud : account_longitude %s",account_longitude)
 				if int(len(account.code)) != int(account_longitude):
-					_logger.info("la longitud de la cuenta es distinto a la configurada este ira TRUE")
+					#_logger.info("la longitud de la cuenta es distinto a la configurada este ira TRUE")
 					res['bold'] = True
 					for detail_account in self.env['account.account'].search([('code', 'ilike', account.code)]):
-						_logger.info("Comparacion de detail_account : len(account.code) %s",len(detail_account.code))
-						_logger.info("Comparacion de detail_account : account_longitude %s",account_longitude)
+						#_logger.info("Comparacion de detail_account : len(account.code) %s",len(detail_account.code))
+						#_logger.info("Comparacion de detail_account : account_longitude %s",account_longitude)
 						if int(len(detail_account.code)) == int(account_longitude):
-							_logger.info("la longitud de la cuenta buscada es igual al ultimo nvel sumar")
+							#_logger.info("la longitud de la cuenta buscada es igual al ultimo nvel sumar")
 							detail_code = detail_account.code[0:len(account.code)]
 							if detail_account.id in account_result:
-								_logger.info("detal_account si esta en account_resilt")
-								_logger.info("detail_code %s",detail_code)
-								_logger.info("account.code %s",account.code)
 								if detail_code == account.code:
 									ib = 0
 									for result_init in result_init_balance:
 										if result_init['id'] == detail_account.id:
 											res['init_balance'] += result_init['init_balance'] or 0.0
 											ib += result_init['init_balance'] or 0.0
-									_logger.info("ESTOY ACUMULANDO EN LOS BOLD")
+									_logger.info("ESTOY ACUMULANDO EN LOS BOLD------------------------------------------")
 									res['debit'] += account_result[detail_account.id].get('debit')
 									res['credit'] += account_result[detail_account.id].get('credit')
 									res['balance'] += account_result[detail_account.id].get('balance') + ib
@@ -191,7 +188,14 @@ class ReportTrialBalance(models.AbstractModel):
 												res['init_balance'] += result_init['init_balance'] or 0.0
 										res['balance'] = res['init_balance'] + res['debit'] - res['credit']
 							else:
-								_logger.info("no esta en account result %s",account_result)
+								_logger.info("no esta en account result %s",detail_account.name)
+								ib = 0
+								for result_init in result_init_balance:
+									if result_init['id'] == detail_account.id:
+										res['init_balance'] += result_init['init_balance'] or 0.0
+										ib += result_init['init_balance'] or 0.0
+								res['balance'] += ib
+
 				#if res['balance'] != 0:
 				#	account_res.append(res)
 				account_res.append(res)
