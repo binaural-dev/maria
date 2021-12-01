@@ -12,6 +12,11 @@ class AccountBalanceReport(models.TransientModel):
 
     another_currency = fields.Boolean(string='En Bolivares')
 
+    #sobreescribir
+    target_move = fields.Selection([('posted', 'Todos los asientos validados'),
+                                    ('all', 'Todos los asientos'),
+                                    ], string='Movimientos destino', required=True, default='posted')
+
     def _print_report(self, data):
         data = self.pre_print_report(data)
         data['form'].update(self.read(['another_currency'])[0])
