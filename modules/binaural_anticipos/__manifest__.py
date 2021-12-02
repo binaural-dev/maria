@@ -29,6 +29,8 @@
         'views/views.xml',
         'views/account_payment_inh.xml',
         'views/account_advance_config.xml',
+        'wizard/wizard_payment_report.xml',
+        'reports/all_payment_report.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
