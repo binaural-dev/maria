@@ -19,7 +19,7 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','sale','binaural_contactos_configuraciones'],
+    'depends': ['base','sale','sale_management','binaural_contactos_configuraciones'],
 
     # always loaded
     'data': [
