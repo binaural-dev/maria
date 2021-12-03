@@ -45,20 +45,20 @@ class ReportMemberList2(models.AbstractModel):
 		if type_payment == 'advance':
 			if type_report and type_report == 'supplier':
 				#search_domain += [('type','=','outbound')]
-				domain += [('supplier','=',True)]
+				domain += [('supplier_rank','>',0)]
 				name_report = 'Listado de anticipos de proveedores'
 			else:
 				#search_domain += [('type','=','inbound')]
-				domain += [('customer','=',True)]
+				domain += [('customer_rank','>',0)]
 				name_report = 'Listado de anticipos de clientes'
 		else:
 			if type_report and type_report == 'supplier':
 				#search_domain += [('type','=','outbound')]
-				domain += [('supplier','=',True)]
+				domain += [('supplier_rank','>',0)]
 				name_report = 'Listado de pagos de proveedores'
 			else:
 				#search_domain += [('type','=','inbound')]
-				domain += [('customer','=',True)]
+				domain += [('customer_rank','>',0)]
 				name_report = 'Listado de pagos de clientes'
 
 		client_ids = []
