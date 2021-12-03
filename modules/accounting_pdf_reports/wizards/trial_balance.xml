@@ -9,13 +9,12 @@
             <data>
                 
                 <field name="journal_ids" widget="many2many_tags"/>
-                    <xpath expr="//field[@name='target_move']" position="after">
-                        <field name="display_account" widget="radio"/>
-                        <field name="another_currency" />
-                        <newline/>
-                        
-                        
-                    </xpath>
+                
+                <xpath expr="//field[@name='target_move']" position="after">
+                    <field name="display_account" widget="radio"/>
+                    <field name="another_currency" />
+                    <newline/>        
+                </xpath>
             </data>
         </field>
     </record>
