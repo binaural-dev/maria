@@ -46,6 +46,8 @@ class ReportTrialBalance(models.AbstractModel):
 					" FROM " + tables + " WHERE account_id IN %s " + filters + " GROUP BY account_id")
 		params = (tuple(accounts.ids),) + tuple(where_params)
 		_logger.info("REQUEST %s",request)
+		_logger.info("filteres de trial balance %s",filters)
+		_logger.info("WHERE PARAMS %s",where_params)
 		self.env.cr.execute(request, params)
 		for row in self.env.cr.dictfetchall():
 			account_result[row.pop('id')] = row
@@ -53,16 +55,18 @@ class ReportTrialBalance(models.AbstractModel):
 		_logger.info("account_result ----------------------------------------------- %s",account_result)
 
 		# fin odoo
-		
 		#inicio personalizado
 		context = dict(self._context or {})
 		date_from = datetime.strptime(context.get('date_from'), "%Y-%m-%d") if context.get('date_from') else False
 		date_today = datetime.now()
+
+		#al request de salto inicial filtrar por diarios
 		if another_currency:
 			if target_move == 'all':
 				if date_from:
 					request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
 						date_from.month).zfill(2) + "-01" + \
 								"' GROUP BY account_id"
@@ -71,6 +75,7 @@ class ReportTrialBalance(models.AbstractModel):
 						date_today.month).zfill(2) + "-01')"
 					request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_today.year) + "-" + str(
 						date_today.month).zfill(2) + "-01" + \
 								"' GROUP BY account_id"
@@ -78,6 +83,7 @@ class ReportTrialBalance(models.AbstractModel):
 				if date_from:
 					request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
 						date_from.month).zfill(2) + "-01" + \
 								"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
@@ -86,15 +92,17 @@ class ReportTrialBalance(models.AbstractModel):
 						date_today.month).zfill(2) + "-01')"
 					request_init = "SELECT account_id AS id, (SUM(debit*account_move_line.foreign_currency_rate) - SUM(credit*account_move_line.foreign_currency_rate)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_today.year) + "-" + str(
 						date_today.month).zfill(2) + "-01" + \
 								"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
-
+					##
 		else:
 			if target_move == 'all':
 				if date_from:
 					request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
 						date_from.month).zfill(2) + "-01" + \
 								"' GROUP BY account_id"
@@ -103,6 +111,7 @@ class ReportTrialBalance(models.AbstractModel):
 						date_today.month).zfill(2) + "-01')"
 					request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_today.year) + "-" + str(
 						date_today.month).zfill(2) + "-01" + \
 								"' GROUP BY account_id"
@@ -110,6 +119,7 @@ class ReportTrialBalance(models.AbstractModel):
 				if date_from:
 					request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_from.year) + "-" + str(
 						date_from.month).zfill(2) + "-01" + \
 								"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
@@ -118,11 +128,13 @@ class ReportTrialBalance(models.AbstractModel):
 						date_today.month).zfill(2) + "-01')"
 					request_init = "SELECT account_id AS id, (SUM(debit) - SUM(credit)) AS init_balance FROM account_move as account_move_line__move_id,account_move_line WHERE account_id IN %s " \
 								" AND account_move_line.move_id=account_move_line__move_id.id" \
+								" AND account_move_line.journal_id IN %s" \
 								" AND account_move_line__move_id.date < '" + str(date_today.year) + "-" + str(
 						date_today.month).zfill(2) + "-01" + \
 								"' AND account_move_line__move_id.state = 'posted' GROUP BY account_id"
-
-		params_init = (tuple(accounts.ids),)
+		_logger.info("CONTEXTTTTTTTTTTTTTTTTTT %s",self._context)
+		#el context trae el data
+		params_init = (tuple(accounts.ids),tuple(self._context.get("journal_ids")))
 		self.invalidate_cache()
 		self.env.cr.execute(request_init, params_init)
 		result_init_balance = self.env.cr.dictfetchall()
@@ -150,7 +162,7 @@ class ReportTrialBalance(models.AbstractModel):
 				debit_total += round(account_result[account.id].get('debit'), 2)
 				credit_total += round(account_result[account.id].get('credit'), 2)
 			else:
-				print("///NO esta////////")
+				#print("///NO esta////////")
 				for result_init in result_init_balance:
 					if result_init['id'] == account.id:
 						print("el saldo inicial de la cuenta es",result_init['init_balance'])
@@ -177,7 +189,7 @@ class ReportTrialBalance(models.AbstractModel):
 										if result_init['id'] == detail_account.id:
 											res['init_balance'] += result_init['init_balance'] or 0.0
 											ib += result_init['init_balance'] or 0.0
-									_logger.info("ESTOY ACUMULANDO EN LOS BOLD------------------------------------------")
+									#_logger.info("ESTOY ACUMULANDO EN LOS BOLD------------------------------------------")
 									res['debit'] += account_result[detail_account.id].get('debit')
 									res['credit'] += account_result[detail_account.id].get('credit')
 									res['balance'] += account_result[detail_account.id].get('balance') + ib
@@ -188,7 +200,7 @@ class ReportTrialBalance(models.AbstractModel):
 												res['init_balance'] += result_init['init_balance'] or 0.0
 										res['balance'] = res['init_balance'] + res['debit'] - res['credit']
 							else:
-								_logger.info("no esta en account result %s",detail_account.name)
+								#_logger.info("no esta en account result %s",detail_account.name)
 								ib = 0
 								for result_init in result_init_balance:
 									if result_init['id'] == detail_account.id:

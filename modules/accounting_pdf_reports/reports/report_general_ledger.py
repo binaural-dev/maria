@@ -4,7 +4,8 @@ import time
 from odoo import api, models, _
 from odoo.exceptions import UserError
 
-
+import logging
+_logger = logging.getLogger(__name__)
 class ReportGeneralLedger(models.AbstractModel):
     _name = 'report.accounting_pdf_reports.report_general_ledger'
     _description = 'General Ledger Report'
@@ -51,6 +52,7 @@ class ReportGeneralLedger(models.AbstractModel):
                 JOIN account_journal j ON (l.journal_id=j.id)\
                 WHERE l.account_id IN %s""" + filters + ' GROUP BY l.account_id')
             params = (tuple(accounts.ids),) + tuple(init_where_params)
+            
             cr.execute(sql, params)
             for row in cr.dictfetchall():
                 move_lines[row.pop('account_id')].append(row)
@@ -80,6 +82,8 @@ class ReportGeneralLedger(models.AbstractModel):
         params = (tuple(accounts.ids),) + tuple(where_params)
         cr.execute(sql, params)
 
+        _logger.info("GENERAL,FILTERS %s",filters)
+        _logger.info("WHEREEEEEEEEEEEEEEEE %s",where_params)
         for row in cr.dictfetchall():
             balance = 0
             for line in move_lines.get(row['account_id']):
