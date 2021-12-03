@@ -135,7 +135,7 @@
 			                                        <span t-esc="p.journal_id.name"/>
 		                                        </td>
                                                 <td style="text-align: center">
-                                                    <t t-set="states_p" t-value="dict([('draft', 'Borrador'),('posted', 'Confirmado'),('sent', 'Enviado'),('reconciled', 'Reconciliado'),('cancelled', 'Cancelado')])"/> <!--('discontinued', 'Suspendido')-->
+                                                    <t t-set="states_p" t-value="dict([('draft', 'Borrador'),('posted', 'Confirmado'), ('cancel', 'Cancelado')])"/> <!--('discontinued', 'Suspendido')-->
                                                     <t t-esc="states_p[p.state]"/>
 			                                        
                                                 
