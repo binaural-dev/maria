@@ -7,12 +7,13 @@
         <field name="inherit_id" ref="account.account_common_report_view"/>
         <field name="arch" type="xml">
             <data>
-            <field name="journal_ids" position="replace"/>
+                
+                <field name="journal_ids" widget="many2many_tags"/>
+                
                 <xpath expr="//field[@name='target_move']" position="after">
                     <field name="display_account" widget="radio"/>
                     <field name="another_currency" />
-                    <newline/>
-                    
+                    <newline/>        
                 </xpath>
             </data>
         </field>
