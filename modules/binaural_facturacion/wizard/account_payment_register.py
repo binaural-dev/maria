@@ -79,7 +79,7 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
         :return: A python dictionary.
         '''
         ctas_anticipos = []
-        for x in self.env['account.payment.config.advance'].search([], order='name desc'):
+        for x in self.env['account.payment.config.advance'].search([], order='id desc'):
             ctas_anticipos.append(x.advance_account_id.id)
         return {
             'partner_id': line.partner_id.id,
