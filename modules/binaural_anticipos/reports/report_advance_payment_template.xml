@@ -97,7 +97,7 @@
                                         <tbody>
                                             <tr>
                                                 <td colspan="2" style="text-align: left;">
-			                                        <b><span t-esc="o.business_name"/></b>
+			                                        <b><span t-esc="o.name"/></b>
                                                     <br/><!--Razon social-->
                                                     <b><span t-esc="o.prefix_vat"/>-<span t-esc="o.vat"/></b>
                                                     <br/>
@@ -135,7 +135,7 @@
 			                                        <span t-esc="p.journal_id.name"/>
 		                                        </td>
                                                 <td style="text-align: center">
-                                                    <t t-set="states_p" t-value="dict([('draft', 'Borrador'),('posted', 'Confirmado'), ('cancel', 'Cancelado')])"/> <!--('discontinued', 'Suspendido')-->
+                                                    <t t-set="states_p" t-value="dict([('posted', 'Confirmado')])"/> <!--('discontinued', 'Suspendido')-->
                                                     <t t-esc="states_p[p.state]"/>
 			                                        
                                                 
