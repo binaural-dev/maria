@@ -90,6 +90,7 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
             'partner_type': 'customer' if line.account_internal_type == 'receivable' or \
                         (line.account_id.user_type_id.type == 'other' and line.account_id.id in ctas_anticipos) else 'supplier',
             'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
+        
         }
 
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id',
