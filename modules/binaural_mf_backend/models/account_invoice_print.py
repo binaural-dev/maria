@@ -103,6 +103,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 					self.write({"serial_machine": machine_info.machine_serial,
 								"machine_invoice_number": number_after})
 					print("factura impresa, mandar a seguir workflow")
+					return False
 			else:
 				raise UserError(msg)
 		else:
