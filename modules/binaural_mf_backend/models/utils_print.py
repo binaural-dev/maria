@@ -354,7 +354,9 @@ class utils_print():
 		invoice_data = {}
 		if not invoice:
 			return False,invoice_data
-		
+		if invoice.machine_invoice_number or invoice.serial_machine:
+			return False,invoice_data		
+
 		if not invoice.partner_id.vat:
 			return False,invoice_data
 		else:
