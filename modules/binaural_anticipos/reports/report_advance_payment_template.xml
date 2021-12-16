@@ -115,6 +115,7 @@
                                                 <th class="text-center">Pago</th>
                                                 <th class="text-center">Diario</th>
                                                 <th class="text-center">Estado</th>
+	                                            <th colspan="2"  class="text-center">Monto Pagado</th>
                                                 <th colspan="2"  class="text-center">Monto Pagado</th>
                                                 <th colspan="2"  class="text-center">Monto Disponible</th>
                                             </tr>
