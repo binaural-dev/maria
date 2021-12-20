@@ -2,12 +2,13 @@
 # Copyright 2017 Tecnativa - Pedro M. Baeza
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import logging
+
 from odoo import _, api, exceptions, fields, models
 from odoo.tools import float_is_zero
 from odoo.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+import logging
 _logger = logging.getLogger(__name__)
 from odoo.exceptions import UserError
 
@@ -120,6 +121,12 @@ class AccountFiscalyearClosing(models.Model):
         comodel_name='account.move', inverse_name='fyc_id', string="Asientos",
         readonly=True,
     )
+
+    jounals_type_bin = fields.Selection([
+        ('fiscal', 'Diarios Fiscales'),
+        ('nofiscal', 'Diarios No Fiscales'),
+        ('all', 'Todos los Diarios'),
+    ], string='Filtro de Diarios',default='all')
 
     _sql_constraints = [
         ('year_company_uniq', 'unique(year, company_id)',
@@ -269,12 +276,30 @@ class AccountFiscalyearClosing(models.Model):
     #@api.multi
     def draft_moves_check(self):
         for closing in self:
-            draft_moves = self.env['account.move'].search([
-                ('company_id', '=', closing.company_id.id),
-                ('state', '=', 'draft'),
-                ('date', '>=', closing.date_start),
-                ('date', '<=', closing.date_end),
-            ])
+            _logger.info("CHECK DRAFT %s",closing.jounals_type_bin)
+            if closing.jounals_type_bin == 'fiscal':
+                draft_moves = self.env['account.move'].search([
+                    ('company_id', '=', closing.company_id.id),
+                    ('state', '=', 'draft'),
+                    ('date', '>=', closing.date_start),
+                    ('date', '<=', closing.date_end),
+                    ('journal_id.fiscal', '=', True),
+                ])
+            elif closing.jounals_type_bin == 'nofiscal':
+                draft_moves = self.env['account.move'].search([
+                    ('company_id', '=', closing.company_id.id),
+                    ('state', '=', 'draft'),
+                    ('date', '>=', closing.date_start),
+                    ('date', '<=', closing.date_end),
+                    ('journal_id.fiscal', '=', False),
+                ])
+            else:
+                draft_moves = self.env['account.move'].search([
+                    ('company_id', '=', closing.company_id.id),
+                    ('state', '=', 'draft'),
+                    ('date', '>=', closing.date_start),
+                    ('date', '<=', closing.date_end),
+                ])
             if draft_moves:
                 msg = _('Se encontraron uno o más movimientos sin asentar: \n')
                 for move in draft_moves:
@@ -412,15 +437,17 @@ class AccountFiscalyearClosingConfig(models.Model):
 
     @api.onchange('l_map')
     def inchange_l_map(self):
+        if not self.journal_id:
+            raise UserError("Seleccione un diario")
         print("buscar las cuentas y ponerlas en fiscal closing==================================================================")
         ingreso = self.env.ref('account.data_account_type_revenue').id
         gasto = self.env.ref('account.data_account_type_expenses').id
         #costo = self.env.ref('accounting_pdf_reports.data_account_type_direct_costs_cost').id
 
         ganancia = self.env.ref('account.data_unaffected_earnings').id
-        accounts = self.env['account.account'].sudo().search([('user_type_id','in',[gasto,ingreso])])
+        accounts = self.env['account.account'].sudo().search([('company_id','=',self.journal_id.company_id.id),('user_type_id','in',[gasto,ingreso])])
 
-        config_a = self.env['account.account'].sudo().search([('user_type_id','=',ganancia)],limit=1)#esta es la de destino siempre es la misma preguntar cual es
+        config_a = self.env['account.account'].sudo().search([('company_id','=',self.journal_id.company_id.id),('user_type_id','=',ganancia)],limit=1)#esta es la de destino siempre es la misma preguntar cual es
         maps = []
         cont = 1
         account_len = int(self.env['ir.config_parameter'].sudo().get_param('account_longitude_report'))
@@ -428,6 +455,7 @@ class AccountFiscalyearClosingConfig(models.Model):
             raise exceptions.UserError("Por favor configure la longitud de las cuentas contables.")
         if self.l_map:
             #sync
+            _logger.info("accounts %s",accounts)
             for a in accounts:
                 if len(a.code) == account_len:
                     vals = {'name':a.name,'src_accounts':a.code,'dest_account_id':config_a.id,'fyc_config_id':self.id}
@@ -518,7 +546,7 @@ class AccountFiscalyearClosingConfig(models.Model):
                 balance = False
                 if closing_type == 'balance':
                     # Get all lines
-                    lines = account_map.account_lines_get(account)
+                    lines = account_map.account_lines_get(account,self.fyc_id.jounals_type_bin)
                     balance, move_line = account_map.move_line_prepare(
                         account, lines
                     )
@@ -690,17 +718,35 @@ class AccountFiscalyearClosingMapping(models.Model):
         return balance, move_line
 
     #@api.multi
-    def account_lines_get(self, account):
+    def account_lines_get(self, account,j_type):
+        _logger.info("buscar account move line por diario tipo: %s",j_type)
         self.ensure_one()
         start = self.fyc_config_id.fyc_id.date_start
         end = self.fyc_config_id.fyc_id.date_end
         company_id = self.fyc_config_id.fyc_id.company_id.id
-        return self.env['account.move.line'].search([
-            ('company_id', '=', company_id),
-            ('account_id', '=', account.id),
-            ('date', '>=', start),
-            ('date', '<=', end),
-        ])
+        if j_type == 'fiscal':
+            return self.env['account.move.line'].search([
+                ('company_id', '=', company_id),
+                ('account_id', '=', account.id),
+                ('date', '>=', start),
+                ('date', '<=', end),
+                ('move_id.journal_id.fiscal','=',True),
+            ])
+        elif j_type == 'nofiscal':
+            return self.env['account.move.line'].search([
+                ('company_id', '=', company_id),
+                ('account_id', '=', account.id),
+                ('date', '>=', start),
+                ('date', '<=', end),
+                ('move_id.journal_id.fiscal','=',False),
+            ])
+        else:
+            return self.env['account.move.line'].search([
+                ('company_id', '=', company_id),
+                ('account_id', '=', account.id),
+                ('date', '>=', start),
+                ('date', '<=', end),
+            ])
 
     #@api.multi
     def move_line_partner_prepare(self, account, partner):

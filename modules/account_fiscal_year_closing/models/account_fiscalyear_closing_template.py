@@ -4,7 +4,8 @@
 
 
 from odoo import _, api, exceptions, fields, models
-
+import logging
+_logger = logging.getLogger(__name__)
 class AccountFiscalyearClosingTemplate(models.Model):
     _inherit = "account.fiscalyear.closing.abstract"
     _name = "account.fiscalyear.closing.template"
@@ -28,27 +29,31 @@ class AccountFiscalyearClosingConfigTemplate(models.Model):
     #aqui poner funcion que actualice/cargue las cuentas
     @api.onchange('l_map')
     def inchange_l_map(self):
+        if not self.journal_id:
+            raise UserError("Seleccione un diario")
         print("buscar las cuentas y ponerlas en fiscal closing==================================================================")
         ingreso = self.env.ref('account.data_account_type_revenue').id
         gasto = self.env.ref('account.data_account_type_expenses').id
         #costo = self.env.ref('accounting_pdf_reports.data_account_type_direct_costs_cost').id
 
         ganancia = self.env.ref('account.data_unaffected_earnings').id
-        accounts = self.env['account.account'].sudo().search([('user_type_id','in',[gasto,ingreso])])
+        accounts = self.env['account.account'].sudo().search([('company_id','=',self.journal_id.company_id.id),('user_type_id','in',[gasto,ingreso])])
 
-        config_a = self.env['account.account'].sudo().search([('user_type_id','=',ganancia)],limit=1)#esta es la de destino siempre es la misma preguntar cual es
+        config_a = self.env['account.account'].sudo().search([('company_id','=',self.journal_id.company_id.id),('user_type_id','=',ganancia)],limit=1)#esta es la de destino siempre es la misma preguntar cual es
         maps = []
         cont = 1
         account_len = int(self.env['ir.config_parameter'].sudo().get_param('account_longitude_report'))
         if not account_len:
             raise exceptions.UserError("Por favor configure la longitud de las cuentas contables.")
+        _logger.info("accounts %s",accounts)
         if self.l_map:
             #sync
+            
             for a in accounts:
                 #en este caso el campo dest_account es string no one2many
                 #validar que sean auxiliares
                 if len(a.code) == account_len:
-                    vals = {'name':a.name,'src_accounts':a.code,'dest_account':config_a.code,'fyc_config_id':self.id}
+                    vals = {'name':a.name,'src_accounts':a.code,'dest_account':config_a.code,'template_config_id':self.id} #fyc_config_id
                     cont +=1
                     print("vals**************",vals)
                     maps.append((0, 0, vals))
