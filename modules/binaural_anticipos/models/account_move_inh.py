@@ -42,7 +42,7 @@ class account_payment_inh(models.Model):
         
             pay_term_lines = move.line_ids \
                 .filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
-        
+            domain=[]
             if move.move_type in ('out_invoice', 'in_refund'):
                 _logger.info('1111111111111111111')
                 advance_account = self.env['account.payment.config.advance'].search(

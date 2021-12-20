@@ -146,9 +146,12 @@ class AccountPaymentInh(models.Model):
                         "The journal entry %s reached an invalid state relative to its payment.\n"
                         "To be consistent, the journal items must share the same partner."
                     ) % move.display_name)
-            
+                ctas_anticipos = []
+                for x in self.env['account.payment.config.advance'].search([('advance_type', '=', 'customer')],
+                                                                           order='id desc'):
+                    ctas_anticipos.append(x.advance_account_id.id)
                 if counterpart_lines.account_id.user_type_id.type == 'receivable' or \
-                        (counterpart_lines.account_id.user_type_id.type == 'other' and counterpart_lines.account_id.user_type_id.name == 'Pasivo circulantes'):
+                        (counterpart_lines.account_id.user_type_id.type == 'other' and counterpart_lines.account_id.id in ctas_anticipos):
                     partner_type = 'customer'
                 else:
                     partner_type = 'supplier'
