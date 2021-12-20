@@ -552,6 +552,7 @@ class AccountFiscalyearClosingConfig(models.Model):
                 if closing_type == 'balance':
                     # Get all lines
                     lines = account_map.account_lines_get(account,self.fyc_id.jounals_type_bin)
+               
                     balance, move_line = account_map.move_line_prepare(
                         account, lines
                     )
