@@ -6,6 +6,7 @@
 from odoo import _, api, exceptions, fields, models
 import logging
 _logger = logging.getLogger(__name__)
+from odoo.exceptions import UserError
 class AccountFiscalyearClosingTemplate(models.Model):
     _inherit = "account.fiscalyear.closing.abstract"
     _name = "account.fiscalyear.closing.template"
@@ -30,7 +31,7 @@ class AccountFiscalyearClosingConfigTemplate(models.Model):
     @api.onchange('l_map')
     def inchange_l_map(self):
         if not self.journal_id:
-            raise UserError("Seleccione un diario")
+            raise exceptions.UserError("Seleccione un diario")
         print("buscar las cuentas y ponerlas en fiscal closing==================================================================")
         ingreso = self.env.ref('account.data_account_type_revenue').id
         gasto = self.env.ref('account.data_account_type_expenses').id

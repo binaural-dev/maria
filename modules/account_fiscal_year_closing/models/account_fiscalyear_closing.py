@@ -375,9 +375,12 @@ class AccountFiscalyearClosing(models.Model):
     #@api.multi
     def button_post(self):
         # Post moves
-        for closing in self:
-            for move_config in closing.move_config_ids.sorted('sequence'):
-                move_config.move_id.post()
+        #for closing in self:
+            #for move_config in closing.move_config_ids.sorted('sequence'):
+            #    move_config.move_id.post()
+        moves = self.env['account.move'].sudo().search([('fyc_id', 'in', self.ids),('state','=','draft')])
+        for m in moves:
+            m.post()
         self.write({'state': 'posted'})
         return True
 
@@ -516,7 +519,7 @@ class AccountFiscalyearClosingConfig(models.Model):
         return closing_type
 
     #@api.multi
-    def move_prepare(self, move_lines):
+    def move_prepare(self, move_lines,rate=0):
         self.ensure_one()
         description = self.name
         journal_id = self.journal_id.id
@@ -527,19 +530,26 @@ class AccountFiscalyearClosingConfig(models.Model):
             'closing_type': self.move_type,
             'journal_id': journal_id,
             'line_ids': [(0, 0, m) for m in move_lines],
+            'foreign_currency_rate':rate,
         }
 
-    def _mapping_move_lines_get(self):
+    def _mapping_move_lines_get(self,src,account_map):
         move_lines = []
         dest_totals = {}
         # Add balance/unreconciled move lines
-        for account_map in self.mapping_ids:
+        #for account_map in self.mapping_ids:
+        rate = 1
+        if 1 == 1:
             dest = account_map.dest_account_id
             dest_totals.setdefault(dest, 0)
-            src_accounts = self.env['account.account'].search([
-                ('company_id', '=', self.fyc_id.company_id.id),
-                ('code', '=ilike', account_map.src_accounts),
-            ], order="code ASC")
+            #aqui filtrar si viene src usar solo esa
+            if not src:
+                src_accounts = self.env['account.account'].search([
+                    ('company_id', '=', self.fyc_id.company_id.id),
+                    ('code', '=ilike', account_map.src_accounts),
+                ], order="code ASC")
+            else:
+                src_accounts = self.env['account.account'].sudo().search([('code','=ilike',src)])
             _logger.info("CANTIDAD DE src_accounts %s",len(src_accounts))
             for account in src_accounts:
                 closing_type = self.closing_type_get(account)
@@ -547,7 +557,8 @@ class AccountFiscalyearClosingConfig(models.Model):
                 if closing_type == 'balance':
                     # Get all lines
                     lines = account_map.account_lines_get(account,self.fyc_id.jounals_type_bin)
-                    balance, move_line = account_map.move_line_prepare(
+               
+                    balance, move_line,rate = account_map.move_line_prepare(
                         account, lines
                     )
                     if move_line:
@@ -575,7 +586,7 @@ class AccountFiscalyearClosingConfig(models.Model):
             move_line = account_map.dest_move_line_prepare(dest, balance)
             if move_line:
                 move_lines.append(move_line)
-        return move_lines
+        return move_lines,rate
 
     #@api.multi
     def inverse_move_prepare(self):
@@ -597,58 +608,73 @@ class AccountFiscalyearClosingConfig(models.Model):
         moves = self.env['account.move']
         # Prepare one move per configuration
         data = False
-        if self.mapping_ids:
-            move_lines = self._mapping_move_lines_get()
-            data = self.move_prepare(move_lines)
-        elif self.inverse:
-            move_ids = self.inverse_move_prepare()
-            move = moves.browse(move_ids[0])
-            move.write({'ref': self.name, 'closing_type': self.move_type})
-            self.move_id = move.id
-            return move, data
-        # Create move
-        if not data:
-            return False, data
-        print("DATAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",data)
-        total_debit = sum([x[2]['debit'] for x in data['line_ids']])
-        total_credit = sum([x[2]['credit'] for x in data['line_ids']])
-        print("TOTAL DEBIT:",total_debit)
-        print("TOTAL CREDIT:",total_credit)
-        dif = total_credit - total_debit
-        if dif >0:
-            print("CREDITO MAYOR AL DEBITO")
-        elif dif < 0:
-            print("DEBITO MAYOR AL CREDITO")
-        print("la diferencia entre ambos es de:",dif)
-        if dif != 0:
-            other_dest = False
-            for line in data['line_ids']:
-                if len(line)>=2:
-                    if line[2]['name'] in ['Resultado','Result']:
-                        other_dest = {
-                            'account_id':line[2]['account_id'],
-                            'name':'Ajuste por precisión decimal',
-                            'date':line[2]['date'],
-                            'debit': abs(dif) if dif > 0 else False,
-                            'credit': abs(dif) if dif < 0 else False,
-                        }
-            if other_dest:
-                data['line_ids'].append((0,0,other_dest))
-            
-                
-        print("esta es la data con la linea de ajuste",data)
-        #el modulo valida pero con 2 decimales mientras que odoo manda las lineas con muchos decimales
-        total_debit = sum([x[2]['debit'] for x in data['line_ids']])
-        total_credit = sum([x[2]['credit'] for x in data['line_ids']])
 
-        print("esto son los resultados de la otra suma despues del ajuste, CREDIT",total_credit)
-        print("esto son los resultados de la otra suma despues del ajuste, DEBIT",total_debit)
-        if abs(round(total_credit - total_debit, 2)) >= 0.01:
-            # the move is not balanced
-            return False, data
-        move = moves.with_context(journal_id=self.journal_id.id).create(data)
-        self.move_id = move.id
-        print("EL MOVE RETORNOOOOOOOOOOOOOOOOOOOOOOOOO",move)
+        rate = 1
+        _logger.info("funcion moves_create self.mapping_ids.filtered('dest_account_id') %s",self.mapping_ids)
+        #raise UserError("T")
+        for ac in self.mapping_ids:
+            #_logger.info("src_accountssrc_accounts------------------------------------------------------ %s",ac.src_accounts)
+            #for c in ac.src_accounts:
+            data = False
+            if 1 == 1:
+                if self.mapping_ids:
+                    move_lines,rate = self._mapping_move_lines_get(ac.src_accounts,ac)
+                    if len(move_lines)>0:
+                        data = self.move_prepare(move_lines,rate)
+                elif self.inverse:
+                    #alerta: el move_id es un many2one
+                    move_ids = self.inverse_move_prepare()
+                    move = moves.browse(move_ids[0])
+                    move.write({'ref': self.name, 'closing_type': self.move_type})
+                    self.move_id = move.id
+                    return move, data
+                # Create move
+                if not data:
+                    continue
+                    #return False, data
+                print("DATAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",data)
+                total_debit = sum([x[2]['debit'] for x in data['line_ids']])
+                total_credit = sum([x[2]['credit'] for x in data['line_ids']])
+                print("TOTAL DEBIT:",total_debit)
+                print("TOTAL CREDIT:",total_credit)
+                dif = total_credit - total_debit
+                if dif >0:
+                    print("CREDITO MAYOR AL DEBITO")
+                elif dif < 0:
+                    print("DEBITO MAYOR AL CREDITO")
+                print("la diferencia entre ambos es de:",dif)
+                if dif != 0:
+                    other_dest = False
+                    for line in data['line_ids']:
+                        if len(line)>=2:
+                            if line[2]['name'] in ['Resultado','Result']:
+                                other_dest = {
+                                    'account_id':line[2]['account_id'],
+                                    'name':'Ajuste por precisión decimal',
+                                    'date':line[2]['date'],
+                                    'debit': abs(dif) if dif > 0 else False,
+                                    'credit': abs(dif) if dif < 0 else False,
+                                }
+                    if other_dest:
+                        data['line_ids'].append((0,0,other_dest))
+                    
+                        
+                print("esta es la data con la linea de ajuste",data)
+                #el modulo valida pero con 2 decimales mientras que odoo manda las lineas con muchos decimales
+                total_debit = sum([x[2]['debit'] for x in data['line_ids']])
+                total_credit = sum([x[2]['credit'] for x in data['line_ids']])
+
+                print("esto son los resultados de la otra suma despues del ajuste, CREDIT",total_credit)
+                print("esto son los resultados de la otra suma despues del ajuste, DEBIT",total_debit)
+                if abs(round(total_credit - total_debit, 2)) >= 0.01:
+                    # the move is not balanced
+                    return False, data
+                move = moves.with_context(journal_id=self.journal_id.id).create(data)
+                #self.move_id = move.id
+                #este move_id debe ser para el inversal, duda
+                print("EL MOVE RETORNOOOOOOOOOOOOOOOOOOOOOOOOO",move)
+                if move:
+                    move._onchange_rate()
         return move, data
 
 
@@ -698,13 +724,23 @@ class AccountFiscalyearClosingMapping(models.Model):
         precision = 12
         description = self.name or account.name
         date = self.fyc_config_id.fyc_id.date_end
+        rate = 1
         if self.fyc_config_id.move_type == 'opening':
             date = self.fyc_config_id.fyc_id.date_opening
         if account_lines:
             balance = (
                 sum(account_lines.mapped('debit')) -
                 sum(account_lines.mapped('credit')))
+            all_deb = all_cred = balance_bs = 0 
+          
+            for al in account_lines:
+                all_deb = al.debit * al.foreign_currency_rate
+                all_cred = al.credit * al.foreign_currency_rate
+            balance_bs = all_deb - all_cred
+
+            
             if not float_is_zero(balance, precision_digits=precision):
+                rate = round(balance_bs/balance,2)
                 move_line = {
                     'account_id': account.id,
                     'debit': balance < 0 and -balance,
@@ -715,7 +751,8 @@ class AccountFiscalyearClosingMapping(models.Model):
                 }
             else:
                 balance = 0
-        return balance, move_line
+        _logger.info("RATE %s",rate)
+        return balance, move_line,rate
 
     #@api.multi
     def account_lines_get(self, account,j_type):
