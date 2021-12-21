@@ -96,10 +96,11 @@ class AccountFiscalyearClosing(models.Model):
         readonly=True,
         states={'draft': [('readonly', False)]},
     )
+    #domain="[('chart_template_ids', '=', chart_template_id)]",
     closing_template_id = fields.Many2one(
         comodel_name="account.fiscalyear.closing.template",
         string="Plantilla de cierre",
-        domain="[('chart_template_ids', '=', chart_template_id)]",
+        
         readonly=True,
         states={'draft': [('readonly', False)]},
         oldname='template_id',
