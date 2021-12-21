@@ -30,17 +30,20 @@ class AccountFiscalyearClosingConfigTemplate(models.Model):
     #aqui poner funcion que actualice/cargue las cuentas
     @api.onchange('l_map')
     def inchange_l_map(self):
-        if not self.journal_id:
-            raise exceptions.UserError("Seleccione un diario")
+        #if not self.journal_id:
+        #    raise exceptions.UserError("Seleccione un diario")
         print("buscar las cuentas y ponerlas en fiscal closing==================================================================")
         ingreso = self.env.ref('account.data_account_type_revenue').id
         gasto = self.env.ref('account.data_account_type_expenses').id
         #costo = self.env.ref('accounting_pdf_reports.data_account_type_direct_costs_cost').id
 
-        ganancia = self.env.ref('account.data_unaffected_earnings').id
-        accounts = self.env['account.account'].sudo().search([('company_id','=',self.journal_id.company_id.id),('user_type_id','in',[gasto,ingreso])])
+        #('company_id','=',self.journal_id.company_id.id),
+        #('company_id','=',self.journal_id.company_id.id),
 
-        config_a = self.env['account.account'].sudo().search([('company_id','=',self.journal_id.company_id.id),('user_type_id','=',ganancia)],limit=1)#esta es la de destino siempre es la misma preguntar cual es
+        ganancia = self.env.ref('account.data_unaffected_earnings').id
+        accounts = self.env['account.account'].sudo().search([('user_type_id','in',[gasto,ingreso])])
+
+        config_a = self.env['account.account'].sudo().search([('user_type_id','=',ganancia)],limit=1)#esta es la de destino siempre es la misma preguntar cual es
         maps = []
         cont = 1
         account_len = int(self.env['ir.config_parameter'].sudo().get_param('account_longitude_report'))
