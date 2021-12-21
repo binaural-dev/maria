@@ -375,9 +375,12 @@ class AccountFiscalyearClosing(models.Model):
     #@api.multi
     def button_post(self):
         # Post moves
-        for closing in self:
-            for move_config in closing.move_config_ids.sorted('sequence'):
-                move_config.move_id.post()
+        #for closing in self:
+            #for move_config in closing.move_config_ids.sorted('sequence'):
+            #    move_config.move_id.post()
+        moves = self.env['account.move'].sudo().search([('fyc_id', 'in', self.ids),('state','=','draft')])
+        for m in moves:
+            m.post()
         self.write({'state': 'posted'})
         return True
 
@@ -516,7 +519,7 @@ class AccountFiscalyearClosingConfig(models.Model):
         return closing_type
 
     #@api.multi
-    def move_prepare(self, move_lines):
+    def move_prepare(self, move_lines,rate=0):
         self.ensure_one()
         description = self.name
         journal_id = self.journal_id.id
@@ -527,6 +530,7 @@ class AccountFiscalyearClosingConfig(models.Model):
             'closing_type': self.move_type,
             'journal_id': journal_id,
             'line_ids': [(0, 0, m) for m in move_lines],
+            'foreign_currency_rate':rate,
         }
 
     def _mapping_move_lines_get(self,src,account_map):
@@ -534,6 +538,7 @@ class AccountFiscalyearClosingConfig(models.Model):
         dest_totals = {}
         # Add balance/unreconciled move lines
         #for account_map in self.mapping_ids:
+        rate = 1
         if 1 == 1:
             dest = account_map.dest_account_id
             dest_totals.setdefault(dest, 0)
@@ -553,7 +558,7 @@ class AccountFiscalyearClosingConfig(models.Model):
                     # Get all lines
                     lines = account_map.account_lines_get(account,self.fyc_id.jounals_type_bin)
                
-                    balance, move_line = account_map.move_line_prepare(
+                    balance, move_line,rate = account_map.move_line_prepare(
                         account, lines
                     )
                     if move_line:
@@ -581,7 +586,7 @@ class AccountFiscalyearClosingConfig(models.Model):
             move_line = account_map.dest_move_line_prepare(dest, balance)
             if move_line:
                 move_lines.append(move_line)
-        return move_lines
+        return move_lines,rate
 
     #@api.multi
     def inverse_move_prepare(self):
@@ -604,16 +609,18 @@ class AccountFiscalyearClosingConfig(models.Model):
         # Prepare one move per configuration
         data = False
 
-
+        rate = 1
         _logger.info("funcion moves_create self.mapping_ids.filtered('dest_account_id') %s",self.mapping_ids)
         #raise UserError("T")
         for ac in self.mapping_ids:
             #_logger.info("src_accountssrc_accounts------------------------------------------------------ %s",ac.src_accounts)
             #for c in ac.src_accounts:
+            data = False
             if 1 == 1:
                 if self.mapping_ids:
-                    move_lines = self._mapping_move_lines_get(ac.src_accounts,ac)
-                    data = self.move_prepare(move_lines)
+                    move_lines,rate = self._mapping_move_lines_get(ac.src_accounts,ac)
+                    if len(move_lines)>0:
+                        data = self.move_prepare(move_lines,rate)
                 elif self.inverse:
                     #alerta: el move_id es un many2one
                     move_ids = self.inverse_move_prepare()
@@ -623,7 +630,8 @@ class AccountFiscalyearClosingConfig(models.Model):
                     return move, data
                 # Create move
                 if not data:
-                    return False, data
+                    continue
+                    #return False, data
                 print("DATAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",data)
                 total_debit = sum([x[2]['debit'] for x in data['line_ids']])
                 total_credit = sum([x[2]['credit'] for x in data['line_ids']])
@@ -665,6 +673,8 @@ class AccountFiscalyearClosingConfig(models.Model):
                 #self.move_id = move.id
                 #este move_id debe ser para el inversal, duda
                 print("EL MOVE RETORNOOOOOOOOOOOOOOOOOOOOOOOOO",move)
+                if move:
+                    move._onchange_rate()
         return move, data
 
 
@@ -714,13 +724,23 @@ class AccountFiscalyearClosingMapping(models.Model):
         precision = 12
         description = self.name or account.name
         date = self.fyc_config_id.fyc_id.date_end
+        rate = 1
         if self.fyc_config_id.move_type == 'opening':
             date = self.fyc_config_id.fyc_id.date_opening
         if account_lines:
             balance = (
                 sum(account_lines.mapped('debit')) -
                 sum(account_lines.mapped('credit')))
+            all_deb = all_cred = balance_bs = 0 
+          
+            for al in account_lines:
+                all_deb = al.debit * al.foreign_currency_rate
+                all_cred = al.credit * al.foreign_currency_rate
+            balance_bs = all_deb - all_cred
+
+            
             if not float_is_zero(balance, precision_digits=precision):
+                rate = round(balance_bs/balance,2)
                 move_line = {
                     'account_id': account.id,
                     'debit': balance < 0 and -balance,
@@ -731,7 +751,8 @@ class AccountFiscalyearClosingMapping(models.Model):
                 }
             else:
                 balance = 0
-        return balance, move_line
+        _logger.info("RATE %s",rate)
+        return balance, move_line,rate
 
     #@api.multi
     def account_lines_get(self, account,j_type):
