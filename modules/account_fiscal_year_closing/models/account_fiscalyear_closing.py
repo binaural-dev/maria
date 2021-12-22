@@ -732,8 +732,8 @@ class AccountFiscalyearClosingMapping(models.Model):
             all_deb = all_cred = balance_bs = 0 
           
             for al in account_lines:
-                all_deb = al.debit * al.foreign_currency_rate
-                all_cred = al.credit * al.foreign_currency_rate
+                all_deb += al.debit * al.foreign_currency_rate
+                all_cred += al.credit * al.foreign_currency_rate
             _logger.info("ALL DEB %s",all_deb)
             _logger.info("ALL CRED %s",all_cred)
             balance_bs = all_deb - all_cred
