@@ -26,6 +26,7 @@ class AccountFiscalYearClosingUnbalancedMove(models.TransientModel):
         string="Líneas de movimiento desequilibradas",
         readonly=True,
     )
+    foreign_currency_rate = fields.Float(string='Tasa')
 
 
 class AccountFiscalYearClosingUnbalancedMoveLine(models.TransientModel):
@@ -47,3 +48,4 @@ class AccountFiscalYearClosingUnbalancedMoveLine(models.TransientModel):
         string="Socio",
     )
     name = fields.Char()
+    date = fields.Date(string='fecha')
