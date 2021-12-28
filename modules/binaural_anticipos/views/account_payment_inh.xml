@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='is_internal_transfer']" position="after">
                     <field name="is_advance" string="Anticipo" attrs="{'readonly': [('state', '!=', 'draft')]}"></field>
+	                <field invisible="1" name="available_partner_bank_ids"/>
             </xpath>
 
         </field>
@@ -45,6 +46,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="before">
                 <field name="is_advance" string="Anticipo"></field>
+	            <field invisible="1" name="available_partner_bank_ids"/>
             </xpath>
 
         </field>
