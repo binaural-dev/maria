@@ -708,6 +708,13 @@ class AccountMoveBinauralFacturacion(models.Model):
 				for l in a.line_ids:
 					l._onchange_amount_currency()
 
+	def change_rate_async(self,rate):
+		for m in self:
+			m.foreign_currency_rate = rate
+
+			#m._onchange_rate()
+			m.line_ids.with_context(check_move_validity=False)._onchange_amount_currency_bin(rate)
+
 
 class AcoountMoveLineBinauralFact(models.Model):
 	_inherit = 'account.move.line'
@@ -866,9 +873,18 @@ class AcoountMoveLineBinauralFact(models.Model):
 
 		return results
 
+	#@api.onchange('amount_currency')
+	def _onchange_amount_currency_bin(self,rate):
+		_logger.info("TRIGGER ")
+		for line in self:
+			company = line.move_id.company_id
+			balance = line.currency_id._convert(line.amount_currency, company.currency_id, company, line.move_id.date,True,rate)
+			line.with_context(check_move_validity=False).debit = balance if balance > 0.0 else 0.0
+			line.with_context(check_move_validity=False).credit = -balance if balance < 0.0 else 0.0
+
 	@api.onchange('amount_currency')
 	def _onchange_amount_currency(self):
-		_logger.info("TRIGGER")
+		_logger.info("TRIGGER ORIGNAL")
 		for line in self:
 			company = line.move_id.company_id
 			balance = line.currency_id._convert(line.amount_currency, company.currency_id, company, line.move_id.date,True,line.move_id.foreign_currency_rate)
