@@ -88,7 +88,9 @@ class AccountPaymentBinauralFacturacion(models.Model):
 	@api.onchange('foreign_currency_id', 'foreign_currency_rate')
 	def _onchange_foreign_currency_rate(self):
 		move_id = self.env['account.move'].browse(self.move_id.ids)
-		move_id.write({'foreign_currency_rate': self.foreign_currency_rate})
+		#move_id.write({'foreign_currency_rate': self.foreign_currency_rate})
+		#move_id._onchange_rate()
+		move_id.change_rate_async(self.foreign_currency_rate)
 
 	def _get_rate(self, foreign_currency_id, foreign_currency_date, operator):
 		rate = self.env['res.currency.rate'].search([('currency_id', '=', foreign_currency_id),
