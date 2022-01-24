@@ -346,14 +346,8 @@ class AccountRetentionBinauralFacturacion(models.Model):
                                 else:
                                     sequence = self.sequence_islr_retention()
                                     correlative = sequence.next_by_code('retention.islr.control.number')
-                                today = datetime.now()
-                                _logger.info('YEAR')
-                                _logger.info(str(ret_line.invoice_id.date.year))
-                                _logger.info('MES')
-                                _logger.info(str(ret_line.invoice_id.date.month))
-                                _logger.info('CORRELATIVO')
-                                _logger.info(correlative)
-                                number = str(ret_line.invoice_id.date.year) + str(ret_line.invoice_id.date.month) + correlative
+                                today = datetime.now()                               
+                                number = str(ret_line.invoice_id.date.year) + '{:02d}'.format(ret_line.invoice_id.date.month) + correlative
                                 self.write({'correlative': correlative, 'number': number})
                             if ret_line.invoice_id.move_type not in ['in_refund']:
                                 # Crea los apuntes contables para las facturas, Nota debito
