@@ -66,7 +66,8 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                     },
                 
                 }
-            if record.retention_amount > record.invoice_id.amount_residual and record.retention_id:
+            #TODO: evaluar posibilidad de crear configuracion para decimales de retenciones            
+            if float_compare(record.retention_amount,record.invoice_id.amount_residual,precision_digits=2) == 1 and record.retention_id:
                 return {
                     'warning': {
                         'title': 'El monto retenido excedende',
