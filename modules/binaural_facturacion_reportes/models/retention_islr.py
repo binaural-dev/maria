@@ -61,7 +61,7 @@ class RetentionIslrReport(models.TransientModel):
 						break
 				dict['Código Concepto'] = concept
 				#dict['Monto Operación'] = i.islr_line_ids[0].invoice_id.amount_total
-				dict['Monto Operación'] = il.foreign_retention_amount
+				dict['Monto Operación'] = il.foreign_facture_amount
 				dict['Porcentaje de retención'] = alicuota
 				lista.append(dict)
 				op += 1
