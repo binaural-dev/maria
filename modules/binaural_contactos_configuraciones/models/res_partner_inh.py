@@ -38,6 +38,7 @@ class ResPartnerBinauralContactos(models.Model):
         ('J', 'J'),
         ('G', 'G'),
         ('C', 'C'),
+        ('P', 'P'),
     ], 'Prefijo Rif', required=False, default='V')
     city_id = fields.Many2one('res.country.city', 'Ciudad', track_visibility='onchange')
 
