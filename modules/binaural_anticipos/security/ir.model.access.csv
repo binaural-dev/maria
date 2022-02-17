@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_binaural_anticipos_binaural_anticipos_config,binaural_anticipos.binaural_anticipos_config,model_account_payment_config_advance,,1,1,1,1
+access_binaural_anticipos_wizard_payment_report_all,binaural_anticipos.wizard_payment_report_all,model_wizard_payment_report_all,,1,1,1,1
+
+access_binaural_anticipos_wizard_advance_payment_list,binaural_anticipos.wizard_advance_payment_list,model_wizard_advance_payment_list,,1,1,1,1

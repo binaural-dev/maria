@@ -22,7 +22,9 @@ class TxtWizard(models.TransientModel):
             retention_count = len(
                 self.env['account.retention'].search([('date', '>=', self.date_start),
                                                       ('date', '<=', self.date_end),
-                                                      ('state', '=', 'emitted')]).ids)
+                                                      ('state', '=', 'emitted'),
+                                                      ('type_retention', '=', 'iva'),
+                                                      ('type', '=', 'in_invoice')]).ids)
             if retention_count == 0:
                 raise UserError("Facturas a pagar obligatorias")
         else:

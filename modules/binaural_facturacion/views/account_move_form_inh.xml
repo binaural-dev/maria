@@ -132,6 +132,8 @@
                                 </div>
                                 <field name="foreign_amount_total" nolabel="1" class="oe_subtotal_footer_separator"
                                        widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
+	                            <field name="foreign_amount_residual"
+                                       widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
                             </group>
                             <div class="oe_clear"/>
                         </group>

@@ -78,15 +78,39 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
         will be grouped together.
         :return: A python dictionary.
         '''
-        return {
-            'partner_id': line.partner_id.id,
-            'account_id': line.account_id.id,
-            'foreign_currency_rate':line.foreign_currency_rate,
-            'currency_id': (line.currency_id or line.company_currency_id).id,
-            'partner_bank_id': line.move_id.partner_bank_id.id,
-            'partner_type': 'customer' if line.account_internal_type == 'receivable' else 'supplier',
-            'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
-        }
+        irModuleObj = self.env['ir.module.module']
+        moduleIds = irModuleObj.sudo().search(
+            [
+                ('state', '=', 'installed'),
+                ('name', '=', 'binaural_anticipos')
+            ]
+        )
+        if moduleIds:
+            ctas_anticipos = []
+            for x in self.env['account.payment.config.advance'].search([('advance_type', '=', 'customer')], order='id desc'):
+                ctas_anticipos.append(x.advance_account_id.id)
+            return {
+                'partner_id': line.partner_id.id,
+                'account_id': line.account_id.id,
+                'foreign_currency_rate':line.foreign_currency_rate,
+                'currency_id': (line.currency_id or line.company_currency_id).id,
+                'partner_bank_id': line.move_id.partner_bank_id.id,
+                'partner_type': 'customer' if line.account_internal_type == 'receivable' or \
+                            (line.account_id.user_type_id.type == 'other' and line.account_id.id in ctas_anticipos) else 'supplier',
+                'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
+            
+            }
+        else:
+            return {
+                'partner_id': line.partner_id.id,
+                'account_id': line.account_id.id,
+                'foreign_currency_rate': line.foreign_currency_rate,
+                'currency_id': (line.currency_id or line.company_currency_id).id,
+                'partner_bank_id': line.move_id.partner_bank_id.id,
+                'partner_type': 'customer' if line.account_internal_type == 'receivable' else 'supplier',
+                'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
+        
+            }
 
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id',
                  'payment_date','foreign_currency_rate')

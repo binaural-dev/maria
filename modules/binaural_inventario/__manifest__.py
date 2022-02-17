@@ -19,7 +19,7 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['stock', 'binaural_contactos_configuraciones'],
+    'depends': ['stock', 'binaural_contactos_configuraciones', 'sale'],
 
     # always loaded
     'data': [

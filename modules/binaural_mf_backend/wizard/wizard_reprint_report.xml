@@ -37,7 +37,7 @@
 
     <menuitem name="Operaciones Fiscales" 
               id="binaural_mf_backend.fiscal_operations"
-              parent="account.menu_finance"/>
+              parent="account.menu_finance_reports"/>
 
     <menuitem name="Reimpresión de reportes" action="binaural_mf_backend.action_reprint_reports_fiscal_machine"
               id="id_reprint_reports_fiscal_machine"

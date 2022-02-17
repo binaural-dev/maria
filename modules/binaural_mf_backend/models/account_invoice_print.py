@@ -44,7 +44,19 @@ class AccountMoveBinauralMFBackend(models.Model):
 		if print_pending:
 			raise UserError(
 				"No se puede validar la factura, tiene pendiente por imprimir la factura: "+print_pending.name)
-		return super(AccountMoveBinauralMFBackend, self).action_post()
+
+		success = super(AccountMoveBinauralMFBackend, self).action_post()
+		if self.move_type in ['out_invoice','out_refund']:
+			ref = "ACC."+str(self.partner_id.action_number.number)
+			if self.move_type == 'out_invoice':
+				sequence = sequence = self._get_sequence()
+				new= self.journal_id.sequence_number_next#sequence.get_next_char(sequence.sequence_number_next)
+				ref += 'FACT.'+str(self.name)
+			if self.move_type == 'out_refund':
+				sequence = sequence = self._get_sequence()
+				new= 'NC.'+str(self.name) #sequence.get_next_char(sequence.sequence_number_next)
+			self.write({"ref":ref})
+		return success
 
 	@api.onchange('is_credit')
 	def _onchange_is_credit(self):
@@ -76,7 +88,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 			
 			success_last_invoice, number = utils_print2.get_last_invoice_number("FAC")
 			if not success_last_invoice:
-				_logger.info("number %s",number)
+				
 				raise UserError("Error consultando ultima factura " + str(number))
 				#chequear que el ultmo + 1 coincida con el numero de la factura que vendra
 	
@@ -91,6 +103,7 @@ class AccountMoveBinauralMFBackend(models.Model):
 					self.write({"serial_machine": machine_info.machine_serial,
 								"machine_invoice_number": number_after})
 					print("factura impresa, mandar a seguir workflow")
+					return False
 			else:
 				raise UserError(msg)
 		else:
