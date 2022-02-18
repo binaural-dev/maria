@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--Control number Sequence-->
+
+        <record id="digist_decimal_precision_binaural" model="decimal.precision">
+            <field name="name">decimal_quantity</field>
+            <field name="digits">15</field>
+        </record>
+
+    </data>
+</odoo>

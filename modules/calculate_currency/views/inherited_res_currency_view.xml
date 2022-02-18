@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_res_currency_rate_inherited" model="ir.ui.view">
+        <field name="name">res.currency.rate.calculate.vef</field>
+        <field name="model">res.currency.rate</field>
+        <field name="inherit_id" ref="base.view_currency_rate_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="vef_rate"/>
+            </field>
+        </field>
+    </record>
+</odoo>
