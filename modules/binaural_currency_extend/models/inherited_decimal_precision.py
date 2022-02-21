@@ -1,6 +1,6 @@
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
-from odoo.tools import float_repr
+from odoo.tools import float_repr,float_is_zero
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -27,6 +27,9 @@ class InheritedDecimalPrecision(models.Model):
         if operation_type not in ["FORM", "CALC"]:
             raise UserError(
                 "Debe enviar 'FORM' para operaciones de formulario o 'CALC' para realizar calculos en operation_type")
+
+        if float_is_zero(rate, 10):
+            return 0.0
 
         if operation_type == 'CALC':
             if base_currency == 'VEF':

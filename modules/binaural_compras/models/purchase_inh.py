@@ -30,7 +30,7 @@ class PurchaseOrderBinauralCompras(models.Model):
                 return {'domain': {
                     'partner_id': [('customer_rank', '>=', 1)],
                 }}
-            elif record.filter_partner == 'supplier':
+            elif record.filter_partner == 'supplier': 
                 return {'domain': {
                     'partner_id': [('supplier_rank', '>=', 1)],
                 }}
@@ -42,8 +42,9 @@ class PurchaseOrderBinauralCompras(models.Model):
                 return []
 
     def default_alternate_currency(self):
-        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
-    
+        alternate_currency = int(
+            self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+
         if alternate_currency:
             return alternate_currency
         else:
@@ -57,7 +58,7 @@ class PurchaseOrderBinauralCompras(models.Model):
                                                         order='name desc')
             if rate:
                 record.update({
-                    'foreign_currency_rate': rate.rate,
+                    'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                 })
             else:
                 rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
@@ -65,7 +66,7 @@ class PurchaseOrderBinauralCompras(models.Model):
                                                             order='name asc')
                 if rate:
                     record.update({
-                        'foreign_currency_rate': rate.rate,
+                        'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                     })
                 else:
                     record.update({
@@ -77,13 +78,23 @@ class PurchaseOrderBinauralCompras(models.Model):
         """
         Compute the foreign total amounts of the SO.
         """
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
         for order in self:
             foreign_amount_untaxed = foreign_amount_tax = 0.0
+            name_foreign_currency = order.foreign_currency_id.name
+            name_base_currency = 'USD' if name_foreign_currency == 'VEF' else 'VEF'
+            value_rate = 0
+            
+            if name_foreign_currency:
+                value_rate = decimal_function.getCurrencyValue(
+                rate=order.foreign_currency_rate, base_currency=name_base_currency, foreign_currency=name_foreign_currency)
+            
             for line in order.order_line:
                 foreign_amount_untaxed += line.price_subtotal
                 foreign_amount_tax += line.price_tax
-            foreign_amount_untaxed *= order.foreign_currency_rate
-            foreign_amount_tax *= order.foreign_currency_rate
+            foreign_amount_untaxed *= value_rate
+            foreign_amount_tax *= value_rate
             order.update({
                 'foreign_amount_untaxed': foreign_amount_untaxed,
                 'foreign_amount_tax': foreign_amount_tax,
@@ -95,12 +106,14 @@ class PurchaseOrderBinauralCompras(models.Model):
         """
         self.ensure_one()
         move_type = self._context.get('default_move_type', 'in_invoice')
-        journal = self.env['account.move'].with_context(default_move_type=move_type)._get_default_journal()
+        journal = self.env['account.move'].with_context(
+            default_move_type=move_type)._get_default_journal()
         if not journal:
             raise UserError(_('Please define an accounting purchase journal for the company %s (%s).') % (
-            self.company_id.name, self.company_id.id))
-    
-        partner_invoice_id = self.partner_id.address_get(['invoice'])['invoice']
+                self.company_id.name, self.company_id.id))
+
+        partner_invoice_id = self.partner_id.address_get(['invoice'])[
+            'invoice']
         invoice_vals = {
             'ref': self.partner_ref or '',
             'move_type': move_type,
@@ -109,7 +122,7 @@ class PurchaseOrderBinauralCompras(models.Model):
             'invoice_user_id': self.user_id and self.user_id.id,
             'partner_id': partner_invoice_id,
             'fiscal_position_id': (
-                        self.fiscal_position_id or self.fiscal_position_id.get_fiscal_position(partner_invoice_id)).id,
+                self.fiscal_position_id or self.fiscal_position_id.get_fiscal_position(partner_invoice_id)).id,
             'payment_reference': self.partner_ref or '',
             'partner_bank_id': self.partner_id.bank_ids[:1].id,
             'invoice_origin': self.name,
@@ -125,38 +138,43 @@ class PurchaseOrderBinauralCompras(models.Model):
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
     address = fields.Char(string='Dirección', related='partner_id.street')
-    business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
-    partner_id = fields.Many2one('res.partner', string='Vendor', required=True, states=READONLY_STATES,\
-                                 change_default=True, tracking=True,\
+    business_name = fields.Char(
+        string='Razón Social', related='partner_id.business_name')
+    partner_id = fields.Many2one('res.partner', string='Vendor', required=True, states=READONLY_STATES,
+                                 change_default=True, tracking=True,
                                  help="You can find a vendor by its Name, TIN, Email or Internal Reference.")
     filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
                                       string='Filtro de Contacto', default='supplier')
 
-    amount_by_group = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+    amount_by_group = fields.Binary(string="Tax amount by group", compute='_compute_invoice_taxes_by_group',
+                                    help='Edit Tax amounts if you encounter rounding issues.')
 
-    amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+    amount_by_group_base = fields.Binary(
+        string="Tax amount by group", compute='_compute_invoice_taxes_by_group', help='Edit Tax amounts if you encounter rounding issues.')
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
-        readonly=True, store=True,
-        help='Utility field to express amount currency')
+                                          readonly=True, store=True,
+                                          help='Utility field to express amount currency')
 
     # Foreing cyrrency fields
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
     foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
-    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+    foreign_currency_date = fields.Date(
+        string="Fecha", default=fields.Date.today(), tracking=True)
 
     foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True,
                                              compute='_amount_all_foreign',
                                              tracking=5)
-    foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
+    foreign_amount_tax = fields.Monetary(
+        string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
     foreign_amount_total = fields.Monetary(string='Total moneda alterna', store=True, readonly=True, compute='_amount_all_foreign',
                                            tracking=4)
     foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo",
                                             compute='_compute_invoice_taxes_by_group')
     foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo",
                                                  compute='_compute_invoice_taxes_by_group')
-    
+
     @api.depends('partner_id')
     def _get_vat(self):
         for p in self:
@@ -172,22 +190,28 @@ class PurchaseOrderBinauralCompras(models.Model):
         This method is only used when printing the invoice.
         '''
         _logger.info("se ejecuto la funcion:_compute_invoice_taxes_by_group")
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
         for move in self:
             lang_env = move.with_context(lang=move.partner_id.lang).env
             tax_lines = move.order_line.filtered(lambda line: line.taxes_id)
-            tax_balance_multiplicator = 1 #-1 if move.is_inbound(True) else 1
+            tax_balance_multiplicator = 1  # -1 if move.is_inbound(True) else 1
             res = {}
             # There are as many tax line as there are repartition lines
             done_taxes = set()
             for line in tax_lines:
-                res.setdefault(line.taxes_id.tax_group_id, {'base': 0.0, 'amount': 0.0})
-                _logger.info("line.price_subtotal en primer for %s",line.price_subtotal)
-                res[line.taxes_id.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
+                res.setdefault(line.taxes_id.tax_group_id, {
+                               'base': 0.0, 'amount': 0.0})
+                _logger.info("line.price_subtotal en primer for %s",
+                             line.price_subtotal)
+                res[line.taxes_id.tax_group_id]['base'] += tax_balance_multiplicator * \
+                    (line.price_subtotal if line.currency_id else line.price_subtotal)
                 #tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
-                _logger.info("done_taxesdone_taxes %s",done_taxes)
+                _logger.info("done_taxesdone_taxes %s", done_taxes)
 
                 if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
-                    amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(self))
+                    amount = line.company_currency_id._convert(
+                        line.price_tax, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(self))
                 else:
                     amount = line.price_tax
                 res[line.taxes_id.tax_group_id]['amount'] += amount
@@ -207,37 +231,52 @@ class PurchaseOrderBinauralCompras(models.Model):
             for line in move.order_line:
                 for tax in line.taxes_id.flatten_taxes_hierarchy():
                     if tax.tax_group_id not in res or tax.tax_group_id in zero_taxes:
-                        res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
-                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
+                        res.setdefault(tax.tax_group_id, {
+                                       'base': 0.0, 'amount': 0.0})
+                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * \
+                            (line.price_subtotal if line.currency_id else line.price_subtotal)
                         zero_taxes.add(tax.tax_group_id)
 
-            _logger.info("res========== %s",res)
+            _logger.info("res========== %s", res)
 
             res = sorted(res.items(), key=lambda l: l[0].sequence)
             move.amount_by_group = [(
                 group.name, amounts['amount'],
                 amounts['base'],
-                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
-                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['amount'],
+                           currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['base'],
+                           currency_obj=move.currency_id),
                 len(res),
                 group.id
             ) for group, amounts in res]
 
             move.amount_by_group_base = [(
-                group.name.replace("IVA", "Total G").replace("TAX", "Total G"), amounts['base'],
+                group.name.replace("IVA", "Total G").replace(
+                    "TAX", "Total G"), amounts['base'],
                 amounts['amount'],
-                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
-                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['base'],
+                           currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['amount'],
+                           currency_obj=move.currency_id),
                 len(res),
                 group.id
             ) for group, amounts in res]
+            
+            name_foreign_currency = move.foreign_currency_id.name
+            name_base_currency = 'USD' if name_foreign_currency == 'VEF' else 'VEF'
+            value_rate = 0
+            
+            if name_foreign_currency:
+                value_rate = decimal_function.getCurrencyValue(
+                rate=move.foreign_currency_rate, base_currency=name_base_currency, foreign_currency=name_foreign_currency)
 
             move.foreign_amount_by_group = [(
-                group.name, amounts['amount'] * move.foreign_currency_rate,
-                amounts['base'] * move.foreign_currency_rate,
-                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                group.name, amounts['amount'] * value_rate,
+                amounts['base'] * value_rate,
+                formatLang(lang_env, amounts['amount'] * value_rate,
                            currency_obj=move.foreign_currency_id),
-                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['base'] * value_rate,
                            currency_obj=move.foreign_currency_id),
                 len(res),
                 group.id
@@ -245,11 +284,11 @@ class PurchaseOrderBinauralCompras(models.Model):
 
             move.foreign_amount_by_group_base = [(
                 group.name.replace("IVA", "Total G").replace("TAX", "Total G"),
-                amounts['base'] * move.foreign_currency_rate,
-                amounts['amount'] * move.foreign_currency_rate,
-                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate,
+                amounts['base'] * value_rate,
+                amounts['amount'] * value_rate,
+                formatLang(lang_env, amounts['base'] * value_rate,
                            currency_obj=move.foreign_currency_id),
-                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate,
+                formatLang(lang_env, amounts['amount'] * value_rate,
                            currency_obj=move.foreign_currency_id),
                 len(res),
                 group.id
@@ -263,34 +302,3 @@ class PurchaseOrderBinauralCompras(models.Model):
          @return list
         """
         return [line.taxes_id.id]
-
-
-class PurchaseOrderLineBinauralCompras(models.Model):
-    _inherit = 'purchase.order.line'
-
-    def default_alternate_currency(self):
-        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
-    
-        if alternate_currency:
-            return alternate_currency
-        else:
-            return False
-
-    @api.depends('order_id.foreign_currency_rate', 'price_unit', 'product_uom_qty')
-    def _amount_all_foreign(self):
-        """
-        Compute the foreign total amounts of the SO.
-        """
-        for order in self:
-            order.update({
-                'foreign_price_unit': order.price_unit * order.order_id.foreign_currency_rate,
-                'foreign_subtotal': order.price_subtotal * order.order_id.foreign_currency_rate,
-            })
-    
-    company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
-        readonly=True, store=True,
-        help='Utility field to express amount currency')
-    foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
-                                          tracking=True)
