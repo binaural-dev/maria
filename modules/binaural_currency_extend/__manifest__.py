@@ -16,7 +16,7 @@
     # always loaded
     'data': [
         'data/decimal_precision.xml',
-        
+        'views/views.xml',
     ],
     'application':True,
 }

@@ -51,7 +51,7 @@ class DecimalPrecisionTestCase2(SavepointCaseWithUserDemo):
         
         self.assertEqual(rate, truncate(1/val, precision.digits))
         
-        self.assertEqual(round(rate *presupuesto ,2),1000)
+        self.assertEqual(float_round(rate *presupuesto ,2),1000)
         
         val = 4001232.37
         currency = 1100907.27
@@ -59,7 +59,7 @@ class DecimalPrecisionTestCase2(SavepointCaseWithUserDemo):
         rate = precision.getCurrencyValue(val, base_currency='VEF', foreign_currency='USD', operation_type='CALC')
         presupuesto = val*currency
         
-        self.assertEqual(round(rate *presupuesto,2),currency)
+        self.assertEqual(float_round(rate *presupuesto,2),currency)
         
         val = 10001232.37
         currency = 1100907.27
@@ -67,15 +67,22 @@ class DecimalPrecisionTestCase2(SavepointCaseWithUserDemo):
         rate = precision.getCurrencyValue(val, base_currency='VEF', foreign_currency='USD', operation_type='CALC')
         presupuesto = val*currency
         
-        self.assertEqual(round(rate *presupuesto,2),currency)
+        self.assertEqual(float_round(rate *presupuesto,2),currency)
+        
+        val = 10001232.37
+        currency = 1109797.27
+        
+        rate = precision.getCurrencyValue(val, base_currency='VEF', foreign_currency='USD', operation_type='CALC')
+        
+        presupuesto = val*currency
+        
+        self.assertEqual(float_round(rate *presupuesto,2),currency)
         
         val = 10001232.37
         currency = 1100907.27
         
         rate = precision.getCurrencyValue(currency, base_currency='USD', foreign_currency='VEF', operation_type='CALC')
         presupuesto = val * currency
-        _logger.warning(rate)
-        _logger.warning(presupuesto)
         
         self.assertEqual(rate * val, presupuesto)
         
