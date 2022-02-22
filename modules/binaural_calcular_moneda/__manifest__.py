@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Calcular Moneda",
+    'name': "Binaural Calcular Moneda",
 
     'summary': """
         Modulo para el proceso el calculo en monedas

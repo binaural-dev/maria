@@ -242,13 +242,20 @@ class AccountPaymentBinauralFacturacion(models.Model):
             counterpart_amount = 0.0
             write_off_amount = 0.0
 
-        balance = self.currency_id._convert(counterpart_amount, self.company_id.currency_id, self.company_id,
-                                            self.date, True, self.foreign_currency_rate)
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
+
+        rateToCalc = decimal_function.getCurrencyValue(rate=self.foreign_currency_rate, base_currency=self.currency_id.name,
+                                                       foreign_currency=self.company_id.currency_id.name) if self.company_id.currency_id != self.currency_id else 1
+
+        balance = counterpart_amount * rateToCalc
 
         counterpart_amount_currency = counterpart_amount
-        write_off_balance = self.currency_id._convert(write_off_amount, self.company_id.currency_id, self.company_id,
-                                                      self.date, True, self.foreign_currency_rate)
+
+        write_off_balance = write_off_amount * rateToCalc
+
         write_off_amount_currency = write_off_amount
+
         currency_id = self.currency_id.id
 
         if self.is_internal_transfer:
