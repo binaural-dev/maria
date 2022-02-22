@@ -119,7 +119,7 @@
 
 		    <!-- VARIACIONES DEPENDIENTES DE LA MONEDA ALTERNA -->
 		    <page string="Moneda $" name="alternate_coin_usd">
-			<field name="foreign_currency_symbol"/>
+			<field name="foreign_currency_symbol" invisible="1"/>
                         <group>
                             <group colspan="4" col="6" name="goreing_grup">
                                 <field name="foreign_currency_id" attrs="{'readonly': [('invoice_origin', '!=', False)]}"/>
@@ -143,6 +143,7 @@
                         </group>
                     </page>
 		    <page string="Moneda Bs.F" name="alternate_coin_bsf">
+			<field name="foreign_currency_symbol" invisible="1"/>
                         <group>
                             <group colspan="4" col="6" name="goreing_grup">
                                 <field name="foreign_currency_id" attrs="{'readonly': [('invoice_origin', '!=', False)]}"/>
@@ -167,6 +168,7 @@
                     </page>
                 </xpath>
 
+		<!-- OCULTAR CADA VARIACION DEPENDIENDO DE LA MONEDA ALTERNA -->
 		<page name="alternate_coin_usd" position="attributes">
 		    <attribute name="attrs">{'invisible':[('foreign_currency_symbol','not in',('$'))]}</attribute>
 		</page>
