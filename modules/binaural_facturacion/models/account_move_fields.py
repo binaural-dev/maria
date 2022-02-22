@@ -23,6 +23,16 @@ class AccountMove(models.Model):
                 foreign_subtotal = doc.xpath("//field[@name='foreign_subtotal']")[0]
                 foreign_subtotal.set("string", "Subtotal $")
                 res["fields"]["invoice_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
+                doc = etree.XML(res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"])
+                foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
+                foreign_facture_amount.set("string", "Base Imponible $")
+                foreign_facture_total = doc.xpath("//field[@name='foreign_facture_total']")[0]
+                foreign_facture_total.set("string", "Total Factura $")
+                foreign_iva_amount = doc.xpath("//field[@name='foreign_iva_amount']")[0]
+                foreign_iva_amount.set("string", "Iva Factura $")
+                foreign_retention_amount = doc.xpath("//field[@name='foreign_retention_amount']")[0]
+                foreign_retention_amount.set("string", "Monto Retenido $")
+                res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
         elif foreign_currency_id and foreign_currency_id == '3':
             if view_type == "tree":
                 doc = etree.XML(res["arch"])
@@ -37,4 +47,14 @@ class AccountMove(models.Model):
                 foreign_subtotal = doc.xpath("//field[@name='foreign_subtotal']")[0]
                 foreign_subtotal.set("string", "Subtotal Bs.F")
                 res["fields"]["invoice_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
+                doc = etree.XML(res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"])
+                foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
+                foreign_facture_amount.set("string", "Base Imponible Bs.F")
+                foreign_facture_total = doc.xpath("//field[@name='foreign_facture_total']")[0]
+                foreign_facture_total.set("string", "Total Factura Bs.F")
+                foreign_iva_amount = doc.xpath("//field[@name='foreign_iva_amount']")[0]
+                foreign_iva_amount.set("string", "Iva Factura Bs.F")
+                foreign_retention_amount = doc.xpath("//field[@name='foreign_retention_amount']")[0]
+                foreign_retention_amount.set("string", "Monto Retenido Bs.F")
+                res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
         return res
