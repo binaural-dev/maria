@@ -532,7 +532,7 @@ class SaleOrderLineBinauralVentas(models.Model):
             product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
             _logger.info("float_compare(product.free_qty, product_qty, precision_digits=precision) %s",float_compare(product.free_qty, product_qty, precision_digits=precision))
             if float_compare(product.free_qty, product_qty, precision_digits=precision) == -1:
-                message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s.') % \
+                message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s, si continuas se creara la orden sin inventario, deseas continuar?') % \
                         (self.product_uom_qty, self.product_uom.name, self.product_id.name, product.free_qty, product.uom_id.name, self.order_id.warehouse_id.name)
                 # We check if some products are available in other warehouses.
                 if float_compare(product.free_qty, self.product_id.free_qty, precision_digits=precision) == -1:
@@ -546,7 +546,7 @@ class SaleOrderLineBinauralVentas(models.Model):
                     'title': _('No hay suficiente inventario!'),
                     'message' : message
                 }
-                self.product_uom_qty = 0
+                
                 return {'warning': warning_mess}
         return {}
     
