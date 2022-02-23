@@ -28,7 +28,9 @@
 
                 <!-- Fields Foreing Currency -->
                 <xpath expr="//notebook" position="inside">
-                    <page string="Moneda alterna" name="alternate_coin">
+		    <!-- VARIACIONES DEPENDIENTES DE LA MONEDA ALTERNA -->
+                    <page string="Moneda $" name="alternate_coin_usd">
+			<field name="foreign_currency_symbol" invisible="1"/>
                         <group>
                             <group colspan="4" col="6" name="goreing_grup">
                                 <field name="foreign_currency_id"/>
@@ -41,7 +43,29 @@
 								<field name="foreign_amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
                                 <field name="foreign_amount_by_group" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
                                 <div class="oe_subtotal_footer_separator oe_inline o_td_label">
-                                    <label for="foreign_amount_total"/>
+                                    <label for="foreign_amount_total" string="Total $"/>
+                                </div>
+                                <field name="foreign_amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                       widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
+                            </group>
+                            <div class="oe_clear"/>
+                        </group>
+                    </page>
+                    <page string="Moneda Bs.F" name="alternate_coin_bsf">
+			<field name="foreign_currency_symbol" invisible="1"/>
+                        <group>
+                            <group colspan="4" col="6" name="goreing_grup">
+                                <field name="foreign_currency_id"/>
+                                <field name="foreign_currency_date" widget="date"/>
+                                <field name="foreign_currency_rate"/>
+                            </group>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="coin_total">
+                                <field name="foreign_amount_untaxed" widget="monetary"
+                                       options="{'currency_field': 'foreign_currency_id'}"/>
+								<field name="foreign_amount_by_group_base" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                                <field name="foreign_amount_by_group" widget="tax-group-custom-field" nolabel="1" colspan="2" attrs="{'invisible': [('amount_tax', '=', 0)]}"/>
+                                <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                    <label for="foreign_amount_total" string="Total Bs.F"/>
                                 </div>
                                 <field name="foreign_amount_total" nolabel="1" class="oe_subtotal_footer_separator"
                                        widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
@@ -50,11 +74,20 @@
                         </group>
                     </page>
                 </xpath>
-	            <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+
+		<!-- OCULTAR CADA VARIACION DEPENDIENDO DE LA MONEDA ALTERNA -->
+		<page name="alternate_coin_usd" position="attributes">
+		    <attribute name="attrs">{'invisible':[('foreign_currency_symbol','not in',('$'))]}</attribute>
+		</page>
+		<page name="alternate_coin_bsf" position="attributes">
+		    <attribute name="attrs">{'invisible':[('foreign_currency_symbol','not in',('Bs.F'))]}</attribute>
+		</page>
+
+	        <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
                     <field name="foreign_currency_id" invisible="1"/>
                     <field name="foreign_price_unit" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
                 </xpath>
-	            <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
+	        <xpath expr="//page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
                     <field name="foreign_subtotal" widget='monetary' options="{'currency_field': 'foreign_currency_id'}"/>
                 </xpath>
             </field>
