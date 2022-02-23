@@ -49,17 +49,16 @@ class HrExpenseBinaural(models.Model):
         decimal_function = self.env['decimal.precision'].search(
             [('name', '=', 'decimal_quantity')])
         for order in self:
-            name_foreign_currency = order.foreign_currency_id.name
-            name_base_currency = 'USD' if name_foreign_currency == 'VEF' else 'VEF'
-            value_rate = 0
 
-            if name_foreign_currency:
+            value_rate = 1
+
+            if order.foreign_currency_id != order.currency_id:
                 value_rate = decimal_function.getCurrencyValue(
-                    rate=order.foreign_currency_rate, base_currency=name_base_currency, foreign_currency=name_foreign_currency)
+                    rate=order.foreign_currency_rate, base_currency=order.currency_id.name, foreign_currency=order.foreign_currency_id.name)
 
             order.update({
-                'foreign_total_amount': order.total_amount * (value_rate if order.foreign_currency_id != order.currency_id else 1),
-                'foreign_amount_residual': order.amount_residual * (value_rate if order.foreign_currency_id != order.currency_id else 1),
+                'foreign_total_amount': order.total_amount * value_rate,
+                'foreign_amount_residual': order.amount_residual * value_rate,
             })
 
     def _get_account_move_line_values(self):
@@ -90,8 +89,9 @@ class HrExpenseBinaural(models.Model):
             value_rate = 1
 
             if company_currency != expense.currency_id:
+                _logger.warning('AQUI')
                 value_rate = decimal_function.getCurrencyValue(
-                    rate=foreign_currency_rate, base_currency=expense.foreign_currency_id.name, foreign_currency=company_currency.name)
+                    rate=foreign_currency_rate, base_currency=expense.currency_id.name, foreign_currency=company_currency.name)
 
             balance = taxes['total_excluded'] * value_rate
             amount_currency = taxes['total_excluded']
@@ -264,13 +264,14 @@ class HrExpenseBinaural(models.Model):
         decimal_function = self.env['decimal.precision'].search(
             [('name', '=', 'decimal_quantity')])
         for expense in self:
-            name_foreign_currency = expense.currency_id.name
-            name_base_currency = 'USD' if name_foreign_currency == 'VEF' else 'VEF'
             value_rate = 1
 
-            if expense.currency_id != expense.company_currency_id:
+            if expense.currency_id != expense.company_id.currency_id:
+                _logger.warning(expense.currency_id.name)
+                _logger.warning(expense.company_currency_id.name)
                 value_rate = decimal_function.getCurrencyValue(
-                    rate=expense.foreign_currency_rate, base_currency=name_foreign_currency, foreign_currency=name_base_currency)
+                    rate=expense.foreign_currency_rate, base_currency=expense.currency_id.name, foreign_currency=expense.company_id.currency_id.name)
+
             _logger.warning(expense.total_amount)
             _logger.warning(value_rate)
             amount = 0
