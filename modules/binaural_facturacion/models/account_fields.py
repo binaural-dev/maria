@@ -23,6 +23,7 @@ class AccountMove(models.Model):
                 foreign_subtotal = doc.xpath("//field[@name='foreign_subtotal']")[0]
                 foreign_subtotal.set("string", "Subtotal $")
                 res["fields"]["invoice_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
+
                 doc = etree.XML(res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"])
                 foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
                 foreign_facture_amount.set("string", "Base Imponible $")
@@ -33,6 +34,7 @@ class AccountMove(models.Model):
                 foreign_retention_amount = doc.xpath("//field[@name='foreign_retention_amount']")[0]
                 foreign_retention_amount.set("string", "Monto Retenido $")
                 res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
+
                 doc = etree.XML(res["fields"]["retention_islr_line_ids"]["views"]["tree"]["arch"])
                 foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
                 foreign_facture_amount.set("string", "Base Imponible $")
@@ -57,6 +59,7 @@ class AccountMove(models.Model):
                 foreign_subtotal = doc.xpath("//field[@name='foreign_subtotal']")[0]
                 foreign_subtotal.set("string", "Subtotal Bs.F")
                 res["fields"]["invoice_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
+
                 doc = etree.XML(res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"])
                 foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
                 foreign_facture_amount.set("string", "Base Imponible Bs.F")
@@ -67,6 +70,7 @@ class AccountMove(models.Model):
                 foreign_retention_amount = doc.xpath("//field[@name='foreign_retention_amount']")[0]
                 foreign_retention_amount.set("string", "Monto Retenido Bs.F")
                 res["fields"]["retention_iva_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
+
                 doc = etree.XML(res["fields"]["retention_islr_line_ids"]["views"]["tree"]["arch"])
                 foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
                 foreign_facture_amount.set("string", "Base Imponible Bs.F")
@@ -81,7 +85,7 @@ class AccountMove(models.Model):
 
 
 class AccountRetention(models.Model):
-    _iherit = "account.retention"
+    _inherit = "account.retention"
 
     @api.model
     def fields_view_get(self, view_id=None, view_type=False, toolbar=False, submenu=False):
@@ -89,7 +93,7 @@ class AccountRetention(models.Model):
         foreign_currency_id = self.env["ir.config_parameter"].sudo().get_param("curreny_foreign_id")
         if foreign_currency_id and foreign_currency_id == '2':
             if view_type == "form":
-                doc = etree.XML(res["fields"]["retention_lie"]["views"]["tree"]["arch"])
+                doc = etree.XML(res["fields"]["retention_line"]["views"]["tree"]["arch"])
                 foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
                 foreign_facture_amount.set("string", "Base Imponible $")
                 foreign_facture_total = doc.xpath("//field[@name='foreign_facture_total']")[0]
@@ -101,7 +105,7 @@ class AccountRetention(models.Model):
                 res["fields"]["retention_line"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
         elif foreign_currency_id and foreign_currency_id == '3':
             if view_type == "form":
-                doc = etree.XML(res["fields"]["retention_lie"]["views"]["tree"]["arch"])
+                doc = etree.XML(res["fields"]["retention_line"]["views"]["tree"]["arch"])
                 foreign_facture_amount = doc.xpath("//field[@name='foreign_facture_amount']")[0]
                 foreign_facture_amount.set("string", "Base Imponible Bs.F")
                 foreign_facture_total = doc.xpath("//field[@name='foreign_facture_total']")[0]
