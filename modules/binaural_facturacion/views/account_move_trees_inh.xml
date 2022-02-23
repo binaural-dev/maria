@@ -22,8 +22,9 @@
                 </field>
 
 	            <field name="amount_total_signed" position="before">
-                    <field name="foreign_currency_rate" optional="show"/>
-                    <field name="foreign_amount_total" optional="show"/>
+                    <field name="foreign_currency_rate" optional="show" />
+                    <field name="foreign_currency_id" invisible="1" />
+                    <field name="foreign_amount_total" optional="show" widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
                 </field>
 
             </field>
