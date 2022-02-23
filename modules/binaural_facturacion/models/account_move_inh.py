@@ -179,6 +179,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 	# Foreing cyrrency fields
 	foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
 										  tracking=True)
+	foreign_currency_symbol = fields.Char(string="Simbolo", related="foreign_currency_id.symbol", tracking=True, store=True)
 	foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
 	foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
@@ -200,6 +201,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 	generate_retencion_iva = fields.Boolean(string="Generar Retención IVA", default=False, copy=False)
 
 	retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[('retention_id.type_retention', '=', 'islr')])
+
 
 	@api.constrains('foreign_currency_rate')
 	def _check_foreign_currency_rate(self):

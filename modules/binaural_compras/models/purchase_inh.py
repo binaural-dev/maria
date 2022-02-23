@@ -143,6 +143,7 @@ class PurchaseOrderBinauralCompras(models.Model):
     # Foreing cyrrency fields
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
+    foreign_currency_symbol = fields.Char(related="foreign_currency_id.symbol")
     foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
     foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
 
