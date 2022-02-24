@@ -23,6 +23,7 @@
             <field name="green_on_positive" eval="True"/>
             <field name="figure_type">float</field>
             <field name="show_domain">foldable</field>
+            <field name="groupby">account_id</field>
         </record>
 
         <record id="account_financial_html_report_line_costo" model="account.financial.html.report.line">
@@ -38,6 +39,7 @@
             <field name="green_on_positive" eval="True"/>
             <field name="figure_type">float</field>
             <field name="show_domain">foldable</field>
+            <field name="groupby">account_id</field>
         </record>
 
         <record id="account_financial_html_report_line_egreso" model="account.financial.html.report.line">
@@ -53,6 +55,7 @@
             <field name="green_on_positive" eval="True"/>
             <field name="figure_type">float</field>
             <field name="show_domain">foldable</field>
+            <field name="groupby">account_id</field>
         </record>
 
         <record id="account_financial_html_report_line_ganancias_perdidas" model="account.financial.html.report.line">
@@ -99,6 +102,7 @@
                    ref('account.data_account_type_current_assets'),
                    ref('account.data_account_type_prepayments')])]"/>
             <field name="green_on_positive" eval="True"/>
+            <field name="groupby">account_id</field>
             <field name="figure_type">float</field>
             <field name="show_domain">foldable</field>
         </record>
@@ -122,6 +126,7 @@
                    ref('account.data_account_type_credit_card'),
                    ref('account.data_account_type_payable')])]"/>
             <field name="green_on_positive" eval="True"/>
+            <field name="groupby">account_id</field>
             <field name="figure_type">float</field>
             <field name="show_domain">foldable</field>
         </record>
@@ -139,6 +144,20 @@
             <field name="sequence" eval="0"/>
             <field name="account_prefi" eval="3"/>
             <field name="type_control_ids" eval="[(6,0,[ref('account.data_unaffected_earnings'),ref('account.data_account_type_equity')])]"/>
+            <field name="green_on_positive" eval="True"/>
+            <field name="groupby">account_id</field>
+            <field name="figure_type">float</field>
+            <field name="show_domain">foldable</field>
+        </record>
+
+        <record id="account_financial_html_report_line_apc" model="account.financial.html.report.line">
+            <field name="name">Activo - (Pasivo + Capital)</field>
+            <field name="code">APC_BIN</field>
+            <field name="financial_report_id" ref="account_financial_report_sitaucion_financiera"/>
+            <field name="formulas">TA_BIN - (L_BIN + EQ_BIN)</field>
+            <field name="level" eval="0"/>
+            <field name="sequence" eval="0"/>
+            <field name="account_prefi" eval="4"/>
             <field name="green_on_positive" eval="True"/>
             <field name="figure_type">float</field>
             <field name="show_domain">foldable</field>
