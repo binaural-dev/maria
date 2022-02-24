@@ -34,6 +34,7 @@
                         <page string="Linea de Retención">
                             <field colspan="4" name="retention_line" nolabel="1" attrs="{'invisible':[('partner_id','=',False)],'readonly':[('state','in',['emitted','cancel'])]}">
                                 <tree editable='bottom'>
+				    <field name="partner_id" invisible="1"/>
                                     <field name="name"/>
                                     <field name="invoice_id" force_save="1" />
                                     <field name="invoice_type" force_save="1" readonly="1"/>
@@ -122,6 +123,7 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Lineas de Retencion">
+		    <field name="partner_id" invisible="1"/>
                     <field name="name"/>
                     <field name="invoice_id" on_change="invoice_id_change(invoice_id)" domain="[('state', '=', 'open'), ('partner_id','=', parent.partner_id)]"/>
                     <field name="retention_rate" />
@@ -142,6 +144,7 @@
                 <form string="Lineas de Retencion">
                     <sheet>
                         <group>
+			    <field name="partner_id" invisible="1"/>
                             <field name="name"/>
                             <field name="invoice_id"/>
                             <field name="retention_rate"/>
