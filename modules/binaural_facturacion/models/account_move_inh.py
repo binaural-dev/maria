@@ -695,7 +695,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 		'''
 		res = super(AccountMoveBinauralFacturacion, self).action_register_payment()
 		context = res.get('context')
-		res['context'].setdefault('default_foreign_currency_rate', self.foreign_currency_rate)
+		res['context'].setdefault('default_foreign_currency_rate', self[0].foreign_currency_rate)
 		if self.foreign_currency_id:
 			res['context'].setdefault('default_foreign_currency_id', self.foreign_currency_id.id)
 		return res
