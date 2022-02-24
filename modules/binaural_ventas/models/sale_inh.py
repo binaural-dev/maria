@@ -16,11 +16,11 @@ _logger = logging.getLogger(__name__)
 
 class SaleOrderBinauralVentas(models.Model):
     _inherit = 'sale.order'
-    
+
     def recalculate_foreign_rate(self):
         for record in self:
             record._compute_foreign_currency_rate()
-    
+
     @api.onchange('filter_partner')
     def get_domain_partner(self):
         for record in self:
@@ -39,10 +39,11 @@ class SaleOrderBinauralVentas(models.Model):
                 }}
             else:
                 return []
-    
+
     def default_alternate_currency(self):
-        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
-        
+        alternate_currency = int(
+            self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+
         if alternate_currency:
             return alternate_currency
         else:
@@ -71,19 +72,19 @@ class SaleOrderBinauralVentas(models.Model):
         print("pasoooooooooooo")
         for record in self:
             rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
-                                                                ('name', '<=', record.foreign_currency_date)], limit=1,
-                                                               order='name desc')
+                                                         ('name', '<=', record.foreign_currency_date)], limit=1,
+                                                        order='name desc')
             if rate:
                 record.update({
-                    'foreign_currency_rate': rate.rate,
+                    'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                 })
             else:
                 rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
-                                                                   ('name', '>=', record.foreign_currency_date)], limit=1,
-                                                                  order='name asc')
+                                                             ('name', '>=', record.foreign_currency_date)], limit=1,
+                                                            order='name asc')
                 if rate:
                     record.update({
-                        'foreign_currency_rate': rate.rate,
+                        'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                     })
                 else:
                     record.update({
@@ -95,13 +96,25 @@ class SaleOrderBinauralVentas(models.Model):
         """
         Compute the foreign total amounts of the SO.
         """
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
+
         for order in self:
+            name_foreign_currency = order.foreign_currency_id.name
+            name_base_currency = 'USD' if name_foreign_currency == 'VEF' else 'VEF'
+            value_rate = 0
+            
+            if name_foreign_currency:
+                value_rate = decimal_function.getCurrencyValue(
+                rate=order.foreign_currency_rate, base_currency=name_base_currency, foreign_currency=name_foreign_currency)
+
+                
             foreign_amount_untaxed = foreign_amount_tax = 0.0
             for line in order.order_line:
                 foreign_amount_untaxed += line.price_subtotal
                 foreign_amount_tax += line.price_tax
-            foreign_amount_untaxed *= order.foreign_currency_rate
-            foreign_amount_tax *= order.foreign_currency_rate
+            foreign_amount_untaxed *= value_rate
+            foreign_amount_tax *= value_rate
             order.update({
                 'foreign_amount_untaxed': foreign_amount_untaxed,
                 'foreign_amount_tax': foreign_amount_tax,
@@ -116,15 +129,17 @@ class SaleOrderBinauralVentas(models.Model):
         """
         self.ensure_one()
         if not contingence:
-            journal = self.env['account.move'].with_context(default_move_type='out_invoice')._get_default_journal()
+            journal = self.env['account.move'].with_context(
+                default_move_type='out_invoice')._get_default_journal()
             is_contingencia = False
         else:
-            journal = self.env['account.journal'].search([('journal_contingence', '=', True), ('type', '=', 'sale')], limit=1)
+            journal = self.env['account.journal'].search(
+                [('journal_contingence', '=', True), ('type', '=', 'sale')], limit=1)
             is_contingencia = True
         if not journal:
             raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (
-            self.company_id.name, self.company_id.id))
-    
+                self.company_id.name, self.company_id.id))
+
         invoice_vals = {
             'ref': self.client_order_ref or '',
             'move_type': 'out_invoice',
@@ -156,45 +171,54 @@ class SaleOrderBinauralVentas(models.Model):
 
     def default_currency_rate(self):
         rate = 0
-        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+        alternate_currency = int(
+            self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
         if alternate_currency:
             currency = self.env['res.currency.rate'].search([('currency_id', '=', alternate_currency)], limit=1,
                                                             order='name desc')
             rate = currency.rate
 
         return rate
-        
+
     phone = fields.Char(string='Teléfono', related='partner_id.phone')
     vat = fields.Char(string='RIF', compute='_get_vat')
     address = fields.Char(string='Dirección', related='partner_id.street')
-    business_name = fields.Char(string='Razón Social', related='partner_id.business_name')
-    
-    amount_by_group = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+    business_name = fields.Char(
+        string='Razón Social', related='partner_id.business_name')
+
+    amount_by_group = fields.Binary(string="Tax amount by group", compute='_compute_invoice_taxes_by_group',
+                                    help='Edit Tax amounts if you encounter rounding issues.')
     partner_id = fields.Many2one(
         'res.partner', string='Customer', readonly=True,
         states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         required=True, change_default=True, index=True, tracking=1)
-    filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],\
+    filter_partner = fields.Selection([('customer', 'Clientes'), ('supplier', 'Proveedores'), ('contact', 'Contactos')],
                                       string='Filtro de Contacto', default='customer')
-    
-    amount_by_group_base = fields.Binary(string="Tax amount by group",compute='_compute_invoice_taxes_by_group',help='Edit Tax amounts if you encounter rounding issues.')
+
+    amount_by_group_base = fields.Binary(
+        string="Tax amount by group", compute='_compute_invoice_taxes_by_group', help='Edit Tax amounts if you encounter rounding issues.')
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
-        readonly=True, store=True,
-        help='Utility field to express amount currency')
+                                          readonly=True, store=True,
+                                          help='Utility field to express amount currency')
     # Foreing cyrrency fields
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
     foreign_currency_symbol = fields.Char(related="foreign_currency_id.symbol")
     foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
-    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+    foreign_currency_date = fields.Date(
+        string="Fecha", default=fields.Date.today(), tracking=True)
 
     foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True, compute='_amount_all_foreign',
-                                     tracking=5)
-    foreign_amount_tax = fields.Monetary(string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
-    foreign_amount_total = fields.Monetary(string='Total moneda alterna', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_amount_by_group = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
-    foreign_amount_by_group_base = fields.Binary(string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
+                                             tracking=5)
+    foreign_amount_tax = fields.Monetary(
+        string='Impuestos', store=True, readonly=True, compute='_amount_all_foreign')
+    foreign_amount_total = fields.Monetary(
+        string='Total moneda alterna', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
+    foreign_amount_by_group = fields.Binary(
+        string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
+    foreign_amount_by_group_base = fields.Binary(
+        string="Monto de impuesto por grupo", compute='_compute_invoice_taxes_by_group')
     is_contingence = fields.Boolean(string='Es contingencia', default=False)
 
     @api.depends('partner_id')
@@ -212,22 +236,29 @@ class SaleOrderBinauralVentas(models.Model):
         This method is only used when printing the invoice.
         '''
         _logger.info("se ejecuto la funcion:_compute_invoice_taxes_by_group")
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
         for move in self:
             lang_env = move.with_context(lang=move.partner_id.lang).env
             tax_lines = move.order_line.filtered(lambda line: line.tax_id)
-            tax_balance_multiplicator = 1 #-1 if move.is_inbound(True) else 1
+            tax_balance_multiplicator = 1  # -1 if move.is_inbound(True) else 1
             res = {}
             # There are as many tax line as there are repartition lines
             done_taxes = set()
             for line in tax_lines:
-                res.setdefault(line.tax_id.tax_group_id, {'base': 0.0, 'amount': 0.0})
-                _logger.info("line.price_subtotal en primer for %s",line.price_subtotal)
-                res[line.tax_id.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
-                tax_key_add_base = tuple(move._get_tax_key_for_group_add_base(line))
-                _logger.info("done_taxesdone_taxes %s",done_taxes)
+                res.setdefault(line.tax_id.tax_group_id, {
+                               'base': 0.0, 'amount': 0.0})
+                _logger.info("line.price_subtotal en primer for %s",
+                             line.price_subtotal)
+                res[line.tax_id.tax_group_id]['base'] += tax_balance_multiplicator * \
+                    (line.price_subtotal if line.currency_id else line.price_subtotal)
+                tax_key_add_base = tuple(
+                    move._get_tax_key_for_group_add_base(line))
+                _logger.info("done_taxesdone_taxes %s", done_taxes)
 
                 if line.currency_id and line.company_currency_id and line.currency_id != line.company_currency_id:
-                    amount = line.company_currency_id._convert(line.price_tax, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
+                    amount = line.company_currency_id._convert(
+                        line.price_tax, line.currency_id, line.company_id, line.date or fields.Date.context_today(self))
                 else:
                     amount = line.price_tax
                 res[line.tax_id.tax_group_id]['amount'] += amount
@@ -247,45 +278,64 @@ class SaleOrderBinauralVentas(models.Model):
             for line in move.order_line:
                 for tax in line.tax_id.flatten_taxes_hierarchy():
                     if tax.tax_group_id not in res or tax.tax_group_id in zero_taxes:
-                        res.setdefault(tax.tax_group_id, {'base': 0.0, 'amount': 0.0})
-                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * (line.price_subtotal if line.currency_id else line.price_subtotal)
+                        res.setdefault(tax.tax_group_id, {
+                                       'base': 0.0, 'amount': 0.0})
+                        res[tax.tax_group_id]['base'] += tax_balance_multiplicator * \
+                            (line.price_subtotal if line.currency_id else line.price_subtotal)
                         zero_taxes.add(tax.tax_group_id)
 
-            _logger.info("res========== %s",res)
+            _logger.info("res========== %s", res)
 
             res = sorted(res.items(), key=lambda l: l[0].sequence)
             move.amount_by_group = [(
                 group.name, amounts['amount'],
                 amounts['base'],
-                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
-                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['amount'],
+                           currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['base'],
+                           currency_obj=move.currency_id),
                 len(res),
                 group.id
             ) for group, amounts in res]
 
             move.amount_by_group_base = [(
-                group.name.replace("IVA", "Total G").replace("TAX", "Total G"), amounts['base'],
+                group.name.replace("IVA", "Total G").replace(
+                    "TAX", "Total G"), amounts['base'],
                 amounts['amount'],
-                formatLang(lang_env, amounts['base'], currency_obj=move.currency_id),
-                formatLang(lang_env, amounts['amount'], currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['base'],
+                           currency_obj=move.currency_id),
+                formatLang(lang_env, amounts['amount'],
+                           currency_obj=move.currency_id),
                 len(res),
                 group.id
             ) for group, amounts in res]
 
+            name_foreign_currency = move.foreign_currency_id.name
+            name_base_currency = 'USD' if name_foreign_currency == 'VEF' else 'VEF'
+            value_rate = 0 
+            if name_foreign_currency:
+                value_rate = decimal_function.getCurrencyValue(
+                rate=move.foreign_currency_rate, base_currency=name_base_currency, foreign_currency=name_foreign_currency)
+
             move.foreign_amount_by_group = [(
-                group.name, amounts['amount'] * move.foreign_currency_rate,
-                amounts['base'] * move.foreign_currency_rate,
-                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
-                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
+                group.name, amounts['amount'] * value_rate,
+                amounts['base'] * value_rate,
+                formatLang(
+                    lang_env, amounts['amount'] * value_rate, currency_obj=move.foreign_currency_id),
+                formatLang(
+                    lang_env, amounts['base'] * value_rate, currency_obj=move.foreign_currency_id),
                 len(res),
                 group.id
             ) for group, amounts in res]
 
             move.foreign_amount_by_group_base = [(
-                group.name.replace("IVA", "Total G").replace("TAX", "Total G"), amounts['base'] * move.foreign_currency_rate,
-                amounts['amount'] * move.foreign_currency_rate,
-                formatLang(lang_env, amounts['base'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
-                formatLang(lang_env, amounts['amount'] * move.foreign_currency_rate, currency_obj=move.foreign_currency_id),
+                group.name.replace("IVA", "Total G").replace(
+                    "TAX", "Total G"), amounts['base'] * value_rate,
+                amounts['amount'] * value_rate,
+                formatLang(
+                    lang_env, amounts['base'] * value_rate, currency_obj=move.foreign_currency_id),
+                formatLang(
+                    lang_env, amounts['amount'] * value_rate, currency_obj=move.foreign_currency_id),
                 len(res),
                 group.id
             ) for group, amounts in res]
@@ -308,7 +358,8 @@ class SaleOrderBinauralVentas(models.Model):
         rate = vals.get('foreign_currency_rate', False)
         if rate:
             rate = round(rate, 2)
-            alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+            alternate_currency = int(
+                self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
             if alternate_currency:
                 currency = self.env['res.currency.rate'].search([('currency_id', '=', alternate_currency)], limit=1,
                                                                 order='name desc')
@@ -318,13 +369,16 @@ class SaleOrderBinauralVentas(models.Model):
         if flag:
             old_rate = self.default_currency_rate()
             # El usuario xxxx ha usado una tasa personalizada, la tasa del sistema para la fecha del pago xxx es de xxxx y ha usada la tasa personalizada xxx
-            display_msg = "El usuario " + self.env.user.name + " ha usado una tasa personalizada,"
-            display_msg += " la tasa del sistema para la fecha del pago " + str(fields.Date.today()) + " es de "
-            display_msg += str(old_rate) + " y ha usada la tasa personalizada " + str(rate)
+            display_msg = "El usuario " + self.env.user.name + \
+                " ha usado una tasa personalizada,"
+            display_msg += " la tasa del sistema para la fecha del pago " + \
+                str(fields.Date.today()) + " es de "
+            display_msg += str(old_rate) + \
+                " y ha usada la tasa personalizada " + str(rate)
             res.message_post(body=display_msg)
         return res
 
-    def _create_invoices(self, grouped=False, final=False,date=None, contingence=False):
+    def _create_invoices(self, grouped=False, final=False, date=None, contingence=False):
         """
         Create the invoice associated to the SO.
         :param grouped: if True, invoices are grouped by SO id. If False, invoices are grouped by
@@ -333,11 +387,12 @@ class SaleOrderBinauralVentas(models.Model):
         :returns: list of created invoices
         """
 
-        #qty lines by invoices
-        qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
+        # qty lines by invoices
+        qty_max = int(
+            self.env['ir.config_parameter'].sudo().get_param('qty_max'))
         qty_lines = len(self.order_line)
 
-        #si qty_max es 0 asignar por defecto 5 para que siempre deje facturar y las pruebas no fallen
+        # si qty_max es 0 asignar por defecto 5 para que siempre deje facturar y las pruebas no fallen
         if qty_max == 0:
             qty_max = 5
 
@@ -359,12 +414,13 @@ class SaleOrderBinauralVentas(models.Model):
 
             # 1) Create invoices.
             invoice_vals_list = []
-            invoice_item_sequence = 0 # Incremental sequencing to keep the lines order on the invoice.
+            # Incremental sequencing to keep the lines order on the invoice.
+            invoice_item_sequence = 0
             for order in self:
                 order = order.with_company(order.company_id)
                 current_section_vals = None
                 down_payments = order.env['sale.order.line']
-                
+
                 if not contingence:
                     invoice_vals = order._prepare_invoice()
                 else:
@@ -377,9 +433,10 @@ class SaleOrderBinauralVentas(models.Model):
                 invoice_line_vals = []
                 down_payment_section_added = False
                 for line in invoiceable_lines:
-                    #qty lines
-                    #set default qty_max_i para que en caso de que sea 0 igual deje facturar
-                    qty_max_i = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
+                    # qty lines
+                    # set default qty_max_i para que en caso de que sea 0 igual deje facturar
+                    qty_max_i = int(
+                        self.env['ir.config_parameter'].sudo().get_param('qty_max'))
                     if qty_max_i == 0:
                         qty_max_i = 5
 
@@ -460,174 +517,26 @@ class SaleOrderBinauralVentas(models.Model):
                 for invoice in invoice_vals_list:
                     sequence = 1
                     for line in invoice['invoice_line_ids']:
-                        line[2]['sequence'] = SaleOrderLine._get_invoice_line_sequence(new=sequence, old=line[2]['sequence'])
+                        line[2]['sequence'] = SaleOrderLine._get_invoice_line_sequence(
+                            new=sequence, old=line[2]['sequence'])
                         sequence += 1
 
             # Manage the creation of invoices in sudo because a salesperson must be able to generate an invoice from a
             # sale order without "billing" access rights. However, he should not be able to create an invoice from scratch.
-            moves = self.env['account.move'].sudo().with_context(default_move_type='out_invoice').create(invoice_vals_list)
+            moves = self.env['account.move'].sudo().with_context(
+                default_move_type='out_invoice').create(invoice_vals_list)
 
             # 4) Some moves might actually be refunds: convert them if the total amount is negative
             # We do this after the moves have been created since we need taxes, etc. to know if the total
             # is actually negative or not
             if final:
-                moves.sudo().filtered(lambda m: m.amount_total < 0).action_switch_invoice_into_refund_credit_note()
+                moves.sudo().filtered(lambda m: m.amount_total <
+                                      0).action_switch_invoice_into_refund_credit_note()
             for move in moves:
                 move.message_post_with_view('mail.message_origin_link',
-                    values={'self': move, 'origin': move.line_ids.mapped('sale_line_ids.order_id')},
-                    subtype_id=self.env.ref('mail.mt_note').id
-                )
+                                            values={'self': move, 'origin': move.line_ids.mapped(
+                                                'sale_line_ids.order_id')},
+                                            subtype_id=self.env.ref(
+                                                'mail.mt_note').id
+                                            )
             return moves
-
-
-class SaleOrderLineBinauralVentas(models.Model):
-    _inherit = 'sale.order.line'
-
-    def default_alternate_currency(self):
-        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
-    
-        if alternate_currency:
-            return alternate_currency
-        else:
-            return False
-
-    @api.depends('order_id.foreign_currency_rate', 'price_unit', 'product_uom_qty')
-    def _amount_all_foreign(self):
-        """
-        Compute the foreign total amounts of the SO.
-        """
-        for order in self:
-            order.update({
-                'foreign_price_unit': order.price_unit * order.order_id.foreign_currency_rate,
-                'foreign_subtotal': order.price_subtotal * order.order_id.foreign_currency_rate,
-            })
-
-    #validar que el precio unitario no sea mayor al costo del producto, basado en la configuracion
-    @api.onchange('price_unit','product_id')
-    def onchange_price_unit_check_cost(self):
-        for l in self:
-            if self.env['ir.config_parameter'].sudo().get_param('not_cost_higher_price_sale') and l.price_unit and l.product_id:
-                _logger.info("costo del producto %s",l.product_id.standard_price)
-                _logger.info("precio unitario %s",l.price_unit)
-                if l.price_unit <= l.product_id.standard_price and l.product_id.type == 'product':#solo aplica a almacenables
-                    raise ValidationError("Precio unitario no puede ser menor o igual al costo del producto")
-
-    @api.onchange('product_uom_qty', 'product_uom', 'order_id.warehouse_id')
-    def _onchange_product_id_check_availability(self):
-        _logger.info("_onchange_product_id_check_availability %s")
-        _logger.info(self.product_id)
-        _logger.info(self.product_uom_qty)
-        _logger.info(self.product_uom)
-        _logger.info(self.order_id.warehouse_id)
-        _logger.info(self.warehouse_id)
-
-        if not self.product_id or not self.product_uom_qty or not self.product_uom:
-            #self.product_packaging = False
-            return {}
-        if self.product_id.type == 'product':
-            precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            product = self.product_id.with_context(
-                warehouse=self.order_id.warehouse_id.id,
-                lang=self.order_id.partner_id.lang or self.env.user.lang or 'en_US'
-            )
-            product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
-            _logger.info("float_compare(product.free_qty, product_qty, precision_digits=precision) %s",float_compare(product.free_qty, product_qty, precision_digits=precision))
-            if float_compare(product.free_qty, product_qty, precision_digits=precision) == -1:
-                message =  _('Planeas vender %s %s de %s pero solo tienes %s %s disponibles en %s, si continuas se creara la orden sin inventario, deseas continuar?') % \
-                        (self.product_uom_qty, self.product_uom.name, self.product_id.name, product.free_qty, product.uom_id.name, self.order_id.warehouse_id.name)
-                # We check if some products are available in other warehouses.
-                if float_compare(product.free_qty, self.product_id.free_qty, precision_digits=precision) == -1:
-                    message += _('\nExisten %s %s disponible entre todos los almacenes.\n\n') % \
-                            (self.product_id.free_qty, product.uom_id.name)
-                    for warehouse in self.env['stock.warehouse'].search([]):
-                        quantity = self.product_id.with_context(warehouse=warehouse.id).free_qty
-                        if quantity > 0:
-                            message += "%s: %s %s\n" % (warehouse.name, quantity, self.product_id.uom_id.name)
-                warning_mess = {
-                    'title': _('No hay suficiente inventario!'),
-                    'message' : message
-                }
-                
-                return {'warning': warning_mess}
-        return {}
-    
-    company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
-        readonly=True, store=True,
-        help='Utility field to express amount currency')
-    foreign_price_unit = fields.Monetary(string='Precio Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_subtotal = fields.Monetary(string='Subtotal Alterno', store=True, readonly=True, compute='_amount_all_foreign', tracking=4)
-    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
-                                          tracking=True)
-
-
-class SaleAdvancePaymentInvBinaural(models.TransientModel):
-    _inherit = "sale.advance.payment.inv"
-
-    advance_payment_method = fields.Selection([
-        ('delivered', 'Regular invoice'),
-        ('contingence', 'Factura de contingencia'),
-        ('percentage', 'Down payment (percentage)'),
-        ('fixed', 'Down payment (fixed amount)')
-    ], string='Create Invoice', default='delivered', required=True,
-        help="A standard invoice is issued with all the order lines ready for invoicing, \
-            according to their invoicing policy (based on ordered or delivered quantity).")
-    
-    def create_invoices(self):
-        _logger.info('Creando factura')
-        sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
-        _logger.info('Ordenes')
-        _logger.info(sale_orders)
-        qty_max = int(self.env['ir.config_parameter'].sudo().get_param('qty_max'))
-        _logger.info('QTY_MAX')
-        _logger.info(qty_max)
-        qty_lines = 0
-        for order in sale_orders:
-            qty_lines = len(order.order_line)
-        _logger.info('QTY_LINES')
-        _logger.info(qty_lines)
-        if qty_max and qty_max <= qty_lines:
-            qty_invoice = qty_lines / qty_max
-        else:
-            qty_invoice = 1
-        if (qty_invoice - int(qty_invoice)) > 0:
-            qty_invoice = int(qty_invoice) + 1
-        else:
-            qty_invoice = int(qty_invoice)
-        _logger.info('QTY_INVOICE')
-        _logger.info(qty_invoice)
-        for i in range(0, qty_invoice):
-            if self.advance_payment_method == 'delivered':
-                sale_orders._create_invoices(final=self.deduct_down_payments)
-            elif self.advance_payment_method == 'contingence':
-                sale_orders._create_invoices(final=self.deduct_down_payments, contingence=True)
-            else:
-                # Create deposit product if necessary
-                if not self.product_id:
-                    vals = self._prepare_deposit_product()
-                    self.product_id = self.env['product.product'].create(vals)
-                    self.env['ir.config_parameter'].sudo().set_param('sale.default_deposit_product_id',
-                                                                     self.product_id.id)
-                
-                sale_line_obj = self.env['sale.order.line']
-                for order in sale_orders:
-                    amount, name = self._get_advance_details(order)
-                    
-                    if self.product_id.invoice_policy != 'order':
-                        raise UserError(_(
-                            'The product used to invoice a down payment should have an invoice policy set to "Ordered quantities". Please update your deposit product to be able to create a deposit invoice.'))
-                    if self.product_id.type != 'service':
-                        raise UserError(_(
-                            "The product used to invoice a down payment should be of type 'Service'. Please use another product or update this product."))
-                    taxes = self.product_id.taxes_id.filtered(
-                        lambda r: not order.company_id or r.company_id == order.company_id)
-                    tax_ids = order.fiscal_position_id.map_tax(taxes, self.product_id, order.partner_shipping_id).ids
-                    analytic_tag_ids = []
-                    for line in order.order_line:
-                        analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.analytic_tag_ids]
-                    
-                    so_line_values = self._prepare_so_line(order, analytic_tag_ids, tax_ids, amount)
-                    so_line = sale_line_obj.create(so_line_values)
-                    self._create_invoice(order, so_line, amount)
-        if self._context.get('open_invoices', False):
-            return sale_orders.action_view_invoice()
-        return {'type': 'ir.actions.act_window_close'}

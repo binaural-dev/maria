@@ -8,9 +8,10 @@ _logger = logging.getLogger(__name__)
 
 class HrExpenseBinaural(models.Model):
     _inherit = 'hr.expense'
-    
+
     def default_alternate_currency(self):
-        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+        alternate_currency = int(
+            self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
 
         if alternate_currency:
             return alternate_currency
@@ -25,15 +26,16 @@ class HrExpenseBinaural(models.Model):
                                                         order='name desc')
             if rate:
                 record.update({
-                    'foreign_currency_rate': rate.rate,
+                    'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                 })
             else:
+                rate.vef_rate,
                 rate = self.env['res.currency.rate'].search([('currency_id', '=', record.foreign_currency_id.id),
                                                              ('name', '>=', record.foreign_currency_date)], limit=1,
                                                             order='name asc')
                 if rate:
                     record.update({
-                        'foreign_currency_rate': rate.rate,
+                        'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                     })
                 else:
                     record.update({
@@ -44,22 +46,35 @@ class HrExpenseBinaural(models.Model):
     def _amount_all_foreign(self):
         """
         """
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
         for order in self:
+
+            value_rate = 1
+
+            if order.foreign_currency_id != order.currency_id:
+                value_rate = decimal_function.getCurrencyValue(
+                    rate=order.foreign_currency_rate, base_currency=order.currency_id.name, foreign_currency=order.foreign_currency_id.name)
+
             order.update({
-                'foreign_total_amount': order.total_amount * order.foreign_currency_rate,
-                'foreign_amount_residual': order.amount_residual * order.foreign_currency_rate,
+                'foreign_total_amount': order.total_amount * value_rate,
+                'foreign_amount_residual': order.amount_residual * value_rate,
             })
 
     def _get_account_move_line_values(self):
         move_line_values_by_expense = {}
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
         for expense in self:
-            move_line_name = expense.employee_id.name + ': ' + expense.name.split('\n')[0][:64]
+            move_line_name = expense.employee_id.name + \
+                ': ' + expense.name.split('\n')[0][:64]
             account_src = expense._get_expense_account_source()
             account_dst = expense._get_expense_account_destination()
-            account_date = expense.sheet_id.accounting_date or expense.date or fields.Date.context_today(expense)
-        
+            account_date = expense.sheet_id.accounting_date or expense.date or fields.Date.context_today(
+                expense)
+
             company_currency = expense.company_id.currency_id
-        
+
             move_line_values = []
             taxes = expense.tax_ids.with_context(round=True).compute_all(expense.unit_amount, expense.currency_id,
                                                                          expense.quantity, expense.product_id)
@@ -71,9 +86,16 @@ class HrExpenseBinaural(models.Model):
             _logger.info(foreign_currency_rate)
             _logger.info('TASA DE GASTOS')
             # source move line
-            balance = expense.currency_id._convert(taxes['total_excluded'], company_currency, expense.company_id,
-                                                   account_date)
+            value_rate = 1
+
+            if company_currency != expense.currency_id:
+                _logger.warning('AQUI')
+                value_rate = decimal_function.getCurrencyValue(
+                    rate=foreign_currency_rate, base_currency=expense.currency_id.name, foreign_currency=company_currency.name)
+
+            balance = taxes['total_excluded'] * value_rate
             amount_currency = taxes['total_excluded']
+
             move_line_src = {
                 'name': move_line_name,
                 'quantity': expense.quantity or 1,
@@ -95,19 +117,21 @@ class HrExpenseBinaural(models.Model):
             move_line_values.append(move_line_src)
             total_amount -= balance
             total_amount_currency -= move_line_src['amount_currency']
-        
+
             # taxes move lines
             for tax in taxes['taxes']:
-                balance = expense.currency_id._convert(tax['amount'], company_currency, expense.company_id,
-                                                       account_date)
+                balance = tax['amount'] * value_rate
+
                 amount_currency = tax['amount']
-            
+
                 if tax['tax_repartition_line_id']:
-                    rep_ln = self.env['account.tax.repartition.line'].browse(tax['tax_repartition_line_id'])
-                    base_amount = self.env['account.move']._get_base_amount_to_display(tax['base'], rep_ln)
+                    rep_ln = self.env['account.tax.repartition.line'].browse(
+                        tax['tax_repartition_line_id'])
+                    base_amount = self.env['account.move']._get_base_amount_to_display(
+                        tax['base'], rep_ln)
                 else:
                     base_amount = None
-            
+
                 move_line_tax_values = {
                     'name': tax['name'],
                     'quantity': 1,
@@ -128,7 +152,7 @@ class HrExpenseBinaural(models.Model):
                 total_amount -= balance
                 total_amount_currency -= move_line_tax_values['amount_currency']
                 move_line_values.append(move_line_tax_values)
-        
+
             # destination move line
             move_line_dst = {
                 'name': move_line_name,
@@ -143,7 +167,7 @@ class HrExpenseBinaural(models.Model):
                 'foreign_currency_rate': foreign_currency_rate,
             }
             move_line_values.append(move_line_dst)
-        
+
             move_line_values_by_expense[expense.id] = move_line_values
         return move_line_values_by_expense
 
@@ -152,22 +176,22 @@ class HrExpenseBinaural(models.Model):
         main function that is called when trying to create the accounting entries related to an expense
         '''
         move_group_by_sheet = self._get_account_move_by_sheet()
-    
+
         move_line_values_by_expense = self._get_account_move_line_values()
-    
+
         for expense in self:
             company_currency = expense.company_id.currency_id
             different_currency = expense.currency_id != company_currency
-        
+
             # get the account move of the related sheet
             move = move_group_by_sheet[expense.sheet_id.id]
-        
+
             # get move line values
             move_line_values = move_line_values_by_expense.get(expense.id)
             move_line_dst = move_line_values[-1]
             total_amount = move_line_dst['debit'] or -move_line_dst['credit']
             total_amount_currency = move_line_dst['amount_currency']
-        
+
             # create one more move line, a counterline for the total on payable account
             if expense.payment_mode == 'company_account':
                 if not expense.sheet_id.bank_journal_id.default_account_id:
@@ -189,18 +213,19 @@ class HrExpenseBinaural(models.Model):
                     'ref': expense.name,
                     'foreign_currency_rate': expense.foreign_currency_rate,
                 })
-        
+
             # link move lines to move, and move to expense sheet
-            move.write({'line_ids': [(0, 0, line) for line in move_line_values]})
+            move.write({'line_ids': [(0, 0, line)
+                       for line in move_line_values]})
             expense.sheet_id.write({'account_move_id': move.id})
-        
+
             if expense.payment_mode == 'company_account':
                 expense.sheet_id.paid_expense_sheets()
-    
+
         # post the moves
         for move in move_group_by_sheet.values():
             move._post()
-    
+
         return move_group_by_sheet
 
     def _prepare_move_values(self):
@@ -225,9 +250,31 @@ class HrExpenseBinaural(models.Model):
     foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
                                           tracking=True)
     foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
-    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+    foreign_currency_date = fields.Date(
+        string="Fecha", default=fields.Date.today(), tracking=True)
 
     foreign_total_amount = fields.Monetary(string='Total moneda alterna', store=True, readonly=True,
-                                             compute='_amount_all_foreign',
-                                             tracking=5)
-    foreign_amount_residual = fields.Monetary(string='Monto Adeudado alterno', store=True, readonly=True, compute='_amount_all_foreign')
+                                           compute='_amount_all_foreign',
+                                           tracking=5)
+    foreign_amount_residual = fields.Monetary(
+        string='Monto Adeudado alterno', store=True, readonly=True, compute='_amount_all_foreign')
+
+    @api.depends('date', 'total_amount', 'company_currency_id')
+    def _compute_total_amount_company(self):
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')])
+        for expense in self:
+            value_rate = 1
+
+            if expense.currency_id != expense.company_id.currency_id:
+                _logger.warning(expense.currency_id.name)
+                _logger.warning(expense.company_currency_id.name)
+                value_rate = decimal_function.getCurrencyValue(
+                    rate=expense.foreign_currency_rate, base_currency=expense.currency_id.name, foreign_currency=expense.company_id.currency_id.name)
+
+            _logger.warning(expense.total_amount)
+            _logger.warning(value_rate)
+            amount = 0
+            if expense.company_currency_id:
+                amount = expense.total_amount * value_rate
+            expense.total_amount_company = amount

@@ -33,6 +33,7 @@ class ResCurrencyInh(models.Model):
         # apply rounding
         return to_currency.round(to_amount) if round else to_amount
 
+
     @api.model
     def _get_conversion_byrate(self, from_currency, to_currency, company, date, byrate):
         currency_rates = (from_currency + to_currency)._get_rates(company, date)
@@ -40,3 +41,4 @@ class ResCurrencyInh(models.Model):
         res = currency_rates.get(to_currency.id) / currency_rates.get(from_currency.id)
         _logger.info(res)
         return res
+

@@ -9,32 +9,38 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
     _inherit = 'account.payment.register'
 
     def default_alternate_currency(self):
-        alternate_currency = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+        alternate_currency = int(
+            self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
 
         if alternate_currency:
             return alternate_currency
         else:
             return False
 
-    foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency, tracking=True)
-    foreign_currency_rate = fields.Monetary(string="Tasa", tracking=True, currency_field='foreign_currency_id')
-    foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+    foreign_currency_id = fields.Many2one(
+        'res.currency', default=default_alternate_currency, tracking=True)
+    foreign_currency_rate = fields.Monetary(
+        string="Tasa", tracking=True, currency_field='foreign_currency_id')
+    foreign_currency_date = fields.Date(
+        string="Fecha", default=fields.Date.today(), tracking=True)
 
-    @api.onchange('foreign_currency_id', 'foreign_currency_date','foreign_currency_rate')
+    @api.onchange('foreign_currency_id', 'foreign_currency_date', 'foreign_currency_rate')
     def _compute_foreign_currency_rate(self):
         for record in self:
             if record.foreign_currency_rate == 0:
-                rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '<=')
+                rate = self._get_rate(
+                    record.foreign_currency_id.id, record.foreign_currency_date, '<=')
 
                 if rate:
                     record.update({
-                        'foreign_currency_rate': rate.rate,
+                        'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                     })
                 else:
-                    rate = self._get_rate(record.foreign_currency_id.id, record.foreign_currency_date, '>=')
+                    rate = self._get_rate(
+                        record.foreign_currency_id.id, record.foreign_currency_date, '>=')
                     if rate:
                         record.update({
-                            'foreign_currency_rate': rate.rate,
+                            'foreign_currency_rate': rate.rate if rate.currency_id.name == 'VEF' else rate.vef_rate,
                         })
                     else:
                         record.update({
@@ -45,8 +51,8 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
         rate = self.env['res.currency.rate'].search([('currency_id', '=', foreign_currency_id),
                                                      ('name', operator, foreign_currency_date)], limit=1,
                                                     order='name desc')
-        return rate
 
+        return rate
 
     def _create_payment_vals_from_wizard(self):
         payment_vals = {
@@ -61,7 +67,7 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
             'partner_bank_id': self.partner_bank_id.id,
             'payment_method_id': self.payment_method_id.id,
             'destination_account_id': self.line_ids[0].account_id.id,
-            'foreign_currency_rate':self.foreign_currency_rate,
+            'foreign_currency_rate': self.foreign_currency_rate,
         }
 
         if not self.currency_id.is_zero(self.payment_difference) and self.payment_difference_handling == 'reconcile':
@@ -92,13 +98,13 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
             return {
                 'partner_id': line.partner_id.id,
                 'account_id': line.account_id.id,
-                'foreign_currency_rate':line.foreign_currency_rate,
+                'foreign_currency_rate': line.foreign_currency_rate,
                 'currency_id': (line.currency_id or line.company_currency_id).id,
                 'partner_bank_id': line.move_id.partner_bank_id.id,
-                'partner_type': 'customer' if line.account_internal_type == 'receivable' or \
-                            (line.account_id.user_type_id.type == 'other' and line.account_id.id in ctas_anticipos) else 'supplier',
+                'partner_type': 'customer' if line.account_internal_type == 'receivable' or
+                (line.account_id.user_type_id.type == 'other' and line.account_id.id in ctas_anticipos) else 'supplier',
                 'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
-            
+
             }
         else:
             return {
@@ -109,11 +115,11 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
                 'partner_bank_id': line.move_id.partner_bank_id.id,
                 'partner_type': 'customer' if line.account_internal_type == 'receivable' else 'supplier',
                 'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
-        
+
             }
 
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id',
-                 'payment_date','foreign_currency_rate')
+                 'payment_date', 'foreign_currency_rate')
     def _compute_amount(self):
         for wizard in self:
             if wizard.source_currency_id == wizard.currency_id:
@@ -123,14 +129,13 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
                 # Payment expressed on the company's currency.
                 wizard.amount = wizard.source_amount
             else:
-                # Foreign currency on payment different than the one set on the journal entries.
-                if wizard.currency_id.id == wizard.env.ref('base.VEF').id:
-                    amount_payment_currency = wizard.source_amount * wizard.foreign_currency_rate
-                else:
-                    amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount,
-                                                                                     wizard.currency_id,
-                                                                                     wizard.company_id,
-                                                                                     wizard.payment_date)
+                decimal_function = self.env['decimal.precision'].search(
+                    [('name', '=', 'decimal_quantity')])
+                rateToCalc = decimal_function.getCurrencyValue(rate=wizard.foreign_currency_rate, base_currency=wizard.company_id.currency_id.name,
+                                                               foreign_currency=wizard.currency_id.name) if wizard.company_id.currency_id != wizard.currency_id else 1
+
+                amount_payment_currency = wizard.source_amount * rateToCalc
+
                 wizard.amount = amount_payment_currency
 
     @api.depends('amount')
@@ -143,12 +148,10 @@ class AccountPaymentRegisterBinauralFacturacion(models.TransientModel):
                 # Payment expressed on the company's currency.
                 wizard.payment_difference = wizard.source_amount - wizard.amount
             else:
-                if wizard.currency_id.id == wizard.env.ref('base.VEF').id:
-                    amount_payment_currency = wizard.source_amount * wizard.foreign_currency_rate
-                else:
+                decimal_function = self.env['decimal.precision'].search(
+                    [('name', '=', 'decimal_quantity')])
+                rateToCalc = decimal_function.getCurrencyValue(rate=wizard.foreign_currency_rate, base_currency=wizard.company_id.currency_id.name,
+                                                               foreign_currency=wizard.currency_id.name) if wizard.company_id.currency_id != wizard.currency_id else 1
+                amount_payment_currency = wizard.source_amount * rateToCalc
 
-                    # Foreign currency on payment different than the one set on the journal entries.
-                    amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount,
-                                                                                     wizard.currency_id, wizard.company_id,
-                                                                                     wizard.payment_date)
                 wizard.payment_difference = amount_payment_currency - wizard.amount
