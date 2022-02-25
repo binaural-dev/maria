@@ -21,7 +21,11 @@
 			        <field name="city" invisible="1"/>
 		        </field>
 
-	            <div id="vat" position="after">
+				<field name="zip" position="after">
+					<field name="municipality_id" placeholder="Municipio" />
+				</field>
+
+	            <div id="vat" position="after">					
                     <field name="withholding_type" attrs="{'required':[('supplier_rank','&gt;', 0)]}"/>
 		            <field name="taxpayer" required="1"/>
 		            <field name="type_person_ids" domain="[('state','=',True)]" attrs="{'required':['|',('supplier_rank','&gt;', 0),('customer_rank','&gt;',0)]}" />

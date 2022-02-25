@@ -6,3 +6,4 @@ from . import models
 from . import res_partner_inh
 from . import account_journal_inh
 from . import res_currency_inh
+from . import inherited_product_category

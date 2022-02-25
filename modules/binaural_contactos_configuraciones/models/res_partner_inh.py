@@ -31,6 +31,8 @@ class ResPartnerBinauralContactos(models.Model):
     exempt_islr = fields.Boolean(default=True, string='Exento ISLR', help='Indica si es exento de retencion de ISLR')
     exempt_iva = fields.Boolean(default=True, string='Exento IVA', help='Indica si es exento de retencion de IVA')
     business_name = fields.Char(string='Razón Social')
+    
+    municipality_id = fields.Many2one('res.country.municipality', string='Municipio', domain="[('state_id','=',state_id)]")
 
     prefix_vat = fields.Selection([
         ('V', 'V'),

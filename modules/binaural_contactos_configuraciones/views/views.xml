@@ -1,48 +1,48 @@
 <odoo>
-  <data>
-	    <!--TYPE WITHHOLDING-->
-	    <!--TREE-->
-	    <record id="view_type_withholdings_tree" model="ir.ui.view">
-	        <field name="name">Retenciones de IVA</field>
-	        <field name="model">type.withholding</field>
-	        <field name="arch" type="xml">
-	            <tree>
-	                <field name="name" required="1"/>
-	                <field name="value" required="1"/>
-	                <field name="state" />
-	            </tree>
-	        </field>
-	    </record>
+    <data>
+        <!--TYPE WITHHOLDING-->
+        <!--TREE-->
+        <record id="view_type_withholdings_tree" model="ir.ui.view">
+            <field name="name">Retenciones de IVA</field>
+            <field name="model">type.withholding</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" required="1" />
+                    <field name="value" required="1" />
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
 
-	    <!--SEARCH-->
-	    <record id="view_search_withholdings" model="ir.ui.view">
-	        <field name="name">Porcentaje de Retención de IVA</field>
-	        <field name="model">type.withholding</field>
-	        <field name="arch" type="xml">
-	            <search string="Retenciones de IVA">
-	                <field name="name"/>
-	                <filter name="state"  domain="[('state','=',True)]" string="Activo"/>
-	            </search>
-	        </field>
-	    </record>
+        <!--SEARCH-->
+        <record id="view_search_withholdings" model="ir.ui.view">
+            <field name="name">Porcentaje de Retención de IVA</field>
+            <field name="model">type.withholding</field>
+            <field name="arch" type="xml">
+                <search string="Retenciones de IVA">
+                    <field name="name" />
+                    <filter name="state" domain="[('state','=',True)]" string="Activo" />
+                </search>
+            </field>
+        </record>
 
-	    <!--ACTION-->
-	    <record id="action_type_withholdings" model="ir.actions.act_window" >
-	        <field name="name">Porcentaje retención de IVA</field>
-	        <field name="res_model">type.withholding</field>
-	        <field name="type">ir.actions.act_window</field>
-	        <field name="binding_view_types">form</field>
-	        <field name="view_mode">tree,form</field>
-	        <field name="view_id" ref="view_type_withholdings_tree"/>
-	        <field name="context">{"search_default_state":True}</field>
-	    </record>
+        <!--ACTION-->
+        <record id="action_type_withholdings" model="ir.actions.act_window">
+            <field name="name">Porcentaje retención de IVA</field>
+            <field name="res_model">type.withholding</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_type_withholdings_tree" />
+            <field name="context">{"search_default_state":True}</field>
+        </record>
 
         <!--MENU-->
-        <menuitem name="Porcentaje Retención de IVA" id="menu_retention_type_withholdings" parent="binaural_contactos_configuraciones.retention_configuration" action="binaural_contactos_configuraciones.action_type_withholdings"/>
-	     <!--TYPE WITHHOLDING-->
+        <menuitem name="Porcentaje Retención de IVA" id="menu_retention_type_withholdings" parent="binaural_contactos_configuraciones.retention_configuration" action="binaural_contactos_configuraciones.action_type_withholdings" />
+        <!--TYPE WITHHOLDING-->
 
-	    <!--TAX_UNIT-->
-	    <!--TREE-->
+        <!--TAX_UNIT-->
+        <!--TREE-->
         <record id="view_tax_unit_tree" model="ir.ui.view">
             <field name="name">Unidad Tributaria</field>
             <field name="model">tax.unit</field>
@@ -64,11 +64,11 @@
                     <sheet string="Unidad Tributaria">
                         <group>
                             <group>
-                                <field name="name"/>
-                                <field name="status"/>
+                                <field name="name" />
+                                <field name="status" />
                             </group>
                             <group>
-                                <field name="value"/>
+                                <field name="value" />
                             </group>
                         </group>
 
@@ -83,12 +83,12 @@
             <field name="model">tax.unit</field>
             <field name="arch" type="xml">
                 <search string="Unidad Tributaria">
-                    <filter name="state" domain="[('status','=',True)]" string="Activo"/>
+                    <filter name="state" domain="[('status','=',True)]" string="Activo" />
                 </search>
             </field>
         </record>
 
-       <!--ACTION-->
+        <!--ACTION-->
         <record id="action_tax_unit" model="ir.actions.act_window">
             <field name="name">Unidad Tributaria</field>
             <field name="res_model">tax.unit</field>
@@ -100,21 +100,21 @@
 
         <!--MENU-->
         <menuitem name="Unidad Tributaria" id="menu_retention_tax_unit" parent="binaural_contactos_configuraciones.retention_configuration" action="action_tax_unit" />
-	    <!--TAX_UNIT-->
+        <!--TAX_UNIT-->
 
-	    <!--TARIF RETENTION-->
-	    <!--TREE-->
+        <!--TARIF RETENTION-->
+        <!--TREE-->
         <record id="view_tariffs_tree" model="ir.ui.view">
             <field name="name">Tarifa</field>
             <field name="model">tarif.retention</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="name"/>
-                    <field name="percentage"/>
-                    <field name="apply_subtracting"/>
-                    <field name="acumulative_rate"/>
-                    <field name="tax_unit_ids"/>
-                    <field name="status"/>
+                    <field name="name" />
+                    <field name="percentage" />
+                    <field name="apply_subtracting" />
+                    <field name="acumulative_rate" />
+                    <field name="tax_unit_ids" />
+                    <field name="status" />
                 </tree>
             </field>
         </record>
@@ -127,29 +127,29 @@
                 <form string="Tarifa">
                     <sheet string="Tarifa">
                         <group>
-                            <field name="name"/>
+                            <field name="name" />
                         </group>
                         <group>
                             <group>
-                                <field name="percentage"/>
-                                <field name="sustract_money"/>
-                                <field name="tax_unit_ids"/>
+                                <field name="percentage" />
+                                <field name="sustract_money" />
+                                <field name="tax_unit_ids" />
                             </group>
                             <group>
-                                <field name="apply_subtracting"/>
-                                <field name="acumulative_rate"/>
-                                <field name="amount_sustract"/>
-                                <field name="status"/>
+                                <field name="apply_subtracting" />
+                                <field name="acumulative_rate" />
+                                <field name="amount_sustract" />
+                                <field name="status" />
                             </group>
                         </group>
                         <group>
                             <field name="acumulative_rate_ids" attrs="{'invisible': [('acumulative_rate', '=', False)]}">
-                                <tree  editable="bottom" string="Tarifas Acumuladas">
-                                    <field name="name"/>
-                                    <field name="since"/>
-                                    <field name="until"/>
-                                    <field name="percentage"/>
-                                    <field name="sustract_ut"/>
+                                <tree editable="bottom" string="Tarifas Acumuladas">
+                                    <field name="name" />
+                                    <field name="since" />
+                                    <field name="until" />
+                                    <field name="percentage" />
+                                    <field name="sustract_ut" />
                                 </tree>
                             </field>
                         </group>
@@ -164,12 +164,12 @@
             <field name="model">tarif.retention</field>
             <field name="arch" type="xml">
                 <search string="Tarifas">
-                    <filter name="status" domain="[('status','=',True)]" string="Activo"/>
+                    <filter name="status" domain="[('status','=',True)]" string="Activo" />
                 </search>
             </field>
         </record>
 
-       <!--SEARCH-->
+        <!--SEARCH-->
         <record id="action_tariffs" model="ir.actions.act_window">
             <field name="name">Tarifas</field>
             <field name="res_model">tarif.retention</field>
@@ -181,16 +181,16 @@
 
         <!--MENU-->
         <menuitem name="Tarifas" id="menu_retention_tarif" parent="binaural_contactos_configuraciones.retention_configuration" action="action_tariffs" />
-	    <!--TARIF RETENTION-->
+        <!--TARIF RETENTION-->
 
-	    <!--PAYMENT CONCEPT-->
-	    <!--TREE-->
-	    <record id="view_payment_concept_tree" model="ir.ui.view">
+        <!--PAYMENT CONCEPT-->
+        <!--TREE-->
+        <record id="view_payment_concept_tree" model="ir.ui.view">
             <field name="name">Concepto de Pago</field>
             <field name="model">payment.concept</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="name"/>
+                    <field name="name" />
                     <field name="status" />
                 </tree>
             </field>
@@ -205,19 +205,19 @@
                     <sheet string="Concepto de Pago">
                         <group>
                             <group>
-                                <field name="name"/>
+                                <field name="name" />
                             </group>
                             <group>
-                                <field name="status"/>
+                                <field name="status" />
                             </group>
                         </group>
                         <notebook>
                             <page name="line_payment_concept" string="Linea concepto de pago">
                                 <field name="line_payment_concept_ids">
-                                    <tree delete="true" editable="op" >
-                                        <field name="type_person_ids"/>
-                                        <field name="code"/>
-                                        <field name="percentage_tax_base"/>
+                                    <tree delete="true" editable="op">
+                                        <field name="type_person_ids" />
+                                        <field name="code" />
+                                        <field name="percentage_tax_base" />
                                         <field name="tariffs_ids" />
                                         <field name="pay_from" />
                                     </tree>
@@ -235,12 +235,12 @@
             <field name="model">payment.concept</field>
             <field name="arch" type="xml">
                 <search string="Concepto de pago">
-                    <filter name="status" domain="[('status','=',True)]" string="Activo"/>
+                    <filter name="status" domain="[('status','=',True)]" string="Activo" />
                 </search>
             </field>
         </record>
 
-       <!--ACTION-->
+        <!--ACTION-->
         <record id="action_payment_concept" model="ir.actions.act_window">
             <field name="name">Concepto de pago</field>
             <field name="res_model">payment.concept</field>
@@ -252,16 +252,16 @@
 
         <!--MENU-->
         <menuitem name="Concepto de pago" id="menu_retention_payment_concept" parent="binaural_contactos_configuraciones.retention_configuration" action="action_payment_concept" />
-	    <!--PAYMENT CONCEPT-->
+        <!--PAYMENT CONCEPT-->
 
-	    <!--SIGNATURE CONFIG-->
-	    <!--TREE-->
-		<record id="view_configurate_tree_signature" model="ir.ui.view">
+        <!--SIGNATURE CONFIG-->
+        <!--TREE-->
+        <record id="view_configurate_tree_signature" model="ir.ui.view">
             <field name="name">Firma digital</field>
             <field name="model">signature.config</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="email"/>
+                    <field name="email" />
                     <field name="active" />
                 </tree>
             </field>
@@ -274,11 +274,11 @@
             <field name="arch" type="xml">
                 <form string="Firma Digital">
                     <sheet string="Firma Digital">
-	                    <group>
-	                        <field name="email"/>
-	                        <field name="signature"  widget="image"/>
-	                        <field name="active"/>
-	                    </group>
+                        <group>
+                            <field name="email" />
+                            <field name="signature" widget="image" />
+                            <field name="active" />
+                        </group>
                     </sheet>
                 </form>
             </field>
@@ -290,7 +290,7 @@
             <field name="model">signature.config</field>
             <field name="arch" type="xml">
                 <search string="Firma digitak">
-                    <filter name="active" domain="[('active','=',True)]" string="Activo"/>
+                    <filter name="active" domain="[('active','=',True)]" string="Activo" />
                 </search>
             </field>
         </record>
@@ -305,20 +305,20 @@
             <field name="context">{"search_default_active":True}</field>
         </record>
 
-	    <!--MENU-->
-        <menuitem name="Firma" id="menu_retention_configurate_signature" parent="binaural_contactos_configuraciones.retention_configuration" action="action_configurate_signature"/>
+        <!--MENU-->
+        <menuitem name="Firma" id="menu_retention_configurate_signature" parent="binaural_contactos_configuraciones.retention_configuration" action="action_configurate_signature" />
         <!--SIGNATURE CONFIG-->
 
-	    <!--RES COUNTRY CITY-->
-	    <!--TREE-->
-		<record id="view_res_country_city_tree" model="ir.ui.view">
+        <!--RES COUNTRY CITY-->
+        <!--TREE-->
+        <record id="view_res_country_city_tree" model="ir.ui.view">
             <field name="name">Ciudad</field>
             <field name="model">res.country.city</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="country_id"/>
-                    <field name="state_id"/>
-                    <field name="name"/>
+                    <field name="country_id" />
+                    <field name="state_id" />
+                    <field name="name" />
                 </tree>
             </field>
         </record>
@@ -330,11 +330,11 @@
             <field name="arch" type="xml">
                 <form string="Ciudad">
                     <sheet string="Ciudad">
-	                    <group>
-	                        <field name="country_id"/>
-	                        <field name="state_id"/>
-	                        <field name="name"/>
-	                    </group>
+                        <group>
+                            <field name="country_id" />
+                            <field name="state_id" />
+                            <field name="name" />
+                        </group>
                     </sheet>
                 </form>
             </field>
@@ -349,8 +349,137 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-	    <!--MENU-->
-        <menuitem name="Ciudad" id="menu_res_city" parent="binaural_contactos_configuraciones.master_configuration" action="action_res_city"/>
+
+        <!--MENU-->
+        <menuitem name="Ciudad" id="menu_res_city" parent="binaural_contactos_configuraciones.master_configuration" action="action_res_city" />
         <!--RES COUNTRY CITY-->
-  </data>
+
+
+        <!--RES COUNTRY MUNICIPALITY-->
+        <!--TREE-->
+        <record id="view_res_country_municipality_tree" model="ir.ui.view">
+            <field name="name">Município</field>
+            <field name="model">res.country.municipality</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom">
+                    <field name="country_id"  />
+                    <field name="state_id" widget="many2many_tags"  domain="[('country_id.code','ilike','ve')]"/>
+                    <field name="name" />
+                </tree>
+            </field>
+        </record>
+
+        <!--FORM-->
+        <record id="view_res_country_municipality_form" model="ir.ui.view">
+            <field name="name">Município</field>
+            <field name="model">res.country.municipality</field>
+            <field name="arch" type="xml">
+                <form string="Município">
+                    <sheet string="Município">
+                        <group>
+                            <field name="country_id" />
+                            <field name="state_id" widget="many2many_tags"  domain="[('country_id.code','ilike','ve')]"/>
+                            <field name="name" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--ACTION-->
+        <record id="action_res_municipality" model="ir.actions.act_window">
+            <field name="name">Município</field>
+            <field name="res_model">res.country.municipality</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!--MENU-->
+        <menuitem name="Município" id="menu_res_municipality" parent="binaural_contactos_configuraciones.master_configuration" action="action_res_municipality" />
+        <!--RES COUNTRY MUNICIPALITY-->
+
+        <!--RAMO ECONOMICO-->
+        <!--TREE-->
+        <!-- <record id="view_economic_branch_tree" model="ir.ui.view">
+            <field name="name">Ramo Económico</field>
+            <field name="model">economic.branch</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="code" />
+                    <field name="name" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_economic_branch_form" model="ir.ui.view">
+            <field name="name">Ramo Económico</field>
+            <field name="model">economic.branch</field>
+            <field name="arch" type="xml">
+                <form string="Ramo Económico">
+                    <sheet string="Ramo Económico">
+                        <group>
+                            <field name="code" />
+                            <field name="name" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_economic_branch" model="ir.actions.act_window">
+            <field name="name">Ramo Económico</field>
+            <field name="res_model">economic.branch</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Ramo Económico" id="menu_economic_branch" parent="binaural_contactos_configuraciones.master_configuration" action="action_economic_branch" />
+
+        <record id="view_economic_activity_tree" model="ir.ui.view">
+            <field name="name">Actividad Económica</field>
+            <field name="model">economic.activity</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="code" />
+                    <field name="name" />
+                    <field name="branch_id" />
+                    <field name="state_id" />
+                    <field name="municipality_id" />
+                    <field name="alicuota" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_economic_activity_form" model="ir.ui.view">
+            <field name="name">Actividad Económica</field>
+            <field name="model">economic.activity</field>
+            <field name="arch" type="xml">
+                <form string="Actividad Económica">
+                    <sheet string="Actividad Económica">
+                        <group>
+                            <field name="code" />
+                            <field name="name" />
+                            <field name="branch_id" />
+                            <field name="state_id" />
+                            <field name="municipality_id" />
+                            <field name="alicuota" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_economic_activity" model="ir.actions.act_window">
+            <field name="name">Actividad Económica</field>
+            <field name="res_model">economic.activity</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="binding_view_types">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Actividad Económica" id="menu_economic_activity" parent="binaural_contactos_configuraciones.master_configuration" action="action_economic_activity" /> -->
+
+    </data>
 </odoo>
