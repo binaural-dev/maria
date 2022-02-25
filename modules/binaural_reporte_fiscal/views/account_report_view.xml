@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_account_financial_report_form_binaural" model="ir.ui.view">
+    <!-- <record id="view_account_financial_report_form_binaural" model="ir.ui.view">
         <field name="name">account.financial.html.report.form.binaural</field>
         <field name="model">account.financial.html.report</field>
         <field name="inherit_id" ref="account_reports.view_account_financial_report_form"/>
@@ -15,7 +15,7 @@
             </xpath>
 
         </field>
-    </record>
+    </record> -->
 
     <record id="view_account_financial_report_line_form_binaural" model="ir.ui.view">
         <field name="name">Configuración para las lineas de reportes financieros</field>
