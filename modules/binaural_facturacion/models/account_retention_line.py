@@ -172,9 +172,8 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                                           readonly=True)
     retention_id = fields.Many2one('account.retention', 'Comprobante', ondelete='cascade', select=True,
                                    help="Comprobante")
-    partner_id = fields.Many2one(related="retention_id.partner_id")
     invoice_id = fields.Many2one('account.move', 'Factura', required=True, ondelete='cascade',
-                                 select=True, help="Factura a retener", domain="[('partner_id','=',partner_id),('state','!=','draft')]")
+                                 select=True, help="Factura a retener")
     invoice_type = fields.Selection(selection=[
         ('out_invoice', 'Factura de Cliente'),
         ('out_refund', 'Nota de Crédito Cliente'),
