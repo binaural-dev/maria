@@ -609,7 +609,7 @@
                         </div>
                         <!-- Sustraendo -->
                         <div style="width:15%">
-                            <span t-field="line.related_amount_sustract_tariffs"/>
+                            <span t-field="line.related_tariff_id.amount_sustract"/>
                         </div>
                         <!-- imp Retenido -->
                         <t t-set="retention_amount" t-value="0"/>
