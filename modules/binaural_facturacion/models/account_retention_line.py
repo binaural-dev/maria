@@ -101,10 +101,11 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                 if record.payment_concept_id:
                     for line in record.payment_concept_id.line_payment_concept_ids:
                         if record.invoice_id.partner_id.type_person_ids.id == line.type_person_ids.id:
-                            amount_sustract = line.tariffs_ids.amount_sustract
                             if record.company_currency_id.id == currency_ut.id:
+                                amount_sustract = line.tariffs_ids.amount_sustract
                                 from_pay = line.pay_from
                             else:
+                                amount_sustract = (line.tariffs_ids.amount_sustract / record.invoice_id.foreign_currency_rate) if record.invoice_id.foreign_currency_rate > 0 else 0.00
                                 from_pay = (line.pay_from / record.invoice_id.foreign_currency_rate) if record.invoice_id.foreign_currency_rate > 0 else 0.00
                             _logger.info('Sustraendo')
                             _logger.info(amount_sustract)
