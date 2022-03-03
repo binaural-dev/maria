@@ -23,4 +23,4 @@ class ReportRetentionIvaVoucher(models.AbstractModel):
         return decimal_places
 
     def get_foreign_currency_id(self):
-        return self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id')
+        return int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))

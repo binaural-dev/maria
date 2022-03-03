@@ -182,7 +182,7 @@
                 <t t-set="total_amount_amount_except" t-value="0"/>
                 <t t-set="amount_except" t-options='{"widget": "float", "precision": get_digits}'/>
 
-                <t t-set="foreign_facture_amount" t-options='{"widget": "float", "precision": get_digits}'/>
+                <t t-set="facture_amount" t-options='{"widget": "float", "precision": get_digits}'/>
                 <t t-set="total_amount_tax" t-options='{"widget": "float", "precision": get_digits}'/>
                 <!--retenido-->
                 <t t-set="porcentage_retention" t-options='{"widget": "float", "precision": get_digits}'/>
@@ -271,8 +271,14 @@
                         `                       <!-- Total Compras Incluyendo el IVA -->
                         <div class="" style="width:7%">
                             <span>
-                                <t t-esc="line.foreign_facture_total"
-                                   t-options='{"widget": "float", "precision": get_digits}'/>
+				<t t-if="get_foreign_currency_id == 3">
+                                    <t t-esc="line.foreign_facture_total"
+                                       t-options='{"widget": "float", "precision": get_digits}'/>
+			    	</t>
+				<t t-else="">
+                                    <t t-esc="line.facture_total"
+                                       t-options='{"widget": "float", "precision": get_digits}'/>
+				</t>
                             </span>
                         </div>
                         <t t-set="total_amount_total" t-value="total_amount_total+str(line.facture_total)"/>
@@ -294,9 +300,16 @@
 
                         <!-- Base Imponible -->
                         <div class="" style="width:10%">
-                            <span t-esc="line.foreign_facture_amount"
-                                  t-options='{"widget": "float", "precision": get_digits}'/>
-                            <t t-set="foreign_facture_amount" t-value="foreign_facture_amount + str(line.foreign_facture_amount)"/>
+			    <t t-if="get_foreign_currency_id == 3">
+                            	<span t-esc="line.foreign_facture_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            	<t t-set="facture_amount" t-value="facture_amount + str(line.foreign_facture_amount)"/>
+			    </t>
+			    <t t-else="">
+                            	<span t-esc="line.facture_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            	<t t-set="facture_amount" t-value="facture_amount + str(line.facture_amount)"/>
+			    </t>
                         </div>
 
                         <!-- % Alic -->
@@ -311,19 +324,35 @@
 
                         <!-- Impuesto IVA -->
                         <div class="" style="width:10%">
-                            <span t-esc="line.foreign_iva_amount"
-                                  t-options='{"widget": "float", "precision": get_digits}'/>
+			    <t t-if="get_foreign_currency_id == 3">
+                            	<span t-esc="line.foreign_iva_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                        	<t t-set="total_amount_tax" t-value="total_amount_tax + str(line.foreign_iva_amount)"/>
+			    </t>
+			    <t t-else="">
+                            	<span t-esc="line.iva_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                        	<t t-set="total_amount_tax" t-value="total_amount_tax + str(line.iva_amount)"/>
+			    </t>
                         </div>
 
-                        <t t-set="total_amount_tax" t-value="total_amount_tax + str(line.foreign_iva_amount)"/>
 
                         <!-- IVA Retenido -->
-                        <div class="" style="width:10%">
-                            <span t-esc="line.foreign_retention_amount"
-                                  t-options='{"widget": "float", "precision": get_digits}'/>
-                        </div>
+			<t t-if="get_foreign_currency_id == 3">
+                            <div class="" style="width:10%">
+                            	<span t-esc="line.foreign_retention_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            </div>
+                            <t t-set="total_amount_to_pay" t-value="total_amount_to_pay + str(line.foreign_retention_amount)"/>
+			</t>
+			<t t-else="">
+                            <div class="" style="width:10%">
+                            	<span t-esc="line.retention_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            </div>
+                            <t t-set="total_amount_to_pay" t-value="total_amount_to_pay + str(line.retention_amount)"/>
+			</t>
 
-                        <t t-set="total_amount_to_pay" t-value="total_amount_to_pay + str(line.foreign_retention_amount)"/>
 
 
                     </div>
@@ -362,7 +391,7 @@
                               t-options='{"widget": "float", "precision": get_digits}'/>
                     </div>
                     <div class="" style="width:10%">
-                        <span t-esc="float(foreign_facture_amount)"
+                        <span t-esc="float(facture_amount)"
                               t-options='{"widget": "float", "precision": get_digits}'/>
                     </div>
                     <div class="" style="width:7%">
