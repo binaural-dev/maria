@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <group name="first" position="after">
                 <group>
-                    <field name="ciu"/>
+                    <field name="ciu" options="{'no_create': True, 'no_create_edit':True}" />
                 </group>
             </group> 
         </field>

@@ -2,6 +2,8 @@
 
 import logging
 
+from numpy import require
+
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
@@ -203,32 +205,41 @@ class ResCountryMunicipalityBinaural(models.Model):
     _rec_name = 'name'
     _sql_constraints = [('name_uniq', 'unique (name,country_id,state_id)',
                          'No puede registrar un município con el mismo nombre para el estado y el pais seleccionado')]
-    
+
     country_id = fields.Many2one('res.country', string="Pais", required=True)
     state_id = fields.Many2many(
         'res.country.state', string="Estado", required=True)
     name = fields.Char(string="Município", required=True)
 
 
-# class EconomicBrandBinaural(models.Model):
-#     _name = 'economic.branch'
-#     _rec_name = 'name'
-#     _sql_constraints = [('name_uniq', 'unique (name)',
-#                          'No puede registrar un ramo económico con el mismo nombre')]
+class EconomicBrandBinaural(models.Model):
+    _name = 'economic.branch'
+    _rec_name = 'name'
+    _sql_constraints = [('name_uniq', 'unique (name)',
+                         'No puede registrar un ramo económico con el mismo nombre')]
 
-#     name = fields.Char(string="Nombre", required=True)
-#     code = fields.Char('Código', required=True)
+    name = fields.Char(string="Nombre", required=True)
+    status = fields.Selection(selection=[(
+        'active', 'Activo'), ('inactive', 'Desactivado')], string="Estado", default='active')
 
 
-# class EconomicActivity(models.Model):
-#     _name = 'economic.activity'
+class EconomicActivity(models.Model):
+    _name = 'economic.activity'
+    _rec_name = 'name'
+    _sql_constraints = [('code_uniq', 'unique (name,municipality_id)',
+                         'No puede existir dos registros con el mismo codigo para el municipio seleccionado'),
+                        ('brach_uniq', 'unique (branch_id,municipality_id)',
+                         'No puede existir dos registros con el mismo municipio y ramo económico'),
+                        ('aliquot_mayor_cero', 'check (aliquot > 0)','La aliquota debe ser mayor a cero')]
 
-#     name = fields.Char('Actividad Económica', required=True)
-#     code = fields.Char('Código', required=True)
-#     state_id = fields.Many2one(
-#         'res.country.state', string="Estado", required=True)
-#     municipality_id = fields.Many2one(
-#         'res.country.municipality', string="Município", required=True)
-#     branch_id = fields.Many2one(
-#         'economic.branch', string="Ramo Económico", required=True)
-#     alicuota = fields.Float(string='Alicuota', required=True)
+    name = fields.Char('Código', required=True)
+    municipality_id = fields.Many2one(
+        'res.country.municipality', string="Município", required=True)
+    branch_id = fields.Many2one(
+        'economic.branch', string="Ramo Económico", required=True, domain="[('status','=','active')]")
+    aliquot = fields.Float(string='Alicuota', required=True)
+    description = fields.Text(string='Descripción', required=True)
+    minimum_monthly = fields.Float(
+        string='Mínimo tributable Mensual', required=True)
+    minimum_annual = fields.Float(
+        string='Mínimo tributable Anual', required=True)

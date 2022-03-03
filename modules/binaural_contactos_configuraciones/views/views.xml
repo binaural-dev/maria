@@ -362,8 +362,8 @@
             <field name="model">res.country.municipality</field>
             <field name="arch" type="xml">
                 <tree editable="bottom">
-                    <field name="country_id"  />
-                    <field name="state_id" widget="many2many_tags"  domain="[('country_id.code','ilike','ve')]"/>
+                    <field name="country_id" />
+                    <field name="state_id" widget="many2many_tags" domain="[('country_id.code','ilike','ve')]" />
                     <field name="name" />
                 </tree>
             </field>
@@ -378,7 +378,7 @@
                     <sheet string="Município">
                         <group>
                             <field name="country_id" />
-                            <field name="state_id" widget="many2many_tags"  domain="[('country_id.code','ilike','ve')]"/>
+                            <field name="state_id" widget="many2many_tags" domain="[('country_id.code','ilike','ve')]" />
                             <field name="name" />
                         </group>
                     </sheet>
@@ -401,13 +401,13 @@
 
         <!--RAMO ECONOMICO-->
         <!--TREE-->
-        <!-- <record id="view_economic_branch_tree" model="ir.ui.view">
+        <record id="view_economic_branch_tree" model="ir.ui.view">
             <field name="name">Ramo Económico</field>
             <field name="model">economic.branch</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="code" />
                     <field name="name" />
+                    <field name="status" />
                 </tree>
             </field>
         </record>
@@ -419,11 +419,26 @@
                 <form string="Ramo Económico">
                     <sheet string="Ramo Económico">
                         <group>
-                            <field name="code" />
                             <field name="name" />
+                            <field name="status" />
                         </group>
                     </sheet>
                 </form>
+            </field>
+        </record>
+
+        <record id="economic_branch_view_search" model="ir.ui.view">
+            <field name="name">economic.branch.search</field>
+            <field name="model">economic.branch</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" />
+                    <field name="status" />
+                    <filter string="Activo" name="status" domain="[('status', '=', 'active')]" />
+                    <group expand="1" string="Agrupar Por">
+                        <filter string="Estado" name='status' context="{'group_by':'status'}" />
+                    </group>
+                </search>
             </field>
         </record>
 
@@ -442,12 +457,12 @@
             <field name="model">economic.activity</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="code" />
                     <field name="name" />
                     <field name="branch_id" />
-                    <field name="state_id" />
                     <field name="municipality_id" />
-                    <field name="alicuota" />
+                    <field name="aliquot" />
+                    <field name="minimum_monthly" />
+                    <field name="minimum_annual" />
                 </tree>
             </field>
         </record>
@@ -459,12 +474,13 @@
                 <form string="Actividad Económica">
                     <sheet string="Actividad Económica">
                         <group>
-                            <field name="code" />
                             <field name="name" />
                             <field name="branch_id" />
-                            <field name="state_id" />
                             <field name="municipality_id" />
-                            <field name="alicuota" />
+                            <field name="aliquot" />
+                            <field name="minimum_monthly" />
+                            <field name="minimum_annual" />
+                            <field name="description" />
                         </group>
                     </sheet>
                 </form>
@@ -479,7 +495,7 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem name="Actividad Económica" id="menu_economic_activity" parent="binaural_contactos_configuraciones.master_configuration" action="action_economic_activity" /> -->
+        <menuitem name="Actividad Económica" id="menu_economic_activity" parent="binaural_contactos_configuraciones.master_configuration" action="action_economic_activity" />
 
     </data>
 </odoo>
