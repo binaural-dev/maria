@@ -57,6 +57,13 @@ class ResPartnerBinauralContactos(models.Model):
     city_id = fields.Many2one(
         'res.country.city', 'Ciudad', track_visibility='onchange')
 
+    economic_activity_id = fields.Many2one(
+        'economic.activity', string='Actividad Económica')
+    activity = fields.Text(string='Actividad Económica',
+                           related="economic_activity_id.description")
+    aliquot = fields.Float(
+        string='Alíquota', related="economic_activity_id.aliquot")
+
     @api.constrains('city_id')
     def _update_city(self):
         for record in self:
@@ -69,12 +76,25 @@ class ResPartnerBinauralContactos(models.Model):
                                       view_type=view_type, toolbar=toolbar, submenu=submenu)
         municipality_retention = self.env["ir.config_parameter"].sudo(
         ).get_param("use_municipal_retention")
+        context = dict(self._context or {})
         if municipality_retention and view_type == "form":
             doc = etree.XML(res["arch"])
             municipality_field = doc.xpath(
                 "//field[@name='municipality_id']")[0]
-            modifiers = json.loads(municipality_field.get("modifiers"))
-            modifiers['required'] = True
-            municipality_field.set('modifiers', json.dumps(modifiers))
+
+            modifiers_field = json.loads(municipality_field.get("modifiers"))
+            modifiers_field['required'] = True
+            municipality_field.set('modifiers', json.dumps(modifiers_field))
+            if not 'params' in context or not 'params' in context and not 'id' in context['params']:
+                return res
+
+            record = self.env['res.partner'].browse(context['params']['id'])
+
+            if record and record.supplier_rank > 0:
+                municipality_page = doc.xpath(
+                    "//notebook/page[@name='municipality_taxes']")[0]
+                modifiers_page = json.loads(municipality_page.get("modifiers"))
+                modifiers_page['invisible'] = False
+                municipality_page.set('modifiers', json.dumps(modifiers_page))
             res["arch"] = etree.tostring(doc, encoding="unicode")
         return res
