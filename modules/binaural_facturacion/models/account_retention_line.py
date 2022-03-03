@@ -112,6 +112,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                             record.related_pay_from = from_pay
                             record.related_percentage_tax_base = line.percentage_tax_base
                             record.related_percentage_tariffs = line.tariffs_ids.percentage
+                            record.related_tariff_id = line.tariffs_ids.id
                             record.related_amount_sustract_tariffs = amount_sustract
                 if record.invoice_id:
                     _logger.info('invoice_idddddddddddddddddd')
@@ -209,6 +210,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     related_percentage_tax_base = fields.Float(string='% Base Imponible', compute=_get_value_related, store=True)
     related_percentage_tariffs = fields.Float(string='% Tarifa', compute=_get_value_related, store=True)
     related_amount_sustract_tariffs = fields.Float(string='Sustraendo', compute=_get_value_related, store=True)
+    related_tariff_id = fields.Many2one('tarif.retention', compute=_get_value_related)
     
     # Moneda Alterna
     foreign_facture_amount = fields.Float(string='Base Imponible Anterna')
