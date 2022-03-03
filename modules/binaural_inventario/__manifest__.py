@@ -28,6 +28,7 @@
         'views/res_config.xml',
         'views/stock_picking.xml',
         'views/product_template.xml',
+        'views/product_category_views.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
