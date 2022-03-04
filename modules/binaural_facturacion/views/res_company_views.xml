@@ -1,0 +1,22 @@
+<odoo>
+    <record id="view_res_company_form_inherited" model="ir.ui.view">
+        <field name="name">res.company.form.inherited</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+
+
+            <field name="logo" position="before">
+                <field name="logo_hacienda" widget="image" class="oe_avatar" invisible="1"/>
+            </field>
+
+            <div class="oe_title" position="after">
+                <group col="6" colspan="3">
+                    <field name="name_hacienda" invisible="1"/>
+                    <field name="economic_activity_number" invisible="1"/>
+                </group>
+            </div>
+
+        </field>
+    </record>
+</odoo>

@@ -2,6 +2,8 @@
 
 import logging
 
+from numpy import require
+
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
@@ -51,8 +53,10 @@ class TaxUnitBinaural(models.Model):
     _name = "tax.unit"
     _description = "Unidad Tributaria"
 
-    name = fields.Char(string='Descripción', help='Descripción de la Unidad Tributaria', required=True)
-    value = fields.Float(string='Valor', help='Valor de la Unidad Tributaria', required=True)
+    name = fields.Char(string='Descripción',
+                       help='Descripción de la Unidad Tributaria', required=True)
+    value = fields.Float(
+        string='Valor', help='Valor de la Unidad Tributaria', required=True)
     status = fields.Boolean(default=True, string="¿Activo?")
 
 
@@ -66,7 +70,8 @@ class TarifRetentionBinaural(models.Model):
             if record.apply_subtracting:
                 # formula del sustraendo
                 # (BaseImponible * %Base) * % Tarifa - (UT * FACTOR(83.334) * PORCENTAJE DE RETENCION)
-                record.amount_sustract = record.tax_unit_ids.value * 83.3334 * record.percentage / 100
+                record.amount_sustract = record.tax_unit_ids.value * \
+                    83.3334 * record.percentage / 100
             else:
                 record.amount_sustract = 0
 
@@ -88,14 +93,19 @@ class TarifRetentionBinaural(models.Model):
         if self.acumulative_rate and len(self.acumulative_rate_ids) is 0:
             raise ValidationError(_('Debe ingresar las tarifas acumuladas.\n'))
         if self.percentage < 0:
-            raise ValidationError(_('El porcentaje de tarifa no puede ser negativo.\n'))
+            raise ValidationError(
+                _('El porcentaje de tarifa no puede ser negativo.\n'))
 
     name = fields.Char(string='Descripción', required=True)
     percentage = fields.Float(string="Porcentaje de tarifa")
-    sustract_money = fields.Float(string='Cantidad a restar al porcentaje de la tarifa')
-    amount_sustract = fields.Float(string='Monto Sustraendo', compute=compute_amount_sustract, store=True)
-    apply_subtracting = fields.Boolean(default=False, string="Aplica sustraendo")
-    acumulative_rate = fields.Boolean(default=False, string="¿Tarifa Acumulada?")
+    sustract_money = fields.Float(
+        string='Cantidad a restar al porcentaje de la tarifa')
+    amount_sustract = fields.Float(
+        string='Monto Sustraendo', compute=compute_amount_sustract, store=True)
+    apply_subtracting = fields.Boolean(
+        default=False, string="Aplica sustraendo")
+    acumulative_rate = fields.Boolean(
+        default=False, string="¿Tarifa Acumulada?")
     status = fields.Boolean(default=True, string="¿Activo?")
     tax_unit_ids = fields.Many2one('tax.unit', string="Unidad Tributaria", required=True,
                                    domain=[('status', '=', True)])
@@ -109,7 +119,8 @@ class AcumulativeTarifBinaural(models.Model):
 
     name = fields.Char(string='Descripcion', required=True)
     since = fields.Float(string='Desde', required=True)
-    until = fields.Float(string='Hasta', help='Deje en blanco para comparar solo con el valor "desde"')
+    until = fields.Float(
+        string='Hasta', help='Deje en blanco para comparar solo con el valor "desde"')
     percentage = fields.Float(string="Porcentaje de tarifa", required=True)
     sustract_ut = fields.Float(string='Restar UT')
     tariffs_id = fields.Many2one('tarif.retention', string='Tarifa acumulada')
@@ -120,7 +131,8 @@ class PaymentConceptBinaural(models.Model):
     _description = "Concepto de Pago"
 
     name = fields.Char(string="Descripción", required=True)
-    line_payment_concept_ids = fields.One2many('payment.concept.line', 'payment_concept_id', 'Linea concepto de pago')
+    line_payment_concept_ids = fields.One2many(
+        'payment.concept.line', 'payment_concept_id', 'Linea concepto de pago')
     status = fields.Boolean(default=True, string="Activo")
 
     @api.constrains('line_payment_concept_ids')
@@ -139,7 +151,8 @@ class PaymentConceptLine(models.Model):
     _description = "Linea de concepto de Pago"
     _rec_name = 'code'
 
-    _sql_constraints = [('unique_code', 'UNIQUE(code)', 'El codigo de concepto ya existe')]
+    _sql_constraints = [('unique_code', 'UNIQUE(code)',
+                         'El codigo de concepto ya existe')]
 
     @api.onchange('percentage_tax_base')
     def check_value_percentage(self):
@@ -160,7 +173,8 @@ class PaymentConceptLine(models.Model):
     payment_concept_id = fields.Many2one('payment.concept', string='Concepto de Pago asociado', required=True,
                                          domain=[('status', '=', True)], ondelete='cascade')
     percentage_tax_base = fields.Float(string='Porcentaje Base Imponible')
-    tariffs_ids = fields.Many2one('tarif.retention', string='Tarifa', domain=[('status', '=', True)])
+    tariffs_ids = fields.Many2one(
+        'tarif.retention', string='Tarifa', domain=[('status', '=', True)])
     code = fields.Char(string='Codigo de concepto', required=True)
 
 
@@ -181,5 +195,51 @@ class ResCountryCityBinaural(models.Model):
                          'No puede registrar una ciudad con el mismo nombre para el estado y el pais seleccionado')]
 
     country_id = fields.Many2one('res.country', string="Pais", required=True)
-    state_id = fields.Many2one('res.country.state', string="Estado", required=True)
+    state_id = fields.Many2one(
+        'res.country.state', string="Estado", required=True)
     name = fields.Char(string="Ciudad", required=True)
+
+
+class ResCountryMunicipalityBinaural(models.Model):
+    _name = 'res.country.municipality'
+    _rec_name = 'name'
+    _sql_constraints = [('name_uniq', 'unique (name,country_id,state_id)',
+                         'No puede registrar un município con el mismo nombre para el estado y el pais seleccionado')]
+
+    country_id = fields.Many2one('res.country', string="Pais", required=True)
+    state_id = fields.Many2many(
+        'res.country.state', string="Estado", required=True)
+    name = fields.Char(string="Município", required=True)
+
+
+class EconomicBrandBinaural(models.Model):
+    _name = 'economic.branch'
+    _rec_name = 'name'
+    _sql_constraints = [('name_uniq', 'unique (name)',
+                         'No puede registrar un ramo económico con el mismo nombre')]
+
+    name = fields.Char(string="Nombre", required=True)
+    status = fields.Selection(selection=[(
+        'active', 'Activo'), ('inactive', 'Desactivado')], string="Estado", default='active')
+
+
+class EconomicActivity(models.Model):
+    _name = 'economic.activity'
+    _rec_name = 'name'
+    _sql_constraints = [('code_uniq', 'unique (name,municipality_id)',
+                         'No puede existir dos registros con el mismo codigo para el municipio seleccionado'),
+                        ('brach_uniq', 'unique (branch_id,municipality_id)',
+                         'No puede existir dos registros con el mismo municipio y ramo económico'),
+                        ('aliquot_mayor_cero', 'check (aliquot > 0)','La aliquota debe ser mayor a cero')]
+
+    name = fields.Char('Código', required=True)
+    municipality_id = fields.Many2one(
+        'res.country.municipality', string="Município", required=True)
+    branch_id = fields.Many2one(
+        'economic.branch', string="Ramo Económico", required=True, domain="[('status','=','active')]")
+    aliquot = fields.Float(string='Alicuota', required=True)
+    description = fields.Text(string='Descripción', required=True)
+    minimum_monthly = fields.Float(
+        string='Mínimo tributable Mensual', required=True)
+    minimum_annual = fields.Float(
+        string='Mínimo tributable Anual', required=True)
