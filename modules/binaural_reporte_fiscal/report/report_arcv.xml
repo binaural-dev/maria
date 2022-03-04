@@ -107,10 +107,10 @@
                             <br/>
 	                         <table class="table-condensed" style="width:100%">
 	                            <tr>
-							        <td colspan="12">
-								        <h1 text-align="center">Información del impuesto retenido y enterado</h1>
-							        </td>
-						        </tr>
+					<td colspan="12">
+					    <h1 text-align="center">Información del impuesto retenido y enterado</h1>
+					</td>
+				    </tr>
 		                        <table style="width:100%;">
                                     <tr style="border: 1px solid black">
                                         <th class="text-center">Fecha de pago o abono en cuenta <br/> Año/mes</th>
@@ -124,10 +124,10 @@
                                         <t t-foreach="docs['retentions']['data']" t-as="line">
                                             <tr>
                                                 <td class="text-center"><span t-esc="line['period']"/></td>
-                                                <td style="text-align: center"><span t-esc="line['amount_total']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'>--</span></td>
-                                                <td style="text-align: center"><span t-esc="line['amount_obj_retention']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
+                                                <td style="text-align: center"><span t-esc="line['amount_total']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id if foreign_currency_id.id == 3 else currency_id}'>--</span></td>
+                                                <td style="text-align: center"><span t-esc="line['amount_obj_retention']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id if foreign_currency_id.id == 3 else currency_id}'/></td>
                                                 <td style="text-align: right"><span t-esc="line['tariff']"/> % <t t-if="line['tariff_sub'] != 0"> - <span t-esc="line['tariff_sub']" t-options='{"widget": "float", "precision": foreign_currency_id.decimal_places}'/></t></td>
-                                                <td style="text-align: right"><span t-esc="line['amount_ret']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
+                                                <td style="text-align: right"><span t-esc="line['amount_ret']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id if foreign_currency_id.id == 3 else currency_id}'/></td>
                                             </tr>
                                         </t>
                                     </t>
@@ -143,10 +143,10 @@
 
                                     <tr style="font-weight: bold;">
                                         <td class="text-center"><span>Totales</span></td>
-                                        <td style="text-align: center"><span t-esc="docs['total_amount_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
-                                        <td style="text-align: center"><span t-esc="docs['total_amount_obj_retention_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
+                                        <td style="text-align: center"><span t-esc="docs['total_amount_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id if foreign_currency_id.id == 3 else currency_id}'/></td>
+                                        <td style="text-align: center"><span t-esc="docs['total_amount_obj_retention_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id if foreign_currency_id.id == 3 else currency_id}'/></td>
                                         <td class="text-center"><span>---</span></td>
-                                        <td style="text-align: right"><span t-esc="docs['total_amount_ret_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id}'/></td>
+                                        <td style="text-align: right"><span t-esc="docs['total_amount_ret_year']" t-options='{"widget": "monetary", "display_currency": foreign_currency_id if foreign_currency_id.id == 3 else currency_id}'/></td>
                                     </tr>
                                 </table>
 	                        </table>

@@ -24,6 +24,9 @@ class ArcvWizard(models.TransientModel):
         return sequence
 
     def print_arcv(self):
+        foreign_currency_id = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+        decimal_function = self.env['decimal.precision'].search(
+            [('name', '=', 'decimal_quantity')], limit=1)
         data_retention = []
         period_fiscal_month_init = datetime.datetime.strptime(str(self.date_init), "%Y-%m-%d").month
         period_fiscal_year_init = datetime.datetime.strptime(str(self.date_init), "%Y-%m-%d").year
@@ -44,8 +47,12 @@ class ArcvWizard(models.TransientModel):
                     if retention.date_accounting.month == period_fiscal_month_init and retention.date_accounting.year == period_fiscal_year_init:
                         for line in retention.retention_line:
                             if tariffs.percentage == line.related_percentage_tariffs:
-                                amount_obj_retention += line.foreign_facture_amount
-                                amount_ret += line.foreign_retention_amount
+                                if foreign_currency_id == 3:
+                                    amount_obj_retention += line.foreign_facture_amount
+                                    amount_ret += line.foreign_retention_amount
+                                else:
+                                    amount_obj_retention += line.facture_amount
+                                    amount_ret += line.retention_amount
                                 payment_register = self.env['account.payment'].search([])
                                 for payment in payment_register:
                                     for payment_invoice in payment.reconciled_bill_ids:
@@ -54,7 +61,9 @@ class ArcvWizard(models.TransientModel):
                                                 if payment.currency_id.id == self.env.ref('base.VEF').id:
                                                     amount_total += payment.amount
                                                 else:
-                                                    amount_total += (payment.amount * payment.foreign_currency_rate)
+                                                    value_rate = decimal_function.getCurrencyValue(
+                                                        rate=payment.foreign_currency_rate, base_currency="USD", foreign_currency="VEF")
+                                                    amount_total += (payment.amount * value_rate)
                 if amount_ret > 0:
                     json_obj = {
                         'period': str(period_fiscal_month_init)+"/"+str(period_fiscal.year),
