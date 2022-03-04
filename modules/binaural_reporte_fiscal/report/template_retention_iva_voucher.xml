@@ -609,12 +609,18 @@
                         </div>
                         <!-- Sustraendo -->
                         <div style="width:15%">
-                            <span t-field="line.related_tariff_id.amount_sustract"/>
+			    <t t-if="line.related_tariff_id">
+				<span t-field="line.related_tariff_id.amount_sustract"/>
+			    </t>
+			    <t t-else="">
+				<span>0,0</span>
+			    </t>
                         </div>
                         <!-- imp Retenido -->
                         <t t-set="retention_amount" t-value="0"/>
                         <div style="width:15%">
-                            <span t-field="line.foreign_retention_amount" />
+                            <span t-field="line.foreign_retention_amount"
+                                  t-options='{"widget": "float", "precision": get_digits}'/>
                         </div>
 
                     </div>

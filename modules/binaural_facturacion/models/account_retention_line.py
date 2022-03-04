@@ -91,6 +91,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
 
     @api.depends('payment_concept_id', 'invoice_id')
     def _get_value_related(self):
+        self.related_tariff_id = None
         for record in self:
             if (record.retention_id and record.retention_id.type_retention in ['islr'] and record.retention_id.type in ['in_invoice']) or (record.invoice_id and record.invoice_id.move_type in ['in_invoice', 'in_refund'] and not record.retention_id):
                 currency_ut = self.env.ref('base.VEF')
