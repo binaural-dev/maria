@@ -229,6 +229,9 @@ class AccountMoveBinauralFacturacion(models.Model):
 
     retention_islr_line_ids = fields.One2many('account.retention.line', 'invoice_id', domain=[
                                               ('retention_id.type_retention', '=', 'islr')])
+    
+    municipality_tax = fields.Boolean(string="Generar impuestos municipales", default=False, copy=False)
+    municipality_tax_voucher = fields.Char(string="Comprobante de Impuesto municipal")
 
     @api.constrains('foreign_currency_rate')
     def _check_foreign_currency_rate(self):
