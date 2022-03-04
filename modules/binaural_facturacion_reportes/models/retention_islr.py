@@ -10,6 +10,7 @@ class RetentionIslrReport(models.TransientModel):
 	_inherit = 'wizard.retention.islr'
 
 	def _retention_islr_excel(self):
+		foreign_currency_id = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
 		search_domain = self._get_domain()
 		search_domain += [
 			('type', 'in', ['in_invoice']),
@@ -61,7 +62,7 @@ class RetentionIslrReport(models.TransientModel):
 						break
 				dict['Código Concepto'] = concept
 				#dict['Monto Operación'] = i.islr_line_ids[0].invoice_id.amount_total
-				dict['Monto Operación'] = il.foreign_facture_amount
+				dict['Monto Operación'] = il.foreign_facture_amount if foreign_currency_id == 3 else il.facture_amount
 				dict['Porcentaje de retención'] = alicuota
 				lista.append(dict)
 				op += 1
