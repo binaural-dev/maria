@@ -19,7 +19,7 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','account','binaural_contactos_configuraciones', 'account_accountant'],
+    'depends': ['base','account','binaural_contactos_configuraciones', 'account_accountant', 'binaural_calcular_moneda'],
 
     # always loaded
     'data': [
