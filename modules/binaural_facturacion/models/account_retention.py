@@ -73,6 +73,9 @@ class AccountRetentionBinauralFacturacion(models.Model):
 
     @api.depends('retention_line')
     def amount_ret_all(self):
+        self.foreign_amount_total_facture = 0
+        self.foreign_amount_imp_ret = 0
+        self.foreign_total_tax_ret = 0
         for record in self:
             record.amount_base_ret = record.amount_imp_ret = record.total_tax_ret = record.amount_total_facture = record.amount_imp_ret = record.total_tax_ret = 0
             invoices = []
