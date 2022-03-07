@@ -1,6 +1,6 @@
 from odoo import api, fields, models
 from lxml import etree
-
+import json
 
 class AccountMove(models.Model):
     _inherit = "account.move"
@@ -9,6 +9,8 @@ class AccountMove(models.Model):
     def fields_view_get(self, view_id=None, view_type=False, toolbar=False, submenu=False):
         res = super().fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
         foreign_currency_id = self.env["ir.config_parameter"].sudo().get_param("curreny_foreign_id")
+        municipality_retention = self.env["ir.config_parameter"].sudo(
+        ).get_param("use_municipal_retention")
         if foreign_currency_id and foreign_currency_id == '2':
             if view_type == "tree":
                 doc = etree.XML(res["arch"])
@@ -81,6 +83,20 @@ class AccountMove(models.Model):
                 foreign_retention_amount = doc.xpath("//field[@name='foreign_retention_amount']")[0]
                 foreign_retention_amount.set("string", "Monto Retenido Bs.F")
                 res["fields"]["retention_islr_line_ids"]["views"]["tree"]["arch"] = etree.tostring(doc, encoding="unicode")
+        if not municipality_retention and view_type == "form":
+            doc = etree.XML(res["arch"])
+            municipality_field = doc.xpath(
+                "//field[@name='municipality_tax']")[0]
+            modifiers_field = json.loads(municipality_field.get("modifiers") or '{}')
+            modifiers_field['invisible'] = True
+            municipality_field.set('modifiers', json.dumps(modifiers_field))
+            
+            municipality_voucher = doc.xpath(
+                "//field[@name='municipality_tax_voucher']")[0]
+            modifiers_voucher = json.loads(municipality_voucher.get("modifiers") or '{}')
+            modifiers_voucher['invisible'] = True
+            municipality_voucher.set('modifiers', json.dumps(modifiers_voucher))
+            res["arch"] = etree.tostring(doc, encoding="unicode")
         return res
 
 

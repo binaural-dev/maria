@@ -1,59 +1,74 @@
 <odoo>
-  <data>
+	<data>
 		<record id="view_form_res_partner_inherited" model="ir.ui.view">
-	        <field name="name">Extension de cliente</field>
-	        <field name="model">res.partner</field>
-	        <field name="inherit_id" ref="base.view_partner_form"/>
-	        <field name="arch" type="xml">
-		        <field name="name" position="after">
-					<field name="customer_rank" invisible="1"/>
-					<field name="supplier_rank" invisible="1"/>
-		        </field>
-		        <field name="vat" position="replace">
-	                <label id="vat" for="vat" string="Rif"/>
-	                <div id="vat" class="">
-	                    <field name="prefix_vat" required="1"/>
-	                    <field name="vat" required="1"/>
-	                </div>
-	            </field>
-		        <field name="city" position="replace">
-			        <field name="city_id" placeholder="Ciudad"/>
-			        <field name="city" invisible="1"/>
-		        </field>
+			<field name="name">Extension de cliente</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_form" />
+			<field name="arch" type="xml">
+				<field name="name" position="after">
+					<field name="customer_rank" invisible="1" />
+					<field name="supplier_rank" invisible="1" />
+				</field>
+				<field name="vat" position="replace">
+					<label id="vat" for="vat" string="Rif" />
+					<div id="vat" class="">
+						<field name="prefix_vat" required="1" />
+						<field name="vat" required="1" />
+					</div>
+				</field>
+				<field name="city" position="replace">
+					<field name="city_id" placeholder="Ciudad" />
+					<field name="city" invisible="1" />
+				</field>
 
-	            <div id="vat" position="after">
-                    <field name="withholding_type" attrs="{'required':[('supplier_rank','&gt;', 0)]}"/>
-		            <field name="taxpayer" required="1"/>
-		            <field name="type_person_ids" domain="[('state','=',True)]" attrs="{'required':['|',('supplier_rank','&gt;', 0),('customer_rank','&gt;',0)]}" />
-	            </div>
-		        <label for="street" position="before">
-	                <field name="business_name" required="1"/>
-	            </label>
+				<field name="zip" position="after">
+					<field name="municipality_id" placeholder="Municipio" />
+				</field>
 
-		        <xpath expr="//sheet/notebook/page[@name='contact_addresses']/field[@name='child_ids']/form//field[@name='city']" position="replace">
-					<field name="city_id" placeholder="Ciudad"/>
-			        <field name="city" invisible="1"/>
+				<div id="vat" position="after">
+					<field name="withholding_type" attrs="{'required':[('supplier_rank','&gt;', 0)]}" />
+					<field name="taxpayer" required="1" />
+					<field name="type_person_ids" domain="[('state','=',True)]" attrs="{'required':['|',('supplier_rank','&gt;', 0),('customer_rank','&gt;',0)]}" />
+				</div>
+				<label for="street" position="before">
+					<field name="business_name" required="1" />
+				</label>
+
+				<xpath expr="//sheet/notebook/page[@name='contact_addresses']/field[@name='child_ids']/form//field[@name='city']" position="replace">
+					<field name="city_id" placeholder="Ciudad" />
+					<field name="city" invisible="1" />
 				</xpath>
 
-		        <page name="sales_purchases" position="after">
-	                <page name='retention' string="Retenciones">
-	                    <group>
-	                        <group>
-		                        <field name="exempt_iva" />
-	                            <field name="iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)],
-	                            'required': [('exempt_iva', '=', False), ('customer_rank', '&gt;', 0)]}"/>
-	                            <field name="supplier_iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)]}"/>
-	                        </group>
-	                        <group>
-		                        <field name="exempt_islr"/>
-	                            <field name="islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)],
-	                            'required': [('exempt_islr', '=', False), ('customer_rank', '&gt;', 0)]}"/>
-	                            <field name="supplier_islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)]}"/>
-	                        </group>
-	                   </group>
-	                </page>
-	            </page>
-	        </field>
-	    </record>
-  </data>
+				<notebook position="inside">
+					<page string="Impuestos Municipales" name="municipality_taxes" invisible="1">
+						<group>
+							<field name="economic_activity_id" options="{'no_create': True, 'no_create_edit':True}" />
+							<field name="activity" />
+							<field name="aliquot" />
+						</group>
+					</page>
+				</notebook>
+
+				<page name="sales_purchases" position="after">
+					
+					<page name='retention' string="Retenciones">
+						<group>
+							<group>
+								<field name="exempt_iva" />
+								<field name="iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)],
+	                            'required': [('exempt_iva', '=', False), ('customer_rank', '&lt;=', 0)]}" />
+								<field name="supplier_iva_retention" attrs="{'invisible': [('exempt_iva', '=', True)]}" />
+							</group>
+							<group>
+								<field name="exempt_islr" />
+								<field name="islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)],
+	                            'required': [('exempt_islr', '=', False), ('customer_rank', '&gt;', 0)]}" />
+								<field name="supplier_islr_retention" attrs="{'invisible': [('exempt_islr', '=', True)]}" />
+							</group>
+						</group>
+					</page>
+				</page>
+			</field>
+		</record>
+	</data>
 </odoo>
