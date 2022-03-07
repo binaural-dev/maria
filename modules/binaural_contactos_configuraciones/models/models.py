@@ -203,13 +203,26 @@ class ResCountryCityBinaural(models.Model):
 class ResCountryMunicipalityBinaural(models.Model):
     _name = 'res.country.municipality'
     _rec_name = 'name'
-    _sql_constraints = [('name_uniq', 'unique (name,country_id,state_id)',
-                         'No puede registrar un município con el mismo nombre para el estado y el pais seleccionado')]
 
     country_id = fields.Many2one('res.country', string="Pais", required=True)
     state_id = fields.Many2many(
         'res.country.state', string="Estado", required=True)
     name = fields.Char(string="Município", required=True)
+
+    @api.constrains('country_id', 'state_id', 'name')
+    def constraint_unique_municipality(self):
+        for record in self:
+            _logger.warning(record.id)
+            x = self.search([
+                ('country_id', '=', record.country_id.id),
+                ('state_id', '=', record.state_id.id),
+                ('name', '=', record.name),
+                ('id', '!=', record.id)
+            ])
+
+            if any(x):
+                raise ValidationError(
+                    "El municipio ya se encuentra registrado")
 
 
 class EconomicBrandBinaural(models.Model):
@@ -230,7 +243,7 @@ class EconomicActivity(models.Model):
                          'No puede existir dos registros con el mismo codigo para el municipio seleccionado'),
                         ('brach_uniq', 'unique (branch_id,municipality_id)',
                          'No puede existir dos registros con el mismo municipio y ramo económico'),
-                        ('aliquot_mayor_cero', 'check (aliquot > 0)','La aliquota debe ser mayor a cero')]
+                        ('aliquot_mayor_cero', 'check (aliquot > 0)', 'La aliquota debe ser mayor a cero')]
 
     name = fields.Char('Código', required=True)
     municipality_id = fields.Many2one(
