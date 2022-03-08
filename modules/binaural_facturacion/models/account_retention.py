@@ -196,6 +196,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                                  help="Proveedor o Cliente al cual se retiene o te retiene")
     currency_id = fields.Many2one('res.currency', 'Moneda', states={'draft': [('readonly', False)]},
                                   help="Moneda enla cual se realiza la operacion")
+    bs_currency_id = fields.Many2one("res.currency", compute="_compute_bs_currency_id")
     company_id = fields.Many2one('res.company', string='Company', change_default=True,
                                  required=True, readonly=True, states={'draft': [('readonly', False)]},
                                  default=lambda self: self.env.user.company_id.id)
@@ -427,3 +428,7 @@ class AccountRetentionBinauralFacturacion(models.Model):
                     rlines.move_id.action_post()
             for index, move_line in enumerate(move):
                 facture[index].js_assign_outstanding_line(move_line.id)
+
+    @api.depends("currency_id")
+    def _compute_bs_currency_id(self):
+        self.bs_currency_id = 3

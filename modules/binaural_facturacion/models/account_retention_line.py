@@ -208,6 +208,10 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
                 rate=record.invoice_id.foreign_currency_rate, base_currency=base_currency, foreign_currency=foreign_currency)
             if record.retention_id and record.retention_id.type in ['out_invoice'] and record.foreign_currency_rate > 0:
                 record.retention_amount = record.foreign_retention_amount * value_rate
+
+    @api.depends("currency_id")
+    def _compute_bs_currency_id(self):
+        self.bs_currency_id = 3
                 
     name = fields.Char('Descripción', size=64, select=True, required=True, default="Retención ISLR")
     currency_id = fields.Many2one(related="retention_id.company_currency_id")
@@ -250,6 +254,7 @@ class AccountRetentionBinauralLineFacturacion(models.Model):
     
     #Campos para uso en ISLR
     porcentage_retention = fields.Float(string='% Retención')
+    bs_currency_id = fields.Many2one("res.currency", compute="_compute_bs_currency_id")
 
     related_pay_from = fields.Float(string='Pagos desde', compute=_get_value_related, store=True)
     related_percentage_tax_base = fields.Float(string='% Base Imponible', compute=_get_value_related, store=True)

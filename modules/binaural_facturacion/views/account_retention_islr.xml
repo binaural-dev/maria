@@ -38,8 +38,10 @@
                     <notebook colspan="4">
                         <page string="Linea de Retención">
 			    <field name="foreign_currency_id" invisible="1"/>
+			    <field name="bs_currency_id" invisible="1"/>
                             <field colspan="4" name="retention_line" nolabel="1" attrs="{'invisible':[('partner_id','=',False)],'readonly':[('state','in',['emitted','cancel'])]}">
                                 <tree editable='bottom'>
+			    	    <field name="bs_currency_id" invisible="1"/>
                                     <field name="name" readonly="1"/>
                                     <field name="invoice_id" domain="[('apply_retention_islr', '=', False), ('move_type', 'in', ['in_invoice','in_refund']), ('state', 'in', ['posted'])]"
                                            force_save="1" attrs="{'readonly':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
@@ -54,24 +56,24 @@
 					SE MUESTRAN LOS CAMPOS ALTERNOS SI LA MONEDA ALTERNA ES BS.F
 					SI LA MONEDA ALTERNA ES USD SE MUESTRAN LOS CAMPOS BASE
 				    -->
-				    <field name="facture_amount"
+				    <field name="facture_amount" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
-				    <field name="foreign_facture_amount"
+				    <field name="foreign_facture_amount" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
 
-				    <field name="facture_total"
+				    <field name="facture_total" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
-				    <field name="foreign_facture_total"
+				    <field name="foreign_facture_total" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
 
-				    <field name="iva_amount"
+				    <field name="iva_amount" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
-				    <field name="foreign_iva_amount"
+				    <field name="foreign_iva_amount" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
 
-				    <field name="retention_amount"
+				    <field name="retention_amount" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
-				    <field name="foreign_retention_amount"
+				    <field name="foreign_retention_amount" widget="monetary" options="{'currency_field': 'bs_currency_id'}"
 					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
                                 </tree>
                             </field>
@@ -79,13 +81,13 @@
                             <group col="2" colspan="2">
                                 <!--field name="amount_base_ret" attrs="{'invisible':[('type','in',[False,'out_invoice','out_refund','out_debit']) ]}" />
                                 <field name="amount_total_facture" attrs="{'invisible':[('type','in',[False,'in_invoice','in_refund','in_debit']) ]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" /-->
-                                <field name="amount_total_facture" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
-                                <field name="amount_imp_ret" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"  />
-                                <field name="total_tax_ret" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+                                <field name="amount_total_facture" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'bs_currency_id'}" />
+                                <field name="amount_imp_ret" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'bs_currency_id'}"  />
+                                <field name="total_tax_ret" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'bs_currency_id'}"/>
 
-	                        <field name="foreign_amount_total_facture" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'foreign_currency_id'}" />
-                                <field name="foreign_amount_imp_ret" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'foreign_currency_id'}"  />
-                                <field name="foreign_total_tax_ret" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
+	                        <field name="foreign_amount_total_facture" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'bs_currency_id'}" />
+                                <field name="foreign_amount_imp_ret" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'bs_currency_id'}"  />
+                                <field name="foreign_total_tax_ret" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'bs_currency_id'}"/>
                             </group>
                         </page>
                         <page string="Otra Información">
