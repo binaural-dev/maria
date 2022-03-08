@@ -14,6 +14,10 @@
                     <field name="address"/>
                     <field name="date_reception" />            
                 </field>
+
+		<filter name="duedate" position="before">
+		    <filter string="Tasa" name="rate" context="{'group_by': 'foreign_currency_rate'}"/>
+		</filter>
             </field>
         </record>
     </data>

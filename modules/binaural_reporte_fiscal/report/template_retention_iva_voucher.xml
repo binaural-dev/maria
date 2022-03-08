@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <template id="report_iva_customer">
         <!--Header-->
         <div class="container" style="font-size:12px !important;">
@@ -37,7 +36,6 @@
                 </div>
             </div>
             <div class="row" style="margin-top:10px">
-
                 <div class="col-4">
                     <div class="col-12">
                         <span>Nombre o Razon Social del Agente de Retención</span>
@@ -101,7 +99,13 @@
                               t-esc="retention.partner_id.prefix_vat+retention.partner_id.vat"/>
                     </div>
                 </div>
-
+                <div class="col-6">
+                    <span>Foreign Currency ID</span>
+                    <div>
+                        <span style="text-transform:uppercase"
+                              t-esc="get_foreign_currency_id"/>
+                    </div>
+                </div>
             </div>
 
             <div class="row">
@@ -115,9 +119,7 @@
                         </t>
                     </div>
                 </div>
-
             </div>
-
         </div>
 
         <!--Line Retention: Description-->
@@ -163,23 +165,21 @@
                     <span>IVA Retenido</span>
                 </div>
             </div>
-
         </div>
-
 
         <!--Line Retention: Line-->
         <div style="margin-top:5px;margin-bottom:5px;font-size:10px !important;" class="container">
             <div style="border-bottom:1px solid black" class="text-center">
 
-                <t t-set="total_amount_total" t-value="0"/>
+                <t t-set="total_amount_total" t-options='{"widget": "float", "precision": get_digits}'/>
                 <t t-set="total_amount_amount_except" t-value="0"/>
-                <t t-set="amount_except" t-value="0"/>
+                <t t-set="amount_except" t-options='{"widget": "float", "precision": get_digits}'/>
 
-                <t t-set="foreign_facture_amount" t-value="0"/>
-                <t t-set="total_amount_tax" t-value="0"/>
+                <t t-set="facture_amount" t-options='{"widget": "float", "precision": get_digits}'/>
+                <t t-set="total_amount_tax" t-options='{"widget": "float", "precision": get_digits}'/>
                 <!--retenido-->
-                <t t-set="porcentage_retention" t-value="0"/>
-                <t t-set="total_amount_to_pay" t-value="0"/>
+                <t t-set="porcentage_retention" t-options='{"widget": "float", "precision": get_digits}'/>
+                <t t-set="total_amount_to_pay" t-options='{"widget": "float", "precision": get_digits}'/>
 
 
                 <t t-foreach="retention.retention_line" t-as="line">
@@ -229,7 +229,6 @@
                             <t t-if="line.invoice_type not in ['out_refund','in_refund']">
                                 <span>--</span>
                             </t>
-
                         </div>
                         <!-- Factura afectada -->
                         <div class="" style="width:7%;">
@@ -259,16 +258,21 @@
                             <t t-else="">
                                 <span>--</span>
                             </t>
-
                         </div>
                         `                       <!-- Total Compras Incluyendo el IVA -->
                         <div class="" style="width:7%">
                             <span>
-                                <t t-esc="line.foreign_facture_total"
-                                   t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+				<t t-if="get_foreign_currency_id == 3">
+                                    <t t-esc="line.foreign_facture_total"
+                                       t-options='{"widget": "float", "precision": get_digits}'/>
+			    	</t>
+				<t t-else="">
+                                    <t t-esc="line.facture_total"
+                                       t-options='{"widget": "float", "precision": get_digits}'/>
+				</t>
                             </span>
                         </div>
-                        <t t-set="total_amount_total" t-value="total_amount_total+line.facture_total"/>
+                        <t t-set="total_amount_total" t-value="total_amount_total+str(line.facture_total)"/>
 
                         <!-- sin derecho a Crédito IVA -->
                         <div class="" style="width:7%">
@@ -280,16 +284,22 @@
                                 <t t-set="amount_except" t-value="float(0)" />
                             </t>
                             <span t-esc="amount_except"
-                                  t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                                  t-options='{"widget": "float", "precision": get_digits}'/>
                             <t t-set="amount_except" t-value="total_amount_amount_except + amount_except"/>
                         </div>
 
-
                         <!-- Base Imponible -->
                         <div class="" style="width:10%">
-                            <span t-esc="line.foreign_facture_amount"
-                                  t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
-                            <t t-set="foreign_facture_amount" t-value="foreign_facture_amount + line.foreign_facture_amount"/>
+			    <t t-if="get_foreign_currency_id == 3">
+                            	<span t-esc="line.foreign_facture_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            	<t t-set="facture_amount" t-value="facture_amount + str(line.foreign_facture_amount)"/>
+			    </t>
+			    <t t-else="">
+                            	<span t-esc="line.facture_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            	<t t-set="facture_amount" t-value="facture_amount + str(line.facture_amount)"/>
+			    </t>
                         </div>
 
                         <!-- % Alic -->
@@ -299,26 +309,38 @@
                         <!-- % Ret -->
                         <div class="" style="width:7%">
                             <span t-esc="'{0:,.2f}'.format(line.porcentage_retention).replace('.', ',')"/>
-                            <t t-set="porcentage_retention" t-value="porcentage_retention + line.porcentage_retention"/>
+                            <t t-set="porcentage_retention" t-value="porcentage_retention + str(line.porcentage_retention)"/>
                         </div>
 
                         <!-- Impuesto IVA -->
                         <div class="" style="width:10%">
-                            <span t-esc="line.foreign_iva_amount"
-                                  t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+			    <t t-if="get_foreign_currency_id == 3">
+                            	<span t-esc="line.foreign_iva_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                        	<t t-set="total_amount_tax" t-value="total_amount_tax + str(line.foreign_iva_amount)"/>
+			    </t>
+			    <t t-else="">
+                            	<span t-esc="line.iva_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                        	<t t-set="total_amount_tax" t-value="total_amount_tax + str(line.iva_amount)"/>
+			    </t>
                         </div>
-
-                        <t t-set="total_amount_tax" t-value="total_amount_tax + line.foreign_iva_amount"/>
 
                         <!-- IVA Retenido -->
-                        <div class="" style="width:10%">
-                            <span t-esc="line.foreign_retention_amount"
-                                  t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
-                        </div>
-
-                        <t t-set="total_amount_to_pay" t-value="total_amount_to_pay + line.foreign_retention_amount"/>
-
-
+			<t t-if="get_foreign_currency_id == 3">
+                            <div class="" style="width:10%">
+                            	<span t-esc="line.foreign_retention_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            </div>
+                            <t t-set="total_amount_to_pay" t-value="total_amount_to_pay + str(line.foreign_retention_amount)"/>
+			</t>
+			<t t-else="">
+                            <div class="" style="width:10%">
+                            	<span t-esc="line.retention_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'/>
+                            </div>
+                            <t t-set="total_amount_to_pay" t-value="total_amount_to_pay + str(line.retention_amount)"/>
+			</t>
                     </div>
                 </t>
             </div>
@@ -328,7 +350,6 @@
         <div class="container" style="font-size:10px !important;">
             <div>
                 <div class="row text-center">
-
                     <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
@@ -352,26 +373,26 @@
                     </div>
                     <div class="" style="width:7%">
                         <span t-esc="amount_except"
-                              t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                              t-options='{"widget": "float", "precision": get_digits}'/>
                     </div>
                     <div class="" style="width:10%">
-                        <span t-esc="foreign_facture_amount"
-                              t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        <span t-esc="float(facture_amount)"
+                              t-options='{"widget": "float", "precision": get_digits}'/>
                     </div>
                     <div class="" style="width:7%">
                         <span style="visibility:hidden">--</span>
                     </div>
                     <div class="" style="width:7%">
-                        <span t-esc="porcentage_retention"
-                              t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        <span t-esc="float(porcentage_retention)"
+                              t-options='{"widget": "float", "precision": get_digits}'/>
                     </div>
                     <div class="" style="width:10%">
-                        <span t-esc="total_amount_tax"
-                              t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        <span t-esc="float(total_amount_tax)"
+                              t-options='{"widget": "float", "precision": get_digits}'/>
                     </div>
                     <div class="" style="width:10%">
-                        <span t-esc="total_amount_to_pay"
-                              t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'/>
+                        <span t-esc="float(total_amount_to_pay)"
+                              t-options='{"widget": "float", "precision": get_digits}'/>
                     </div>
 
                 </div>
@@ -406,14 +427,12 @@
                 </div>
             </div>
         </div>
-
     </template>
 
     <template id="report_isrl_customer">
         <!--Header-->
         <div class="container" style="font-size:12px !important;">
             <div class="row">
-
                 <div class="col-4">
                     <img style="max-height:100px;width:200px;float:left" t-if="res_company.logo"
                          t-att-src="'data:image/png;base64,%s' % to_text(res_company.logo)"/>
@@ -432,7 +451,6 @@
                         <span t-esc="retention.date" t-options='{"widget": "date"}'/>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -508,11 +526,7 @@
                         </t>
                     </div>
                 </div>
-
-
             </div>
-
-
         </div>
 
         <!--Line Retention: Description-->
@@ -590,17 +604,33 @@
                         </div>
                         <!-- Total Factura -->
                         <div style="width:15%">
-                            <span t-field="line.foreign_facture_total"
-                                  t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
-                                --
-                            </span>
+			    <t t-if="get_foreign_currency_id == 3">
+                            	<span t-field="line.foreign_facture_total"
+                                      t-options='{"widget": "float", "precision": get_digits}'>
+                                    --
+                            	</span>
+		    	    </t>
+			    <t t-else="">
+                            	<span t-field="line.facture_total"
+                                      t-options='{"widget": "float", "precision": get_digits}'>
+                                    --
+                            	</span>
+		    	    </t>
                         </div>
                         <!-- Base de Retención -->
                         <div style="width:15%">
-                            <span t-field="line.foreign_facture_amount"
-                                  t-options='{"widget": "float", "precision": res_company.currency_id.decimal_places}'>
-                                --
-                            </span>
+			    <t t-if="get_foreign_currency_id == 3">
+                            	<span t-field="line.foreign_facture_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'>
+                                    --
+                        	</span>
+			    </t>
+			    <t t-else="">
+                            	<span t-field="line.facture_amount"
+                                      t-options='{"widget": "float", "precision": get_digits}'>
+                                    --
+                        	</span>
+			    </t>
                         </div>
                         <!-- Tarifa de Retención -->
                         <div style="width:5%">
@@ -614,16 +644,19 @@
                         <!-- imp Retenido -->
                         <t t-set="retention_amount" t-value="0"/>
                         <div style="width:15%">
-                            <span t-field="line.foreign_retention_amount" />
+			    <t t-if="get_foreign_currency_id == 3">
+                            	<span t-field="line.foreign_retention_amount" />
+		    	    </t>
+			    <t t-else="">
+                            	<span t-field="line.retention_amount" />
+		    	    </t>
                         </div>
-
                     </div>
                 </t>
             </div>
         </div>
 
         <!--<div style="margin-top:20px;font-size:12px !important;" class="container">
-
              <div style="width:40%; float:right">
                  <div style="width:100%; font:14px bold">
                      <div style="width:40%; float:left">
@@ -634,22 +667,21 @@
                      </div>
                  </div>
              </div>
-
         </div>-->
 
         <!--Firmas-->
         <div class="container" style="font-size:12px !important;">
             <div class="row text-center">
-
                 <div class="col-5" style="width:35%;margin-top:10px;">
                     <div style="height:100px"></div>
                     <h6 style="text-align: center; margin: 30px 0;border-top: 1px solid #000;width:80%; padding-top:10px;">
                         Firma del Agente Retenido
                     </h6>
                 </div>
-                <div class="col-5" style="width:30%; margin-top:10px;">
 
+                <div class="col-5" style="width:30%; margin-top:10px;">
                 </div>
+
                 <div class="col-5" style="width:35%; margin-top:10px;">
                     <!--Firma digital-->
                     <div style="height:100px">
@@ -661,8 +693,6 @@
                         Firma del Agente de Retención
                     </h6><!--<span t-esc="res_company.name"/>-->
                 </div>
-
-
             </div>
         </div>
     </template>

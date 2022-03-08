@@ -38,6 +38,7 @@ class TxtWizard(models.TransientModel):
         }
 
     def _retention_iva(self, docs):
+        foreign_currency_id = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
         dic = OrderedDict([
             ('RIF del agente de retención', ''),
             ('Período impositivo', ''),
@@ -82,16 +83,28 @@ class TxtWizard(models.TransientModel):
                 exento = 0.00
                 if li.invoice_id.foreign_amount_by_group[-1][1] == 0.0:
                      exento = li.invoice_id.foreign_amount_by_group[-1][2]
-                if not i.type == 'in_refund':
-                    dict['Monto total del documento'] = li.foreign_facture_amount + li.foreign_iva_amount + exento or 0.00
-                    dict['Base imponible'] = li.foreign_facture_amount or 0.00
-                    dict['Monto del Iva Retenido'] = li.foreign_retention_amount or 0.00
-                    dict['Monto exento del IVA'] = exento
+                if foreign_currency_id == 3:
+                    if not i.type == 'in_refund':
+                        dict['Monto total del documento'] = li.foreign_facture_amount + li.foreign_iva_amount + exento or 0.00
+                        dict['Base imponible'] = li.foreign_facture_amount or 0.00
+                        dict['Monto del Iva Retenido'] = li.foreign_retention_amount or 0.00
+                        dict['Monto exento del IVA'] = exento
+                    else:
+                        dict['Monto total del documento'] = -li.foreign_facture_amount + li.foreign_iva_amount + exento or 0.00
+                        dict['Base imponible'] = -li.foreign_facture_amount or 0.00
+                        dict['Monto del Iva Retenido'] = -li.amount_tax_ret or 0.00
+                        dict['Monto exento del IVA'] = -exento or 0.00
                 else:
-                    dict['Monto total del documento'] = -li.foreign_facture_amount + li.foreign_iva_amount + exento or 0.00
-                    dict['Base imponible'] = -li.foreign_facture_amount or 0.00
-                    dict['Monto del Iva Retenido'] = -li.amount_tax_ret or 0.00
-                    dict['Monto exento del IVA'] = -exento or 0.00
+                    if not i.type == 'in_refund':
+                        dict['Monto total del documento'] = li.facture_amount + li.iva_amount + exento or 0.00
+                        dict['Base imponible'] = li.facture_amount or 0.00
+                        dict['Monto del Iva Retenido'] = li.retention_amount or 0.00
+                        dict['Monto exento del IVA'] = exento
+                    else:
+                        dict['Monto total del documento'] = -li.facture_amount + li.iva_amount + exento or 0.00
+                        dict['Base imponible'] = -li.facture_amount or 0.00
+                        dict['Monto del Iva Retenido'] = -li.amount_tax_ret or 0.00
+                        dict['Monto exento del IVA'] = -exento or 0.00
                 dict['Número de Expediente'] = '0'
                 lista.append(dict)
         tabla = pd.DataFrame(lista)

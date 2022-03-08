@@ -39,6 +39,7 @@
         'views/account_journal.xml',
         'views/account_bank_statement.xml',
         'views/res_company_views.xml',
+        'views/account_move_line_inh.xml',
         'views/account_municipality_retention.xml',
         'wizard/account_payment_register.xml',
         'report/invoice_free_form_bs.xml',

@@ -16,7 +16,7 @@
             <field name="arch" type="xml">
                 <form string="Retention">
                     <header>
-	                    <button name="action_draft" type="object" states="cancel" string="Convertir a Borrador" />
+	                <button name="action_draft" type="object" states="cancel" string="Convertir a Borrador" />
                         <button name="action_emitted" type="object" states="draft" string="Validar" class="oe_highlight"/>
                         <button name="action_cancel" type="object" states="emitted" string="Anular" confirm="¿Esta seguro que quiere anular este comprabante? Se revertiran los asientos contables asociados" />
                         <button name="retention_currency_system" attrs="{'invisible':[('actual_currency_retention','=',False)]}" groups="binaural_facturacion.group_multi_currency_retention" type="object" string="Mostrar en moneda del sistema"/>
@@ -37,6 +37,7 @@
                     </group>
                     <notebook colspan="4">
                         <page string="Linea de Retención">
+			    <field name="foreign_currency_id" invisible="1"/>
                             <field colspan="4" name="retention_line" nolabel="1" attrs="{'invisible':[('partner_id','=',False)],'readonly':[('state','in',['emitted','cancel'])]}">
                                 <tree editable='bottom'>
                                     <field name="name" readonly="1"/>
@@ -46,33 +47,32 @@
                                     <field name="invoice_type" force_save="1" readonly="1"/>
                                     <field name="payment_concept_id" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
 
+				    <field name="tax_line"/>
+				    <field name="foreign_currency_rate"/>
 
-	                                <field name="facture_total" readonly="1" force_save="1" attrs="{'column_invisible':['|', ('parent.multi_currency_retention','=', False), '&amp;' , ('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
-                                    <field name="facture_amount" force_save="1" attrs="{'column_invisible':['|', ('parent.multi_currency_retention','=', False), '&amp;' , ('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', True)], 'readonly':['|',('parent.type_retention', '=', 'iva'), '|',  '&amp;',('parent.type_retention', '=', 'islr'), '&amp;',('parent.type', '=', 'in_invoice'),('payment_concept_id', '=', False), '&amp;', ('parent.type_retention', '=', 'islr'), ('parent.type', '=', 'out_invoice')]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
-                                    <field name="payment_concept_id" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+				    <!--
+					SE MUESTRAN LOS CAMPOS ALTERNOS SI LA MONEDA ALTERNA ES BS.F
+					SI LA MONEDA ALTERNA ES USD SE MUESTRAN LOS CAMPOS BASE
+				    -->
+				    <field name="facture_amount"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
+				    <field name="foreign_facture_amount"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
 
-	                                <field name="tax_line" readonly="1" force_save="1" attrs="{'column_invisible':[('parent.type_retention', '=', 'islr')]}"/>
-                                    <field name="iva_amount" readonly="1" force_save="1" attrs="{'column_invisible':['|', ('parent.multi_currency_retention','=', False), '&amp;' , ('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
+				    <field name="facture_total"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
+				    <field name="foreign_facture_total"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
 
-	                                <field name="related_pay_from" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
-	                                <field name="related_percentage_tax_base" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
-	                                <field name="related_percentage_tariffs" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
-	                                <field name="related_amount_sustract_tariffs" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'iva'),'&amp;', ('parent.type_retention', '=', 'islr'),('parent.type', '=', 'out_invoice')]}"/>
+				    <field name="iva_amount"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
+				    <field name="foreign_iva_amount"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
 
-	                                <field name="porcentage_retention" readonly="1" force_save="1" attrs="{'column_invisible':['|',('parent.type_retention', '=', 'islr'),'&amp;', ('parent.type_retention', '=', 'iva'),('parent.type', '=', 'out_invoice')]}"/>
-	                                <field name="retention_amount" force_save="1" attrs="{'column_invisible':['|', ('parent.multi_currency_retention','=', False), '&amp;' , ('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', True)], 'readonly': [('parent.type_retention', '=', 'iva')]}" widget="monetary" options="{'currency_field': 'company_currency_id'}" />
-
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="company_currency_id" invisible="1" />
-                                    <field name="company_id" invisible="1" />
-                                    <field name="is_retention_client" invisible="1"/>
-
-	                                <field name="foreign_currency_rate" force_save="1" readonly="1" attrs="{'column_invisible':[('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', False)]}"/>
-	                                <field name="foreign_facture_amount" force_save="1" attrs="{'readonly': [('parent.type_retention', '=', 'iva')], 'column_invisible':[('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', False)]}"/>
-	                                <field name="foreign_facture_total" force_save="1" readonly="1" attrs="{'column_invisible':[('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', False)]}"/>
-	                                <field name="foreign_iva_amount" force_save="1" readonly="1" attrs="{'column_invisible':[('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', False)]}"/>
-	                                <field name="foreign_retention_amount" force_save="1" attrs="{'readonly': [('parent.type', '=', 'in_invoice')], 'column_invisible':[('parent.multi_currency_retention','=', True), ('parent.actual_currency_retention','=', False)]}"/>
-
+				    <field name="retention_amount"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 3)]}"/>
+				    <field name="foreign_retention_amount"
+					   attrs="{'column_invisible': [('parent.foreign_currency_id', '=', 2)]}"/>
                                 </tree>
                             </field>
 
@@ -83,7 +83,7 @@
                                 <field name="amount_imp_ret" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"  />
                                 <field name="total_tax_ret" attrs="{'invisible':['|', ('multi_currency_retention','=', False), '&amp;' , ('multi_currency_retention','=', True), ('actual_currency_retention','=', True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
 
-	                            <field name="foreign_amount_total_facture" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'foreign_currency_id'}" />
+	                        <field name="foreign_amount_total_facture" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'foreign_currency_id'}" />
                                 <field name="foreign_amount_imp_ret" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'foreign_currency_id'}"  />
                                 <field name="foreign_total_tax_ret" attrs="{'invisible':[('multi_currency_retention','=', True), ('actual_currency_retention','=', False)]}" widget="monetary" options="{'currency_field': 'foreign_currency_id'}"/>
                             </group>
@@ -104,10 +104,10 @@
             <field name="name">Retenciones ISLR Clientes</field>
             <field name="res_model">account.retention</field>
             <field name="binding_view_types">list</field>
-	        <field name="view_mode">tree,form</field>
+	    <field name="view_mode">tree,form</field>
             <!--field name="search_view_id" ref="view_search_retention_iva"/-->
             <field name="context">{"default_type":'out_invoice', "default_type_retention":'islr'}</field>
-	        <field name="domain">[('type_retention', '=', 'islr'), ('type', '=', 'out_invoice')]</field>
+	    <field name="domain">[('type_retention', '=', 'islr'), ('type', '=', 'out_invoice')]</field>
         </record>
 
 	    <!--Configuracion de Vista: Retenciones ISLR Proveedor-->
@@ -115,10 +115,10 @@
             <field name="name">Retenciones ISLR Proveedor</field>
             <field name="res_model">account.retention</field>
             <field name="binding_view_types">list</field>
-	        <field name="view_mode">tree,form</field>
+	    <field name="view_mode">tree,form</field>
             <!--field name="search_view_id" ref="view_search_retention_iva"/-->
             <field name="context">{"default_type":'in_invoice', "default_type_retention":'islr'}</field>
-	        <field name="domain">[('type_retention', '=', 'islr'), ('type', '=', 'in_invoice')]</field>
+	    <field name="domain">[('type_retention', '=', 'islr'), ('type', '=', 'in_invoice')]</field>
         </record>
 
         <!--Menu Lateral: Retenciones-->
@@ -126,8 +126,6 @@
 
         <menuitem name="Cliente" id="menu_retention_islr_client" sequence="0" parent="menu_retention_islr" action="action_retention_islr_client"/>
 
-	    <menuitem name="Proveedor" id="menu_retention_islr_supplier" sequence="0" parent="menu_retention_islr" action="action_retention_islr_supplier"/>
-
-
+	<menuitem name="Proveedor" id="menu_retention_islr_supplier" sequence="0" parent="menu_retention_islr" action="action_retention_islr_supplier"/>
     </data>
 </odoo>

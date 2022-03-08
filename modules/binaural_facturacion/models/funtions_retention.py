@@ -8,11 +8,18 @@ _logger = logging.getLogger(__name__)
 
 
 def load_line_retention(self, data, move_id=False):
+    foreign_currency_id = int(self.env['ir.config_parameter'].sudo().get_param('curreny_foreign_id'))
+    decimal_function = self.env['decimal.precision'].search(
+        [('name', '=', 'decimal_quantity')], limit=1)
+    base_currency = "VEF" if foreign_currency_id == 2 else "USD"
+    foreign_currency = "USD" if foreign_currency_id == 2 else "VEF"
     #CLIENTE
     if self.type in ['out_invoice']:
         for facture_line_retention in self.env['account.move'].search(
                 [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_invoice', 'out_debit', 'out_refund']),
                  ('state', '=', 'posted'), ('journal_id.fiscal', '=', True)]):
+            value_rate = decimal_function.getCurrencyValue(
+                rate=facture_line_retention.foreign_currency_rate, base_currency=base_currency, foreign_currency=foreign_currency)
             if self.type_retention in ['iva']:
                 if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0\
                         and facture_line_retention.payment_state in ['not_paid', 'partial']:
@@ -27,21 +34,21 @@ def load_line_retention(self, data, move_id=False):
                                                 'facture_total': facture_line_retention.amount_total,
                                                 'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type,
                                                 'foreign_facture_amount': tax[2] * facture_line_retention.foreign_currency_rate,
-                                                'foreign_facture_total': facture_line_retention.amount_total * facture_line_retention.foreign_currency_rate,
+                                                'foreign_facture_total': facture_line_retention.amount_total * value_rate,
                                                 'foreign_iva_amount': tax[1] * facture_line_retention.foreign_currency_rate,
-                                                'foreign_currency_rate': facture_line_retention.foreign_currency_rate
-                                                }))
+                                                'foreign_currency_rate': facture_line_retention.foreign_currency_rate}))
             elif self.type_retention in ['islr']:
                 if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in ['not_paid', 'partial']:
                     data.append((0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
                                         'name': 'Retención ISLR Cliente',
-                                        'facture_amount': facture_line_retention.amount_untaxed, 'facture_total': facture_line_retention.amount_total,
-                                        'iva_amount': facture_line_retention.amount_tax, 'invoice_type': facture_line_retention.move_type,
+                                        'facture_amount': facture_line_retention.amount_untaxed,
+                                        'facture_total': facture_line_retention.amount_total,
+                                        'iva_amount': facture_line_retention.amount_tax,
+                                        'invoice_type': facture_line_retention.move_type,
                                         'foreign_facture_amount':facture_line_retention.amount_untaxed * facture_line_retention.foreign_currency_rate,
                                         'foreign_facture_total': facture_line_retention.amount_total * facture_line_retention.foreign_currency_rate,
                                         'foreign_iva_amount': facture_line_retention.amount_tax * facture_line_retention.foreign_currency_rate,
-                                        'foreign_currency_rate': facture_line_retention.foreign_currency_rate
-                                        }))
+                                        'foreign_currency_rate': facture_line_retention.foreign_currency_rate}))
     #PROVEEDOR
     else:
         if self.type in ['in_invoice']:
@@ -56,6 +63,8 @@ def load_line_retention(self, data, move_id=False):
                      ('move_type', 'in', ['in_invoice', 'in_debit', 'in_refund']),
                      ('state', '=', 'posted'), ('journal_id.fiscal', '=', True)])
             for facture_line_retention in invoices:
+                value_rate = decimal_function.getCurrencyValue(
+                    rate=facture_line_retention.foreign_currency_rate, base_currency=base_currency, foreign_currency=foreign_currency)
                 if self.type_retention in ['iva']:
                     if not facture_line_retention.apply_retention_iva and facture_line_retention.amount_tax > 0 \
                             and facture_line_retention.payment_state in ['not_paid', 'partial']:
@@ -64,19 +73,21 @@ def load_line_retention(self, data, move_id=False):
                                 [('tax_group_id', '=', tax[6]), ('type_tax_use', '=', 'purchase')])
                             if tax_id.amount > 0:
                                 data.append(
-                                    (0, 0, {'invoice_id': facture_line_retention.id, 'is_retention_client': True,
-                                            'name': 'Retención IVA Proveedor', 'tax_line': tax_id.amount,
+                                    (0, 0, {'invoice_id': facture_line_retention.id,
+                                            'is_retention_client': True,
+                                            'name': 'Retención IVA Proveedor',
+                                            'tax_line': tax_id.amount,
                                             'facture_amount': tax[2],
                                             'facture_total': facture_line_retention.amount_total,
-                                            'iva_amount': tax[1], 'invoice_type': facture_line_retention.move_type,
+                                            'iva_amount': tax[1],
+                                            'invoice_type': facture_line_retention.move_type,
                                             'porcentage_retention': facture_line_retention.partner_id.withholding_type.value,
                                             'retention_amount': tax[1] * (facture_line_retention.partner_id.withholding_type.value/100),
                                             'foreign_facture_amount': tax[2] * facture_line_retention.foreign_currency_rate,
                                             'foreign_facture_total': facture_line_retention.amount_total * facture_line_retention.foreign_currency_rate,
                                             'foreign_iva_amount': tax[1] * facture_line_retention.foreign_currency_rate,
-                                            'foreign_retention_amount': tax[1] * (facture_line_retention.partner_id.withholding_type.value/100) * facture_line_retention.foreign_currency_rate,
-                                            'foreign_currency_rate': facture_line_retention.foreign_currency_rate
-                                            }))
+                                            'foreign_retention_amount': tax[1] * (facture_line_retention.partner_id.withholding_type.value/100) * value_rate,
+                                            'foreign_currency_rate': facture_line_retention.foreign_currency_rate}))
                                 """elif self.type_retention in ['islr']:
         if not facture_line_retention.apply_retention_islr and facture_line_retention.payment_state in [\
                 'not_paid', 'partial']:
