@@ -52,6 +52,13 @@ class InheritedResCompany(models.Model):
             modifiers_economic_activity_number['required'] = True
             economic_activity_number_field.set(
                 'modifiers', json.dumps(modifiers_economic_activity_number))
+            
+            municipality_page = doc.xpath(
+                "//notebook/page[@name='datos_hacienda']")[0]
+            modifiers_page = json.loads(
+                municipality_page.get("modifiers") or '{}')
+            modifiers_page['invisible'] = False
+            municipality_page.set('modifiers', json.dumps(modifiers_page))
 
             res["arch"] = etree.tostring(doc, encoding="unicode")
         elif not municipality_retention and view_type == "form":
@@ -82,7 +89,14 @@ class InheritedResCompany(models.Model):
             modifiers_economic_activity_number['invisible'] = True
             economic_activity_number_field.set(
                 'modifiers', json.dumps(modifiers_economic_activity_number))
-
+            
+            municipality_page = doc.xpath(
+                "//notebook/page[@name='datos_hacienda']")[0]
+            modifiers_page = json.loads(
+                municipality_page.get("modifiers") or '{}')
+            modifiers_page['invisible'] = True
+            municipality_page.set('modifiers', json.dumps(modifiers_page))
+            
             res["arch"] = etree.tostring(doc, encoding="unicode")
 
         return res

@@ -209,6 +209,10 @@ class ResCountryMunicipalityBinaural(models.Model):
         'res.country.state', string="Estado", required=True)
     name = fields.Char(string="Município", required=True)
 
+    @api.onchange('name')
+    def on_change_state(self):
+        self.name = str(self.name or '').upper().strip()
+
     @api.constrains('country_id', 'state_id', 'name')
     def constraint_unique_municipality(self):
         for record in self:
@@ -223,6 +227,7 @@ class ResCountryMunicipalityBinaural(models.Model):
             if any(x):
                 raise ValidationError(
                     "El municipio ya se encuentra registrado")
+    
 
 
 class EconomicBrandBinaural(models.Model):

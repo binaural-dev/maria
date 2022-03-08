@@ -6,16 +6,15 @@
         <field name="arch" type="xml">
 
 
-            <field name="logo" position="before">
-                <field name="logo_hacienda" widget="image" class="oe_avatar" />
-            </field>
-
-            <div class="oe_title" position="after">
-                <group col="6" colspan="3">
-                    <field name="name_hacienda" />
-                    <field name="economic_activity_number" />
-                </group>
-            </div>
+            <notebook position="inside">
+                <page string="Datos de Hacienda" name="datos_hacienda">
+                    <group col="5" colspan="3">
+                        <field name="logo_hacienda" widget="image" colspan="4" class="oe_avatar" />
+                        <field name="name_hacienda" />
+                        <field name="economic_activity_number" />
+                    </group>
+                </page>
+            </notebook>
 
         </field>
     </record>
