@@ -4,6 +4,9 @@
         <field name="model">account.municipality.retentions</field>
         <field name="arch" type="xml">
             <form string="Retention">
+                <header >
+                    <button name="action_validate" attrs="{'invisible': [('name','!=', False)]}" type="object" string="Validar" class="btn btn-primary" />
+                </header>
                 <sheet>
                     <group>
                         <group>
@@ -93,12 +96,12 @@
     </record>
 
     <record id="action_retention_municipality_supplier" model="ir.actions.act_window">
-        <field name="name">Impuestos Municipales Clientes Proveedores</field>
+        <field name="name">Impuestos Municipales Proveedores</field>
         <field name="res_model">account.municipality.retentions</field>
         <field name="binding_view_types">list</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{"default_type":'in_invoice'}</field>
-        <field name="domain">[('type', '=', 'in_invoice')]</field> 
+        <field name="domain">[('type', '=', 'in_invoice')]</field>
     </record>
 
     <!--Menu Lateral: Retenciones-->

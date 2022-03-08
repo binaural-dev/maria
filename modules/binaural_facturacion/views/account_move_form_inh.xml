@@ -116,8 +116,24 @@
                                 <field name="foreign_retention_amount" optional="show" />
                             </tree>
                         </field>
-                    </page>
 
+                    </page>
+                    <page string="Impuestos Municipales" attrs="{'invisible':[('move_type','not in', ['in_invoice','in_refund'])]}">
+                        <field name="municipality_retentions_line_ids">
+                            <tree editable="bottom">
+                                <field name="name" />
+                                <field name="total_invoice" />
+                                <field name="invoice_amount_untaxed" />
+                                <field name="economic_activity_id" />
+                                <field name="municipality_id" readonly="1" />
+                                <field name="activity_aliquot" />
+                                <field name="total_retained" />
+                                <field name="foreign_total_invoice" />
+                                <field name="foreign_invoice_amount_untaxed" />
+                                <field name="foreign_total_retained" />
+                            </tree>
+                        </field>
+                    </page>
                     <!-- VARIACIONES DEPENDIENTES DE LA MONEDA ALTERNA -->
                     <page string="Moneda $" name="alternate_coin_usd">
                         <field name="foreign_currency_symbol" invisible="1" />

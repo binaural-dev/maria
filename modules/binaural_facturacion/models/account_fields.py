@@ -103,9 +103,6 @@ class AccountMove(models.Model):
         elif municipality_retention and view_type == 'form':
             context = dict(self._context or {})
             
-            # _logger.warning("context: %s", context)
-            # record = self.env['account.move'].browse(context['default_move_type']['id'] or None)
-            
             if context['default_move_type'] in ['in_invoice', 'in_refund']:
                 doc = etree.XML(res["arch"])
                 municipality_field = doc.xpath(
