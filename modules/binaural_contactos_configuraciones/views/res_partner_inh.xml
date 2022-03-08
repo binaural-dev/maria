@@ -40,7 +40,7 @@
 				</xpath>
 
 				<notebook position="inside">
-					<page string="Impuestos Municipales" name="municipality_taxes" invisible="1">
+					<page string="Impuestos Municipales" name="municipality_taxes">
 						<group>
 							<field name="economic_activity_id" options="{'no_create': True, 'no_create_edit':True}" />
 							<field name="activity" />

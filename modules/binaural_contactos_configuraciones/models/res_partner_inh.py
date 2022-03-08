@@ -82,10 +82,12 @@ class ResPartnerBinauralContactos(models.Model):
             municipality_field = doc.xpath(
                 "//field[@name='municipality_id']")[0]
 
-            modifiers_field = json.loads(municipality_field.get("modifiers"))
+            modifiers_field = json.loads(
+                municipality_field.get("modifiers") or '{}')
             modifiers_field['required'] = True
             municipality_field.set('modifiers', json.dumps(modifiers_field))
             if not 'params' in context or not 'params' in context and not 'id' in context['params']:
+                res["arch"] = etree.tostring(doc, encoding="unicode")
                 return res
 
             record = self.env['res.partner'].browse(context['params']['id'])
@@ -93,8 +95,38 @@ class ResPartnerBinauralContactos(models.Model):
             if record and record.supplier_rank > 0:
                 municipality_page = doc.xpath(
                     "//notebook/page[@name='municipality_taxes']")[0]
-                modifiers_page = json.loads(municipality_page.get("modifiers"))
+                modifiers_page = json.loads(
+                    municipality_page.get("modifiers") or '{}')
                 modifiers_page['invisible'] = False
                 municipality_page.set('modifiers', json.dumps(modifiers_page))
+
+            else:
+                municipality_page = doc.xpath(
+                    "//notebook/page[@name='municipality_taxes']")[0]
+                modifiers_page = json.loads(
+                    municipality_page.get("modifiers") or '{}')
+                modifiers_page['invisible'] = True
+                municipality_page.set('modifiers', json.dumps(modifiers_page))
+
             res["arch"] = etree.tostring(doc, encoding="unicode")
+
+        elif not municipality_retention and view_type == "form":
+            doc = etree.XML(res["arch"])
+            municipality_field = doc.xpath(
+                "//field[@name='municipality_id']")[0]
+
+            modifiers_field = json.loads(
+                municipality_field.get("modifiers") or '{}')
+            modifiers_field['required'] = False
+            municipality_field.set('modifiers', json.dumps(modifiers_field))
+
+            municipality_page = doc.xpath(
+                "//notebook/page[@name='municipality_taxes']")[0]
+            modifiers_page = json.loads(
+                municipality_page.get("modifiers") or '{}')
+            modifiers_page['invisible'] = True
+            municipality_page.set('modifiers', json.dumps(modifiers_page))
+
+            res["arch"] = etree.tostring(doc, encoding="unicode")
+
         return res
