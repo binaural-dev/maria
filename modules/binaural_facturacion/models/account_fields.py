@@ -1,7 +1,9 @@
 from odoo import api, fields, models
 from lxml import etree
 import json
+import logging
 
+_logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = "account.move"
 
@@ -97,20 +99,41 @@ class AccountMove(models.Model):
             modifiers_voucher['invisible'] = True
             municipality_voucher.set('modifiers', json.dumps(modifiers_voucher))
             res["arch"] = etree.tostring(doc, encoding="unicode")
-        elif municipality_retention and view_type == 'form':
-            doc = etree.XML(res["arch"])
-            municipality_field = doc.xpath(
-                "//field[@name='municipality_tax']")[0]
-            modifiers_field = json.loads(municipality_field.get("modifiers") or '{}')
-            modifiers_field['invisible'] = False
-            municipality_field.set('modifiers', json.dumps(modifiers_field))
             
-            municipality_voucher = doc.xpath(
-                "//field[@name='municipality_tax_voucher']")[0]
-            modifiers_voucher = json.loads(municipality_voucher.get("modifiers") or '{}')
-            modifiers_voucher['invisible'] = False
-            municipality_voucher.set('modifiers', json.dumps(modifiers_voucher))
-            res["arch"] = etree.tostring(doc, encoding="unicode")
+        elif municipality_retention and view_type == 'form':
+            context = dict(self._context or {})
+            
+            # _logger.warning("context: %s", context)
+            # record = self.env['account.move'].browse(context['default_move_type']['id'] or None)
+            
+            if context['default_move_type'] in ['in_invoice', 'in_refund']:
+                doc = etree.XML(res["arch"])
+                municipality_field = doc.xpath(
+                    "//field[@name='municipality_tax']")[0]
+                modifiers_field = json.loads(municipality_field.get("modifiers") or '{}')
+                modifiers_field['invisible'] = False
+                municipality_field.set('modifiers', json.dumps(modifiers_field))
+                
+                municipality_voucher = doc.xpath(
+                    "//field[@name='municipality_tax_voucher']")[0]
+                modifiers_voucher = json.loads(municipality_voucher.get("modifiers") or '{}')
+                modifiers_voucher['invisible'] = False
+                municipality_voucher.set('modifiers', json.dumps(modifiers_voucher))
+                res["arch"] = etree.tostring(doc, encoding="unicode")
+            else:
+                doc = etree.XML(res["arch"])
+                municipality_field = doc.xpath(
+                    "//field[@name='municipality_tax']")[0]
+                modifiers_field = json.loads(municipality_field.get("modifiers") or '{}')
+                modifiers_field['invisible'] = True
+                municipality_field.set('modifiers', json.dumps(modifiers_field))
+                
+                municipality_voucher = doc.xpath(
+                    "//field[@name='municipality_tax_voucher']")[0]
+                modifiers_voucher = json.loads(municipality_voucher.get("modifiers") or '{}')
+                modifiers_voucher['invisible'] = True
+                municipality_voucher.set('modifiers', json.dumps(modifiers_voucher))
+                res["arch"] = etree.tostring(doc, encoding="unicode")
             
         return res
 
