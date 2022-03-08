@@ -19,7 +19,7 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','account','binaural_contactos_configuraciones', 'account_accountant', 'binaural_currency_extend'],
+    'depends': ['base', 'account', 'binaural_contactos_configuraciones', 'account_accountant', 'binaural_currency_extend'],
 
     # always loaded
     'data': [
@@ -40,15 +40,16 @@
         'views/account_bank_statement.xml',
         'views/res_company_views.xml',
         'views/account_move_line_inh.xml',
+        'views/account_municipality_retention.xml',
         'wizard/account_payment_register.xml',
         'report/invoice_free_form_bs.xml',
         'report/invoice_free_form.xml',
         'report/report_invoice_document_override.xml',
-        
+
     ],
     # only loaded in demonstration mode
     'demo': [
         'demo/demo.xml',
     ],
-    'application':True,
+    'application': True,
 }

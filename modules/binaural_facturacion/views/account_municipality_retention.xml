@@ -1,0 +1,112 @@
+<odoo>
+    <record id="account_municipality_retentions_form" model="ir.ui.view">
+        <field name="name">account.municipality.retentions.form</field>
+        <field name="model">account.municipality.retentions</field>
+        <field name="arch" type="xml">
+            <form string="Retention">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="type" />
+                            <field name="name" />
+                        </group>
+                        <group>
+                            <field name="date" />
+                            <field name="date_accounting" />
+                            <field name="partner_id" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Linea de Retención">
+                            <field name="retention_line_ids" />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- View: Tree: Retenciones client-->
+    <record id="account_municipality_retentions_tree" model="ir.ui.view">
+        <field name="name">account.municipality.retentions.tree</field>
+        <field name="model">account.municipality.retentions</field>
+        <field name="arch" type="xml">
+            <tree string="Impuestos Municipales">
+                <field name="name" />
+                <field name="date" />
+                <field name="date_accounting" />
+                <field name="partner_id" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="account_municipality_retentions_line_tree" model="ir.ui.view">
+        <field name="name">account.municipality.retentions.line.tree</field>
+        <field name="model">account.municipality.retentions.line</field>
+        <field name="arch" type="xml">
+            <tree string="Lineas de Impuestos Municipales" editable="bottom">
+                <field name="name" />
+                <field name="invoice_id" domain="[('partner_id','=',parent.partner_id),('state','=','posted'), ('amount_residual','>',0)]" />
+                <field name="total_invoice" />
+                <field name="invoice_amount_untaxed" />
+                <field name="economic_activity_id" />
+                <field name="activity_aliquot" />
+                <field name="total_retained" />
+                <field name="foreign_total_invoice" />
+                <field name="foreign_invoice_amount_untaxed" />
+                <field name="foreign_total_retained" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- View: Form: Retenciones -->
+    <record id="account_municipality_retentions_line_form" model="ir.ui.view">
+        <field name="name">account.municipality.retentions.line.form</field>
+        <field name="model">account.municipality.retentions.line</field>
+        <field name="arch" type="xml">
+            <form string="Linea de Retencion">
+                <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="invoice_id" />
+                        <field name="total_invoice" />
+                        <field name="invoice_amount_untaxed" />
+                        <field name="economic_activity_id" />
+                        <field name="activity_aliquot" />
+                        <field name="total_retained" />
+                        <field name="foreign_total_invoice" />
+                        <field name="foreign_invoice_amount_untaxed" />
+                        <field name="foreign_total_retained" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_retention_municipality_client" model="ir.actions.act_window">
+        <field name="name">Impuestos Municipales Clientes</field>
+        <field name="res_model">account.municipality.retentions</field>
+        <field name="binding_view_types">list</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{"default_type":'out_invoice'}</field>
+        <field name="domain">[('type', '=', 'out_invoice')]</field>
+    </record>
+
+    <record id="action_retention_municipality_supplier" model="ir.actions.act_window">
+        <field name="name">Impuestos Municipales Clientes Proveedores</field>
+        <field name="res_model">account.municipality.retentions</field>
+        <field name="binding_view_types">list</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{"default_type":'in_invoice'}</field>
+        <field name="domain">[('type', '=', 'in_invoice')]</field> 
+    </record>
+
+    <!--Menu Lateral: Retenciones-->
+    <menuitem name="Impuestos Municipales" id="menu_retention_municipality" sequence="5" parent="account_accountant.menu_accounting" />
+
+    <menuitem name="Cliente" id="menu_retention_municipality_client" sequence="0" parent="menu_retention_municipality" action="action_retention_municipality_client" />
+
+    <menuitem name="Proveedor" id="menu_retention_municipality_supplier" sequence="0" parent="menu_retention_municipality" action="action_retention_municipality_supplier" />
+
+
+</odoo>
