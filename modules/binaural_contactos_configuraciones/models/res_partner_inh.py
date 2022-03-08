@@ -69,6 +69,10 @@ class ResPartnerBinauralContactos(models.Model):
         for record in self:
             if record.city_id:
                 record.city = record.city_id.name
+                
+    @api.onchange('state_id')
+    def on_change_state(self):
+        self.municipality_id = None
 
     @api.model
     def fields_view_get(self, view_id=None, view_type=False, toolbar=False, submenu=False):
