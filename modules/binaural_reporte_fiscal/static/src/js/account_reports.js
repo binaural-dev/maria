@@ -120,6 +120,23 @@ odoo.define('binaural_reporte_fiscal.accountReportsWidgetInherit', function (req
         reload: function() {
             this._super.apply(this, arguments);
         },
+    	custom_events: {
+        	'value_changed': function(ev) {
+             	var self = this;
+             	self.report_options.partner_ids = ev.data.partner_ids;
+             	self.report_options.partner_categories = ev.data.partner_categories;
+             	self.report_options.analytic_accounts = ev.data.analytic_accounts;
+             	self.report_options.analytic_tags = ev.data.analytic_tags;
+             	try {
+				    return self.reload().then(function () {
+                 	    self.$searchview_buttons.find('.account_partner_filter').click();
+                 	    self.$searchview_buttons.find('.account_analytic_filter').click();
+             		});
+				} catch (err) {
+					console.log(err);
+				}
+         	},
+    	},
         render: function() {
             var self = this;
             this.render_template();
