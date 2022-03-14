@@ -212,32 +212,35 @@ odoo.define('binaural_reporte_fiscal.accountReportsWidgetInherit', function (req
                 });
                 self.reload();
             });
+	// -- FIX ME --
+
         // partner filter
-        if (this.report_options.partner) {
-            if (!this.M2MFilters) {
-                var fields = {};
-                if ('partner_ids' in this.report_options) {
-                    fields['partner_ids'] = {
-                        label: _t('Partners'),
-                        modelName: 'res.partner',
-                        value: this.report_options.partner_ids.map(Number),
-                    };
-                }
-                if ('partner_categories' in this.report_options) {
-                    fields['partner_categories'] = {
-                        label: _t('Tags'),
-                        modelName: 'res.partner.category',
-                        value: this.report_options.partner_categories.map(Number),
-                    };
-                }
-                if (!_.isEmpty(fields)) {
-                    this.M2MFilters = new M2MFilters(this, fields);
-                    this.M2MFilters.appendTo(this.$searchview_buttons.find('.js_account_partner_m2m'));
-                }
-            } else {
-                this.$searchview_buttons.find('.js_account_partner_m2m').append(this.M2MFilters.$el);
-            }
-        }
+        // if (this.report_options.partner) {
+        //     if (!this.M2MFilters) {
+        //         var fields = {};
+        //         if ('partner_ids' in this.report_options) {
+        //             fields['partner_ids'] = {
+        //                 label: _t('Partners'),
+        //                 modelName: 'res.partner',
+        //                 value: this.report_options.partner_ids.map(Number),
+        //             };
+        //         }
+        //         if ('partner_categories' in this.report_options) {
+        //             fields['partner_categories'] = {
+        //                 label: _t('Tags'),
+        //                 modelName: 'res.partner.category',
+        //                 value: this.report_options.partner_categories.map(Number),
+        //             };
+        //         }
+        //         if (!_.isEmpty(fields)) {
+        //             this.M2MFilters = new M2MFilters(this, fields);
+        //             this.M2MFilters.appendTo(this.$searchview_buttons.find('.js_account_partner_m2m'));
+        //         }
+        //     } else {
+        //         this.$searchview_buttons.find('.js_account_partner_m2m').append(this.M2MFilters.$el);
+        //     }
+        // }
+	
 
         // analytic filter
         if (this.report_options.analytic) {
@@ -265,6 +268,7 @@ odoo.define('binaural_reporte_fiscal.accountReportsWidgetInherit', function (req
                 this.$searchview_buttons.find('.js_account_analytic_m2m').append(this.M2MFilters.$el);
             }
         }
+	// -- FIX ME --
     },
     });
 
