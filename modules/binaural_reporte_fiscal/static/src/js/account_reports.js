@@ -128,9 +128,9 @@ odoo.define('binaural_reporte_fiscal.accountReportsWidgetInherit', function (req
              	self.report_options.analytic_accounts = ev.data.analytic_accounts;
              	self.report_options.analytic_tags = ev.data.analytic_tags;
              	try {
-					return self.reload().then(function () {
-                 		self.$searchview_buttons.find('.account_partner_filter').click();
-                 		self.$searchview_buttons.find('.account_analytic_filter').click();
+				    return self.reload().then(function () {
+                 	    self.$searchview_buttons.find('.account_partner_filter').click();
+                 	    self.$searchview_buttons.find('.account_analytic_filter').click();
              		});
 				} catch (err) {
 					console.log(err);
@@ -330,7 +330,7 @@ odoo.define('binaural_reporte_fiscal.accountReportsWidgetInherit', function (req
             });
         // partner filter
         if (this.report_options.partner) {
-            if (!this.M2MFilters || this.report_options.analytic) {
+            if (!this.M2MFilters) {
                 var fields = {};
                 if ('partner_ids' in this.report_options) {
                     fields['partner_ids'] = {
@@ -357,7 +357,7 @@ odoo.define('binaural_reporte_fiscal.accountReportsWidgetInherit', function (req
 
         // analytic filter
         if (this.report_options.analytic) {
-            if (!this.M2MFilters || this.report_options.partner) {
+            if (!this.M2MFilters) {
                 var fields = {};
                 if (this.report_options.analytic_accounts) {
                     fields['analytic_accounts'] = {
