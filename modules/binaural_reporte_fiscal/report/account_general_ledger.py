@@ -305,7 +305,7 @@ class AccountGeneralLedgerReportBinaural(models.AbstractModel):
             # valida los campos None
             # Debit
             if account_sum.get('debit', 0.0) != None:
-                account_sum_debit = account_sum.get('balance', 0.0)
+                account_sum_debit = account_sum.get('debit', 0.0)
             else:
                 account_sum_debit = 0.0
             if account_un_earn.get('debit', 0.0) != None:
