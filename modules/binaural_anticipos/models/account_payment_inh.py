@@ -77,7 +77,10 @@ class AccountPaymentInh(models.Model):
         liquidity_lines = self.env['account.move.line']
         counterpart_lines = self.env['account.move.line']
         writeoff_lines = self.env['account.move.line']
-    
+        if self.is_advance:
+            adv = True
+        else:
+            adv = False
         for line in self.move_id.line_ids:
             if line.account_id in (
                     self.journal_id.default_account_id,
@@ -86,7 +89,10 @@ class AccountPaymentInh(models.Model):
             ):
                 liquidity_lines += line
             elif line.account_id.internal_type in (
-            'receivable', 'payable', 'other') or line.partner_id == line.company_id.partner_id:
+            'receivable', 'payable') or line.partner_id == line.company_id.partner_id:
+                counterpart_lines += line
+            elif (line.account_id.internal_type in (
+            'other') or line.partner_id == line.company_id.partner_id) and adv:
                 counterpart_lines += line
             else:
                 writeoff_lines += line
