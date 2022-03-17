@@ -738,7 +738,7 @@ class AcoountMoveLineBinauralFact(models.Model):
 		else:
 			return False
 
-	@api.depends('move_id.foreign_currency_rate','price_unit','quantity')
+	@api.depends('move_id.foreign_currency_rate','price_unit','quantity', 'tax_ids')
 	def _amount_all_foreign(self):
 		"""
 		Compute the foreign total amounts of the SO.
