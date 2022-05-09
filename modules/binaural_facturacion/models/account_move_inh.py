@@ -180,7 +180,7 @@ class AccountMoveBinauralFacturacion(models.Model):
 	foreign_currency_id = fields.Many2one('res.currency', default=default_alternate_currency,
 										  tracking=True)
 	foreign_currency_rate = fields.Float(string="Tasa", tracking=True)
-	foreign_currency_date = fields.Date(string="Fecha", default=fields.Date.today(), tracking=True)
+	foreign_currency_date = fields.Date(string="Fecha de Tasa", default=fields.Date.today(), tracking=True)
 
 	foreign_amount_untaxed = fields.Monetary(string='Base Imponible', store=True, readonly=True,
 											 compute='_amount_all_foreign',

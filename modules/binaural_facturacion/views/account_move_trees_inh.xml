@@ -19,6 +19,7 @@
                 <!--add date_reception-->
                 <field name="invoice_date" position="after">
                     <field name="date_reception" optional="show"/>
+		    <field name="date" string="Fecha Contable" optional="hide"/>
                 </field>
 
 	            <field name="amount_total_signed" position="before">
